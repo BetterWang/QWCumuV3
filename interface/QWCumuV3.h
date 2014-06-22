@@ -118,7 +118,7 @@ class QWCumuV3 : public edm::EDAnalyzer {
 
 //		TNtupleD * ntResult;
 		TTree * trV[7];
-		TTree * trX;
+		TTree * trG;
 
 		int gNoff;
 		int gMult;

@@ -66,6 +66,9 @@ namespace correlations {
     {
       resize(mN, mP);
     }
+    QVector() {
+	    QVector(0, 0, false);
+    }
     /** 
      * Constructor 
      * 
@@ -243,6 +246,7 @@ namespace correlations {
 	    _maxP = rhs._maxP;
 	    _useWeights = rhs._useWeights;
 	    _q = rhs._q;
+	    return *this;
     }
   protected:
     /**

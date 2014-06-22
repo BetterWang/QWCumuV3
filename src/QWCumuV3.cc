@@ -352,7 +352,7 @@ QWCumuV3::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	for ( int n = 1; n < 7; n++ ) {
 		for ( int np = 0; np < 4; np++ ) {
 			// cross check
-			Complex qp = 0;
+			correlations::Complex qp = 0;
 			double wt = 0;
 			for ( int i = 0; i < t->Mult; i++ ) {
 				if ( !t->RFP[i] ) continue;
@@ -371,7 +371,7 @@ QWCumuV3::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 						break;
 				}
 				correlations::Result r = cq->calculate(np*2+1, hc[n]);
-				qp += t->weight[i] * Complex( TMath::Cos(t->Phi[i] * n) , TMath::Sin(t->Phi[i] * n) ) * r.sum();
+				qp += t->weight[i] * correlations::Complex( TMath::Cos(t->Phi[i] * n) , TMath::Sin(t->Phi[i] * n) ) * r.sum();
 				wt += t->weight[i] * r.weight();
 			}
 			rX[n][np] = qp.real();
@@ -399,7 +399,7 @@ QWCumuV3::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 							break;
 					}
 					correlations::Result r = cq->calculate(np*2+1, hc[n]);
-					qp += t->weight[i] * Complex( TMath::Cos(t->Phi[i] * n) , TMath::Sin(t->Phi[i] * n) ) * r.sum();
+					qp += t->weight[i] * correlations::Complex( TMath::Cos(t->Phi[i] * n) , TMath::Sin(t->Phi[i] * n) ) * r.sum();
 					wt += t->weight[i] * r.weight();
 				}
 				rQp[n][np][ipt] = qp.real();
@@ -427,7 +427,7 @@ QWCumuV3::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 							break;
 					}
 					correlations::Result r = cq->calculate(np*2+1, hc[n]);
-					qp += t->weight[i] * Complex( TMath::Cos(t->Phi[i] * n) , TMath::Sin(t->Phi[i] * n) ) * r.sum();
+					qp += t->weight[i] * correlations::Complex( TMath::Cos(t->Phi[i] * n) , TMath::Sin(t->Phi[i] * n) ) * r.sum();
 					wt += t->weight[i] * r.weight();
 				}
 				rQeta[n][np][ieta] = qp.real();
@@ -455,7 +455,7 @@ QWCumuV3::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 							break;
 					}
 					correlations::Result r = cq->calculate(np*2+1, hc[n]);
-					qp += t->weight[i] * Complex( TMath::Cos(t->Phi[i] * n) , TMath::Sin(t->Phi[i] * n) ) * r.sum();
+					qp += t->weight[i] * correlations::Complex( TMath::Cos(t->Phi[i] * n) , TMath::Sin(t->Phi[i] * n) ) * r.sum();
 					wt += t->weight[i] * r.weight();
 			}
 			rQc[n][np][0] = qp.real();
@@ -482,7 +482,7 @@ QWCumuV3::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 							break;
 					}
 					correlations::Result r = cq->calculate(np*2+1, hc[n]);
-					qp += t->weight[i] * Complex( TMath::Cos(t->Phi[i] * n) , TMath::Sin(t->Phi[i] * n) ) * r.sum();
+					qp += t->weight[i] * correlations::Complex( TMath::Cos(t->Phi[i] * n) , TMath::Sin(t->Phi[i] * n) ) * r.sum();
 					wt += t->weight[i] * r.weight();
 			}
 			rQc[n][np][1] = qp.real();
