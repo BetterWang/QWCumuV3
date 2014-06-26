@@ -176,6 +176,8 @@ QWCumuV3::QWCumuV3(const edm::ParameterSet& iConfig)
 	trG = fs->make<TTree>("trG", "trG");
 	trG->Branch("Noff", &gNoff, "Noff/I");
 	trG->Branch("Mult", &gMult, "Mult/I");
+	trG->SetAutoSave(1000000);
+	trG->SetAutoFlush(1000000);
 
 	trV[1] = fs->make<TTree>("trV1", "trV1");
 	trV[2] = fs->make<TTree>("trV2", "trV2");
@@ -185,6 +187,8 @@ QWCumuV3::QWCumuV3(const edm::ParameterSet& iConfig)
 	trV[6] = fs->make<TTree>("trV6", "trV6");
 
 	for ( int n = 1; n < 7; n++ ) {
+		trV[n]->SetAutoSave(1000000);
+		trV[n]->SetAutoFlush(1000000);
 		for ( int np = 0; np < 4; np++ ) {
 			trV[n]->Branch(Form("rQ%i%i", n, 2+2*np), &rQ[n][np], Form("rQ%i%i/D", n, 2+2*np));
 			trV[n]->Branch(Form("iQ%i%i", n, 2+2*np), &iQ[n][np], Form("iQ%i%i/D", n, 2+2*np));

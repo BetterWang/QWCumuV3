@@ -186,7 +186,7 @@ namespace correlations {
      */
     virtual Result c7(const HarmonicVector& h) const
     {
-      std::cout << "Calculating C7" << std::endl;
+//      std::cout << "Calculating C7" << std::endl;
       return Result(uc7(h[0],h[1],h[2],h[3],h[4],h[5],h[6]),
                     uc7(0,   0,   0,   0,   0,   0,   0).real());
     }
@@ -202,7 +202,7 @@ namespace correlations {
      */
     virtual Result c8(const HarmonicVector& h) const
     {
-      std::cout << "Calculating C8" << std::endl;
+//      std::cout << "Calculating C8" << std::endl;
       return Result(uc8(h[0],h[1],h[2],h[3],h[4],h[5],h[6],h[7]),
                     uc8(0,   0,   0,   0,   0,   0,   0,   0).real());
     }

@@ -1,11 +1,9 @@
-#define CORRELATIONS_CLOSED_ENABLE_U8 1
-#define CORRELATIONS_CLOSED_ENABLE_U7 1
-#include <QWAna/QWCumuV3/interface/correlations/Types.hh>
-#include <QWAna/QWCumuV3/interface/correlations/Result.hh>
-#include <QWAna/QWCumuV3/interface/correlations/QVector.hh>
-#include <QWAna/QWCumuV3/interface/correlations/recursive/FromQVector.hh>
-#include <QWAna/QWCumuV3/interface/correlations/recurrence/FromQVector.hh>
-#include <QWAna/QWCumuV3/interface/correlations/closed/FromQVector.hh>
+#include <correlations/Types.hh>
+#include <correlations/Result.hh>
+#include <correlations/QVector.hh>
+#include <correlations/recursive/FromQVector.hh>
+#include <correlations/recurrence/FromQVector.hh>
+#include <correlations/closed/FromQVector.hh>
 #include <TComplex.h>
 #include <TH1.h>
 #include <TH2.h>

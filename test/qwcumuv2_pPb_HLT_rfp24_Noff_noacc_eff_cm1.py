@@ -28,7 +28,7 @@ process.options = cms.untracked.PSet(
 #	fN.append('file:'+line);
 #
 process.source = cms.Source("PoolSource",
-                            fileNames = cms.untracked.vstring("file:/afs/cern.ch/user/q/qwang/work/cleanroom2/CMSSW_5_3_8_HI_patch2/src/QWAna/QWCumuV3/test/pPb_HM_Skim.root")
+                            fileNames = cms.untracked.vstring("file:/afs/cern.ch/user/q/qwang/work/cleanroom2/CMSSW_5_3_8_HI_patch2/src/QWAna/QWCumuV3/test/pPb_HM_100_1_tMI.root")
 )
 
 #import FWCore.PythonUtilities.LumiList as LumiList
