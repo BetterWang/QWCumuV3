@@ -377,6 +377,7 @@ QWCumuV3::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 				correlations::Result r = cq->calculate(np*2+1, hc[n]);
 				qp += t->weight[i] * correlations::Complex( TMath::Cos(t->Phi[i] * n) , TMath::Sin(t->Phi[i] * n) ) * r.sum();
 				wt += t->weight[i] * r.weight();
+				delete cq;
 			}
 			rX[n][np] = qp.real();
 			iX[n][np] = qp.imag();
@@ -405,6 +406,7 @@ QWCumuV3::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 					correlations::Result r = cq->calculate(np*2+1, hc[n]);
 					qp += t->weight[i] * correlations::Complex( TMath::Cos(t->Phi[i] * n) , TMath::Sin(t->Phi[i] * n) ) * r.sum();
 					wt += t->weight[i] * r.weight();
+					delete cq;
 				}
 				rQp[n][np][ipt] = qp.real();
 				iQp[n][np][ipt] = qp.real();
@@ -433,6 +435,7 @@ QWCumuV3::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 					correlations::Result r = cq->calculate(np*2+1, hc[n]);
 					qp += t->weight[i] * correlations::Complex( TMath::Cos(t->Phi[i] * n) , TMath::Sin(t->Phi[i] * n) ) * r.sum();
 					wt += t->weight[i] * r.weight();
+					delete cq;
 				}
 				rQeta[n][np][ieta] = qp.real();
 				iQeta[n][np][ieta] = qp.real();
@@ -440,33 +443,6 @@ QWCumuV3::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 			}
 	
 			// charge - differential
-			qp = 0;
-			wt = 0;
-			for ( int i = 0; i < t->Mult; i++ ) {
-					if ( t->Charge[i] < 0 || t->RFP[i] != 1 ) continue;
-					correlations::QVector tq = q[n];
-					tq.unfill(t->Phi[i], t->weight[i]);
-					correlations::FromQVector *cq = 0;
-					switch ( cmode_ ) {
-						case 1:
-							cq = new correlations::closed::FromQVector(tq);
-							break;
-						case 2:
-							cq = new correlations::recurrence::FromQVector(tq);
-							break;
-						case 3:
-							cq = new correlations::recursive::FromQVector(tq);
-							break;
-					}
-					correlations::Result r = cq->calculate(np*2+1, hc[n]);
-					qp += t->weight[i] * correlations::Complex( TMath::Cos(t->Phi[i] * n) , TMath::Sin(t->Phi[i] * n) ) * r.sum();
-					wt += t->weight[i] * r.weight();
-			}
-			rQc[n][np][0] = qp.real();
-			iQc[n][np][0] = qp.real();
-			wQc[n][np][0] = wt;
-
-			// charge + differential
 			qp = 0;
 			wt = 0;
 			for ( int i = 0; i < t->Mult; i++ ) {
@@ -488,6 +464,35 @@ QWCumuV3::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 					correlations::Result r = cq->calculate(np*2+1, hc[n]);
 					qp += t->weight[i] * correlations::Complex( TMath::Cos(t->Phi[i] * n) , TMath::Sin(t->Phi[i] * n) ) * r.sum();
 					wt += t->weight[i] * r.weight();
+					delete cq;
+			}
+			rQc[n][np][0] = qp.real();
+			iQc[n][np][0] = qp.real();
+			wQc[n][np][0] = wt;
+
+			// charge + differential
+			qp = 0;
+			wt = 0;
+			for ( int i = 0; i < t->Mult; i++ ) {
+					if ( t->Charge[i] < 0 || t->RFP[i] != 1 ) continue;
+					correlations::QVector tq = q[n];
+					tq.unfill(t->Phi[i], t->weight[i]);
+					correlations::FromQVector *cq = 0;
+					switch ( cmode_ ) {
+						case 1:
+							cq = new correlations::closed::FromQVector(tq);
+							break;
+						case 2:
+							cq = new correlations::recurrence::FromQVector(tq);
+							break;
+						case 3:
+							cq = new correlations::recursive::FromQVector(tq);
+							break;
+					}
+					correlations::Result r = cq->calculate(np*2+1, hc[n]);
+					qp += t->weight[i] * correlations::Complex( TMath::Cos(t->Phi[i] * n) , TMath::Sin(t->Phi[i] * n) ) * r.sum();
+					wt += t->weight[i] * r.weight();
+					delete cq;
 			}
 			rQc[n][np][1] = qp.real();
 			iQc[n][np][1] = qp.real();
