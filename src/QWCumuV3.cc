@@ -347,9 +347,9 @@ QWCumuV3::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	// RFP
 	for ( int n = 1; n < 7; n++ ) {
 		for ( int np = 0; np < 4; np++ ) {
-			rQ[np][n] = r[np][n].sum().real();
-			iQ[np][n] = r[np][n].sum().imag();
-			wQ[np][n] = r[np][n].weight();
+			rQ[n][np] = r[n][np].sum().real();
+			iQ[n][np] = r[n][np].sum().imag();
+			wQ[n][np] = r[n][np].weight();
 		}
 	}
 
