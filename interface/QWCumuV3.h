@@ -116,8 +116,7 @@ class QWCumuV3 : public edm::EDAnalyzer {
 		TH2D * hacc[nCentBins][nPtBins][2];
 
 //		TNtupleD * ntResult;
-		TTree * trV[7];
-		TTree * trG;
+		TTree * trV;
 
 		int gNoff;
 		int gMult;
