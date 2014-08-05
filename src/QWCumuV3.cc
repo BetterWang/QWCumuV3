@@ -401,7 +401,7 @@ QWCumuV3::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 					delete cq;
 				}
 				rQp[n][np][ipt] = qp.real();
-				iQp[n][np][ipt] = qp.real();
+				iQp[n][np][ipt] = qp.imag();
 				wQp[n][np][ipt] = wt;
 			}
 			// eta differential
@@ -430,7 +430,7 @@ QWCumuV3::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 					delete cq;
 				}
 				rQeta[n][np][ieta] = qp.real();
-				iQeta[n][np][ieta] = qp.real();
+				iQeta[n][np][ieta] = qp.imag();
 				wQeta[n][np][ieta] = wt;
 			}
 	
@@ -459,7 +459,7 @@ QWCumuV3::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 					delete cq;
 			}
 			rQc[n][np][0] = qp.real();
-			iQc[n][np][0] = qp.real();
+			iQc[n][np][0] = qp.imag();
 			wQc[n][np][0] = wt;
 
 			// charge + differential
@@ -487,7 +487,7 @@ QWCumuV3::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 					delete cq;
 			}
 			rQc[n][np][1] = qp.real();
-			iQc[n][np][1] = qp.real();
+			iQc[n][np][1] = qp.imag();
 			wQc[n][np][1] = wt;
 		}
 	}
