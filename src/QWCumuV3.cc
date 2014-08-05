@@ -803,25 +803,70 @@ QWCumuV3::doneQ()
 void
 QWCumuV3::Sim()
 {
-#if 0
-	// QC{2} = -0.071428
-	// QC{4} = -0.007142
-	// QC{6} = 0.0357142
-	// QC{8} = 0.0571429
-	t->Cent = 100;
-	t->Mult = 8;
-	for ( int i = 0; i < 8; i++ ) {
+//	if ( t->Mult == 0 ) {
+//		cout << "!!! Evt skipped" << endl;
+//		return;
+//	}
+
+	cout << "!!! in the Sim" << endl;
+
+	t->Mult = 10;
+	for ( int i = 0; i < t->Mult; i++ ) {
+		t->Phi[i] = 0.3*i;
+		t->Eta[i] = 0.1;
+		if ( i < 5 ) {
+			t->Pt[i] = 0.4;
+			t->RFP[i] = 1;
+		}
+		else {
+			t->Pt[i] = 0.2;
+			t->RFP[i] = 0;
+		}
 		t->weight[i] = 1.;
 	}
-	t->Phi[0] = -Pi;
-	t->Phi[1] = -Pi*5/6.;
-	t->Phi[2] = -Pi/2.;
-	t->Phi[3] = -Pi/6.;
-	t->Phi[4] = 0;
-	t->Phi[5] = Pi/6.;
-	t->Phi[6] = Pi/2.;
-	t->Phi[7] = Pi*5/6.;
-#endif
+//	t->RFP[4] = 0;
+	int n = 2;
+	int ipt = 0;
+	correlations::Complex Q = 0;
+	correlations::Complex W = 0;
+	correlations::Complex Qp = 0;
+	correlations::Complex Wp = 0;
+	for ( int i = 0; i < t->Mult; i++ ) {
+		if (!t->RFP[i] ) continue;
+		for ( int j = 0; j < t->Mult; j++ ) {
+			if ( !t->RFP[j] || j == i ) continue;
+			for ( int k = 0; k < t->Mult; k++ ) {
+				if ( !t->RFP[k] || k == j || k == i ) continue;
+				for ( int l = 0; l < t->Mult; l++ ) {
+					if ( !t->RFP[l] || l == k || l == j || l == i ) continue;
+					correlations::Complex tq = ( correlations::Complex( TMath::Cos(t->Phi[i]*(-n)), TMath::Sin(t->Phi[i]*(-n)) ) *
+						correlations::Complex( TMath::Cos(t->Phi[j]*n), TMath::Sin(t->Phi[j]*n) ) * 
+						correlations::Complex( TMath::Cos(t->Phi[k]*(-n)), TMath::Sin(t->Phi[k]*(-n)) ) * 
+						correlations::Complex( TMath::Cos(t->Phi[l]*n), TMath::Sin(t->Phi[l]*n) )
+					     );
+					double w = t->weight[i] * t->weight[j] * t->weight[k] * t->weight[l];
+					Q += w*tq;
+					W += w;
+					cout << i << "\t" << j << "\t" << k << "\t" << l << endl;
+				}
+				for ( int l = 0; l < t->Mult; l++ ) {
+					if ( t->Pt[l] < ptbins[ipt] || t->Pt[l] > ptbins[ipt+1] || l == k || l == j || l == i ) continue;
+					correlations::Complex tq = ( correlations::Complex( TMath::Cos(t->Phi[i]*(-n)), TMath::Sin(t->Phi[i]*(-n)) ) *
+						correlations::Complex( TMath::Cos(t->Phi[j]*n), TMath::Sin(t->Phi[j]*n) ) * 
+						correlations::Complex( TMath::Cos(t->Phi[k]*(-n)), TMath::Sin(t->Phi[k]*(-n)) ) * 
+						correlations::Complex( TMath::Cos(t->Phi[l]*n), TMath::Sin(t->Phi[l]*n) )
+					     );
+					double w = t->weight[i] * t->weight[j] * t->weight[k] * t->weight[l];
+					Qp += w*tq;
+					Wp += w;
+				}
+			}
+		}
+	}
+
+
+	cout << "!!! Ref Q = " << Q << "\tW = " << W << "\tQp = " << Qp << "\tWp = " << Wp << endl;
+
 }
 
 // ------------ method called once each job just before starting event loop  ------------
