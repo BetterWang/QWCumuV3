@@ -3,3 +3,4 @@ PbPb
 pPb
 test/*
 !test/qw*.py
+*.pyc
