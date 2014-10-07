@@ -94,6 +94,7 @@ QWCumuV3::QWCumuV3(const edm::ParameterSet& iConfig)
 	cweight_ = iConfig.getUntrackedParameter<int>("cweight_", 0);
 	bGen_ = iConfig.getUntrackedParameter<bool>("bGen_", false);
 	nvtx_ = iConfig.getUntrackedParameter<int>("nvtx_", 100);
+	bFlipEta_ = iConfig.getUntrackedParameter<bool>("bFlipEta_", false);
 
 	string streff = fweight_.label();
 	if ( streff == string("NA") ) {
@@ -148,7 +149,6 @@ QWCumuV3::QWCumuV3(const edm::ParameterSet& iConfig)
 			q[n] = correlations::QVector(0, 0, false);
 		}
 	}
-
 
 	//
 	//cout << __LINE__ << "\t" << tracks_.label().c_str() << "\t|" << tracks_.instance() << "\t|" << tracks_.process() << endl;
@@ -507,7 +507,6 @@ QWCumuV3::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 void
 QWCumuV3::analyzeGen(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
-#if 0
 	using namespace edm;
 	using namespace reco;
 
@@ -537,14 +536,21 @@ QWCumuV3::analyzeGen(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 		if ( itTrack->charge() == 0 ) continue;
 		if ( fabs(itTrack->eta()) > 2.4 ) continue;
 		t->Pt[t->Mult] = itTrack->pt();
-		if ( (t->Pt[t->Mult] < rfpptmin_) || (t->Pt[t->Mult] > rfpptmax_) || itTrack->eta() < rfpmineta_ || itTrack->eta() > rfpmaxeta_ ) continue;
+		t->Charge[t->Mult] = itTrack->charge();
+		t->Eta[t->Mult] = itTrack->eta();
+		if (bFlipEta_) t->Eta[t->Mult] = - t->Eta[t->Mult];
+
+		if ( (t->Pt[t->Mult] > rfpptmin_) && (t->Pt[t->Mult] < rfpptmax_) && t->Eta[t->Mult] > rfpmineta_ && t->Eta[t->Mult] < rfpmaxeta_ ) {
+			t->RFP[t->Mult] = 1;
+		} else {
+			t->RFP[t->Mult] = 0;
+		}
 
 		t->weight[t->Mult] = 1.;
 		t->Phi[t->Mult] = itTrack->phi();
 
 		t->Mult++;
 	}
-#endif
 }
 
 
@@ -638,6 +644,7 @@ QWCumuV3::analyzeData(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 			t->RFP[t->Mult] = 0;
 		}
 		t->Eta[t->Mult] = itTrack->eta();
+		if (bFlipEta_) t->Eta[t->Mult] = - t->Eta[t->Mult];
 
 		if (effCut_>0.)  {
 			double eff = hEff_cbin[bin]->GetBinContent( hEff_cbin[bin]->FindBin(t->Eta[t->Mult], t->Pt[t->Mult] ) ) ;

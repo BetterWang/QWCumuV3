@@ -21,7 +21,7 @@ process.load('GeneratorInterface.HiGenCommon.AfterBurnerGenerator_cff')
 process.load('QWAna.QWCumuV3.PionFlatPt_cfi')
 
 
-process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(20))
+process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(200000))
 process.options = cms.untracked.PSet(wantSummary = cms.untracked.bool(True))
 
 from Configuration.AlCa.GlobalTag import GlobalTag
@@ -46,7 +46,7 @@ process.source = cms.Source("EmptySource")
 #
 #
 
-Mult = 2000
+Mult = 100
 part_id = cms.vint32();
 for i in range(Mult):
         part_id.append(211)
@@ -54,7 +54,7 @@ for i in range(Mult):
 process.generator.PGunParameters.PartID = part_id
 
 process.cumulant = cms.EDAnalyzer('QWCumuV3'
-	, tracks_ = cms.untracked.InputTag('generalTracks')
+	, tracks_ = cms.untracked.InputTag('genParticles')
 	, centrality_ = cms.InputTag("centralityBin")
 	, chi2_ = cms.untracked.double(40.)
 	, vertexSrc_ = cms.untracked.InputTag('offlinePrimaryVertices', "")
@@ -72,6 +72,7 @@ process.cumulant = cms.EDAnalyzer('QWCumuV3'
 #	, fweight_ = cms.untracked.InputTag('TrackCorrections_HIJING_538_OFFICIAL_Mar24.root')
 #	, bEff_ = cms.untracked.bool(True)
 	, cmode_ = cms.untracked.int32(1)
+	, bGen_ = cms.untracked.bool(True)
 )
 
 process.TFileService = cms.Service("TFileService",
@@ -93,14 +94,14 @@ process.RAWSIMoutput = cms.OutputModule("PoolOutputModule",
 )
 
 process.AftBurner.modv1 = cms.InputTag("0.0")
-process.AftBurner.modv2 = cms.InputTag("(-0.00912015+0.096324*x)*exp(-0.360431*x)")
+process.AftBurner.modv2 = cms.InputTag("0.165646*exp(-( (x-2.64741)/1.36298 + exp( -(x-2.64741)/1.36298 ) )/2.)")
 process.AftBurner.fluct_v1 = cms.double(0.0)
 process.AftBurner.fluct_v2 = cms.double(0.0)
 process.AftBurner.modmethod = cms.int32(1)
 
 #process.pgen = cms.Sequence(cms.SequencePlaceholder("randomEngineStateProducer")+process.VertexSmearing+process.GeneInfo)
 #process.pgen = cms.Sequence(cms.SequencePlaceholder("randomEngineStateProducer")+process.AfterBurner+process.GeneInfo)
-process.pgen = cms.Sequence(cms.SequencePlaceholder("randomEngineStateProducer")+process.AfterBurner+process.GeneInfo)
+process.pgen = cms.Sequence(cms.SequencePlaceholder("randomEngineStateProducer")+process.AfterBurner+process.GeneInfo+process.cumulant)
 
 from IOMC.RandomEngine.RandomServiceHelper import RandomNumberServiceHelper
 randSvc = RandomNumberServiceHelper(process.RandomNumberGeneratorService)
@@ -120,7 +121,7 @@ process.RAWSIMoutput_step = cms.EndPath(process.RAWSIMoutput)
 #)
 process.schedule = cms.Schedule(
 	process.generation_step,
-        process.RAWSIMoutput_step
+#        process.RAWSIMoutput_step
 )
 
 

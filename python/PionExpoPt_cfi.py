@@ -7,10 +7,11 @@ import FWCore.ParameterSet.Config as cms
 #
 #
 
-generator = cms.EDProducer("FlatRandomPtGunProducer",
+generator = cms.EDProducer("ExpoRandomPtGunProducer",
     PGunParameters = cms.PSet(
         MaxPt = cms.double(12.30),
         MinPt = cms.double(0.30),
+        MeanPt = cms.double(0.90),
         PartID = cms.vint32(211),
         MaxEta = cms.double(2.4),
         MaxPhi = cms.double(3.14159265359),
@@ -19,7 +20,7 @@ generator = cms.EDProducer("FlatRandomPtGunProducer",
     ),
     Verbosity = cms.untracked.int32(0), ## set to 1 (or greater)  for printouts
 
-    psethack = cms.string('pi pt 0.3 12.3'),
+    psethack = cms.string('pi expo pt 0.3 12.3 0.90'),
     AddAntiParticle = cms.bool(True),
     firstRun = cms.untracked.uint32(1)
 )
