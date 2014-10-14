@@ -74,10 +74,10 @@ QWCumuV3::QWCumuV3(const edm::ParameterSet& iConfig)
 	rfpptmin_ = iConfig.getUntrackedParameter<double>("rfpptmin_", 0.3);
 	rfpptmax_ = iConfig.getUntrackedParameter<double>("rfpptmax_", 100);
 
-	poimineta_ = iConfig.getUntrackedParameter<double>("poimineta_", rfpmineta_);
-	poimaxeta_ = iConfig.getUntrackedParameter<double>("poimaxeta_", rfpmaxeta_);
-	poiptmin_ = iConfig.getUntrackedParameter<double>("poiptmin_", rfpptmin_);
-	poiptmax_ = iConfig.getUntrackedParameter<double>("poiptmax_", rfpptmax_);
+	poimineta_ = iConfig.getUntrackedParameter<double>("poimineta_", -2.4);
+	poimaxeta_ = iConfig.getUntrackedParameter<double>("poimaxeta_", 2.4);
+	poiptmin_ = iConfig.getUntrackedParameter<double>("poiptmin_", 0.3);
+	poiptmax_ = iConfig.getUntrackedParameter<double>("poiptmax_", 3.0);
 
 	fweight_ = iConfig.getUntrackedParameter<edm::InputTag>("fweight_", string("NA"));
 	facceptance_ = iConfig.getUntrackedParameter<edm::InputTag>("facceptance_", string("NA"));
@@ -380,6 +380,7 @@ QWCumuV3::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 				qp = 0;
 				wt = 0;
 				for ( int i = 0; i < t->Mult; i++ ) {
+					if ( t->Eta[i] < poimineta_ or t->Eta[i] > poimaxeta_ ) continue;
 					if ( t->Pt[i] < ptbins[ipt] || t->Pt[i] > ptbins[ipt+1] ) continue;
 					correlations::QVector tq = q[n];
 					if ( t->RFP[i] ) tq.unfill(t->Phi[i], t->weight[i]);
@@ -412,6 +413,7 @@ QWCumuV3::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 				qp = 0;
 				wt = 0;
 				for ( int i = 0; i < t->Mult; i++ ) {
+					if ( t->Pt[i] < poiptmin_ or t->Pt[i] > poiptmax_ ) continue;
 					if ( t->Eta[i] < etabins[ieta] || t->Eta[i] > etabins[ieta+1] || t->RFP[i] != 1 ) continue;
 					correlations::QVector tq = q[n];
 					tq.unfill(t->Phi[i], t->weight[i]);
