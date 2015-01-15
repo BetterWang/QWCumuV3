@@ -11,13 +11,13 @@ process.load('Configuration.StandardSequences.MagneticField_38T_cff')
 #process.load('Configuration.StandardSequences.ReconstructionHeavyIons_cff')
 process.load('Configuration.StandardSequences.EndOfProcess_cff')
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
-process.load('HeavyIonsAnalysis.Configuration.collisionEventSelection_cff')
+#process.load('HeavyIonsAnalysis.Configuration.collisionEventSelection_cff')
 process.load('Configuration.EventContent.EventContentHeavyIons_cff')
 
 
 process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(-1))
 process.options = cms.untracked.PSet(wantSummary = cms.untracked.bool(True))
-process.GlobalTag.globaltag = 'GR_P_V43::All'
+process.GlobalTag.globaltag = 'GR_P_V27A::All'
 
 process.options = cms.untracked.PSet(
     Rethrow = cms.untracked.vstring('ProductNotFound')
@@ -28,7 +28,7 @@ process.options = cms.untracked.PSet(
 #	fN.append('file:'+line);
 #
 process.source = cms.Source("PoolSource",
-                            fileNames = cms.untracked.vstring("file:/afs/cern.ch/user/q/qwang/work/cleanroom6/CMSSW_5_3_20/src/QWAna/QWCumuV3/test/PbPb_MB_100_1_7OP.root")
+                            fileNames = cms.untracked.vstring("file:/afs/cern.ch/user/q/qwang/work/cleanroom2/CMSSW_5_3_20/src/QWAna/QWCumuV3/test/PbPb_MB_100_1_7OP.root")
 )
 
 #import FWCore.PythonUtilities.LumiList as LumiList
@@ -54,12 +54,15 @@ process.cumulant = cms.EDAnalyzer('QWCumuV3'
 	, bCentNoff_ = cms.untracked.bool(True)
 	, poimineta_ = cms.untracked.double(-2.4)
 	, poimaxeta_ = cms.untracked.double(2.4)
+	, poiptmin_ = cms.untracked.double(0.3)
+	, poiptmax_ = cms.untracked.double(3.0)
 	, pterrorpt_ = cms.untracked.double(0.1)
 	, Noffmin_ = cms.untracked.int32(0)
 	, Noffmax_ = cms.untracked.int32(1000)
 #	, fweight_ = cms.untracked.InputTag('TrackCorrections_HIJING_538_OFFICIAL_Mar24.root')
 #	, bEff_ = cms.untracked.bool(True)
 	, cmode_ = cms.untracked.int32(1)
+	, bFlipEta_ = cms.untracked.bool(False)
 )
 
 process.p = cms.Path(process.cumulant)

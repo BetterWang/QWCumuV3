@@ -94,7 +94,6 @@ class QWCumuV3 : public edm::EDAnalyzer {
 		int 	Noffmin_;
 		int 	Noffmax_;
 		int	cmode_;
-		int	cweight_;
 		bool	bGen_;
 		bool	bFlipEta_;
 

@@ -91,7 +91,6 @@ QWCumuV3::QWCumuV3(const edm::ParameterSet& iConfig)
 	Noffmax_ = iConfig.getUntrackedParameter<int>("Noffmax_", 5000);
 	effCut_ = iConfig.getUntrackedParameter<double>("effCut_", -1.0);
 	cmode_ = iConfig.getUntrackedParameter<int>("cmode_", 1);
-	cweight_ = iConfig.getUntrackedParameter<int>("cweight_", 0);
 	bGen_ = iConfig.getUntrackedParameter<bool>("bGen_", false);
 	nvtx_ = iConfig.getUntrackedParameter<int>("nvtx_", 100);
 	bFlipEta_ = iConfig.getUntrackedParameter<bool>("bFlipEta_", false);
@@ -144,9 +143,10 @@ QWCumuV3::QWCumuV3(const edm::ParameterSet& iConfig)
 		}
 	}
 
-	if ( cweight_ == 0 || bEff == false ) {
+	if ( bEff == true ) {
 		for ( int n = 1; n < 7; n++ ) {
-			q[n] = correlations::QVector(0, 0, false);
+			cout << "-> with weights" << endl;
+			q[n] = correlations::QVector(0, 0, true);
 		}
 	}
 

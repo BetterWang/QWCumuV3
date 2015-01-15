@@ -4,4 +4,5 @@ PbPb
 pPb
 test/*
 !test/qw*.py
+!test/run*.sh
 *.pyc
