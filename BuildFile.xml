@@ -5,6 +5,3 @@
 <use name="DataFormats/VertexReco"/>
 <use name="DataFormats/TrackReco"/>
 <use name="CommonTools/UtilAlgos"/>
-<export>
-   <lib name="1"/>
-</export>

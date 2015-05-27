@@ -30,10 +30,10 @@ typedef struct QWEvent_ {
 	int     Cent;
 	int     Mult;
 	double  vz;
-	int 	Noff;
-	double  Pt[NMAX_TRK];
-	double  Eta[NMAX_TRK];
-	double  Phi[NMAX_TRK];
+	int	Noff;
+	float	Pt[NMAX_TRK];
+	float	Eta[NMAX_TRK];
+	float	Phi[NMAX_TRK];
 	int     Charge[NMAX_TRK];
 	double	rEff[NMAX_TRK];
 	double	rFak[NMAX_TRK];

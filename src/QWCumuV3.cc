@@ -167,7 +167,7 @@ QWCumuV3::QWCumuV3(const edm::ParameterSet& iConfig)
 			}
 		}
 	}
-	for ( int cent = 0; cent < 20; cent++ ) {
+	for ( int cent = 0; cent < nCentBins; cent++ ) {
 		cout << "!! new histo cent = " << cent << endl;
 		hdNdPtdEta[cent] = fs->make<TH2D>(Form("hdNdPtdEta_%i", cent), Form("hdNdPtdEta_%i", cent), nEtaBins, etabins, 38, fakpt );
 		hdNdPtdEtaPt[cent] = fs->make<TH2D>(Form("hdNdPtdEtaPt_%i", cent), Form("hdNdPtdEta_%i", cent), nEtaBins, etabins, 38, fakpt );
@@ -175,8 +175,6 @@ QWCumuV3::QWCumuV3(const edm::ParameterSet& iConfig)
 
 
 	trV = fs->make<TTree>("trV", "trV");
-//		trV->SetAutoSave(10000000);
-//		trV->SetAutoFlush(1000000);
 	trV->Branch("Noff", &gNoff, "Noff/I");
 	trV->Branch("Mult", &gMult, "Mult/I");
 
