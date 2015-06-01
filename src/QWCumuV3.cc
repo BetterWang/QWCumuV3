@@ -20,6 +20,7 @@ Implementation:
 
 // system include files
 #include <memory>
+#include <cmath>
 
 // user include files
 #include "FWCore/Framework/interface/Frameworkfwd.h"
@@ -95,6 +96,9 @@ QWCumuV3::QWCumuV3(const edm::ParameterSet& iConfig)
 	nvtx_ = iConfig.getUntrackedParameter<int>("nvtx_", 100);
 	bFlipEta_ = iConfig.getUntrackedParameter<bool>("bFlipEta_", false);
 
+	nmixed_ = iConfig.getUntrackedParameter<int>("nmixed_", 15);
+	ntry_ = iConfig.getUntrackedParameter<int>("ntry_", nmixed_*5);
+
 	string streff = fweight_.label();
 	if ( streff == string("NA") ) {
 		bFak = false;
@@ -150,20 +154,16 @@ QWCumuV3::QWCumuV3(const edm::ParameterSet& iConfig)
 		}
 	}
 
-	//
-	//cout << __LINE__ << "\t" << tracks_.label().c_str() << "\t|" << tracks_.instance() << "\t|" << tracks_.process() << endl;
-	//
-	t = new QWEvent;
-	memset(t, 0, sizeof(QWEvent));
-	//
+//	t = new QWEvent;
+//	memset(t, 0, sizeof(QWEvent));
 	edm::Service<TFileService> fs;
 	for ( int cent = 0; cent < nCentBins; cent++ ) {
 		hPt[cent] = fs->make<TH1D>(Form("hPt_%i", cent), "", 20000, 0, 100);
 		if ( bPhiEta ) {
 			for ( int i = 0; i < nPtBins; i++ ) {
 				cout << "!! new histo cent = " << cent << " of " << nCentBins << "\t ipt = " << i  << " of " << nPtBins << endl;
-				hPhiEta[cent][i][0] = fs->make<TH2D>(Form("hPhiEta_%i_%i_0", cent, i), "", 512, -Pi, Pi, 480, -2.4, 2.4);
-				hPhiEta[cent][i][1] = fs->make<TH2D>(Form("hPhiEta_%i_%i_1", cent, i), "", 512, -Pi, Pi, 480, -2.4, 2.4);
+				hPhiEta[cent][i][0] = fs->make<TH2D>(Form("hPhiEta_%i_%i_0", cent, i), "", 512, -M_PI, M_PI, 480, -2.4, 2.4);
+				hPhiEta[cent][i][1] = fs->make<TH2D>(Form("hPhiEta_%i_%i_1", cent, i), "", 512, -M_PI, M_PI, 480, -2.4, 2.4);
 			}
 		}
 	}
@@ -204,13 +204,21 @@ QWCumuV3::QWCumuV3(const edm::ParameterSet& iConfig)
 
 	initQ();
 
-//	cout << cq2->name() << endl;
-//	ntResult = new TNtupleD("ntResult",cq2->name(),"Noff:Mult:Cent:C22:C24:C26:C28:iC22:iC24:iC26:iC28:wC22:wC24:wC26:wC28:C32:C34:C36:C38:iC32:iC34:iC36:iC38:wC32:wC34:wC36:wC38");
-//	ntResult = fs->make<TNtupleD>("ntResult",cq2->name(),"Noff:Mult:Cent:C22:C24:C26:C28:iC22:iC24:iC26:iC28:wC22:wC24:wC26:wC28:C32:C34:C36:C38:iC32:iC34:iC36:iC38:wC32:wC34:wC36:wC38");
-//	ntResult->SetAutoFlush(-3000000);
-//	ntResult->SetAutoSave(-30000000);
+	for ( int c = 0; c < nCentBins; ++c ) {
+		for ( int itrig = 0; itrig < nPtBins; ++itrig ) {
+			for ( int iasso = 0; iasso < nPtBins; ++iasso ) {
+				h2DPhiDEta[c][itrig][iasso] = fs->make<TH2D>(Form("h2DPhiDEta_%i_%i_%i", c, itrig, iasso), 30, -M_PI_4, M_2_PI - M_PI_4, 48, -4.8, 4.8);
+				h2DPhiDEtaMix[c][itrig][iasso] = fs->make<TH2D>(Form("h2DPhiDEtaMix_%i_%i_%i", c, itrig, iasso), 30, -M_PI_4, M_2_PI - M_PI_4, 48, -4.8, 4.8);
+			}
+			h2NDPhiDEta[c][itrig] = fs->make<TH1D>(Form("h2NDPhiDEta_%i_%i", c, itrig), 1, 0, 10);
+			h2NDPhiDEtaMix[c][itrig] = fs->make<TH1D>(Form("h2NDPhiDEtaMix_%i_%i", c, itrig), 1, 0, 10);
+		}
+		h2DPhiDEtaRFP[c] = fs->make<TH2D>(Form("h2DPhiDEtaRFP_%i", c), 30, -M_PI_4, M_2_PI - M_PI_4, 48, -4.8, 4.8);
+		h2DPhiDEtaRFPMix[c] = fs->make<TH2D>(Form("h2DPhiDEtaRFPMix_%i", c), 30, -M_PI_4, M_2_PI - M_PI_4, 48, -4.8, 4.8);
 
-//	cout << "!! initQ" << endl;
+		h2NDPhiDEtaRFP[c] = fs->make<TH1D>(Form("h2NDPhiDEtaRFP_%i", c), 1, 0, 10);
+		h2NDPhiDEtaRFPMix[c] = fs->make<TH1D>(Form("h2NDPhiDEtaRFPMix_%i", c), 1, 0, 10);
+	}
 }
 
 
@@ -249,7 +257,7 @@ QWCumuV3::getNoffCent(const edm::Event& iEvent, const edm::EventSetup& iSetup, i
 	Handle<TrackCollection> tracks;
 	iEvent.getByLabel(tracks_,tracks);
 	for(TrackCollection::const_iterator itTrack = tracks->begin();
-		itTrack != tracks->end();                      
+		itTrack != tracks->end();
 		++itTrack) {
 
 		if ( !itTrack->quality(reco::TrackBase::highPurity) ) continue;
@@ -288,9 +296,14 @@ QWCumuV3::getNoffCent(const edm::Event& iEvent, const edm::EventSetup& iSetup, i
 void
 QWCumuV3::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
-	if ( bGen_ ) analyzeGen(iEvent, iSetup);
-	else analyzeData(iEvent, iSetup);
-	if ( t->Mult == 0 ) return;
+	t = vEvt.emplace_back();
+	bool bAna = true;
+	if ( bGen_ ) bAna = analyzeGen(iEvent, iSetup);
+	else bAna = analyzeData(iEvent, iSetup);
+	if ( !bAna || t->Mult == 0 ) {
+		vEvt.pop_back();
+		return;
+	}
 
 	for ( int n = 0; n < 7; n++ ) {
 		for ( int np = 0; np < 4; np++ ) {
@@ -321,7 +334,7 @@ QWCumuV3::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	}
 
 	for ( int i = 0; i < t->Mult; i++ ) {
-		if ( t->RFP[i] != 1 ) continue;
+		if ( !t->RFP[i] ) continue;
 		for ( int n = 1; n < 7; n++ ) {
 			q[n].fill(t->Phi[i], t->weight[i]);
 		}
@@ -412,7 +425,7 @@ QWCumuV3::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 				wt = 0;
 				for ( int i = 0; i < t->Mult; i++ ) {
 					if ( t->Pt[i] < poiptmin_ or t->Pt[i] > poiptmax_ ) continue;
-					if ( t->Eta[i] < etabins[ieta] || t->Eta[i] > etabins[ieta+1] || t->RFP[i] != 1 ) continue;
+					if ( t->Eta[i] < etabins[ieta] || t->Eta[i] > etabins[ieta+1] || !t->RFP[i] ) continue;
 					correlations::QVector tq = q[n];
 					tq.unfill(t->Phi[i], t->weight[i]);
 					correlations::FromQVector *cq = 0;
@@ -436,12 +449,12 @@ QWCumuV3::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 				iQeta[n][np][ieta] = qp.imag();
 				wQeta[n][np][ieta] = wt;
 			}
-	
+
 			// charge - differential
 			for ( int i = 0; i < t->Mult; i++ ) {
 				qp = 0;
 				wt = 0;
-				if ( t->Charge[i] > 0 || t->RFP[i] != 1 ) continue;
+				if ( t->Charge[i] > 0 || !t->RFP[i] ) continue;
 				correlations::QVector tq = q[n];
 				tq.unfill(t->Phi[i], t->weight[i]);
 				correlations::FromQVector *cq = 0;
@@ -469,7 +482,7 @@ QWCumuV3::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 			qp = 0;
 			wt = 0;
 			for ( int i = 0; i < t->Mult; i++ ) {
-				if ( t->Charge[i] < 0 || t->RFP[i] != 1 ) continue;
+				if ( t->Charge[i] < 0 || !t->RFP[i] ) continue;
 				correlations::QVector tq = q[n];
 				tq.unfill(t->Phi[i], t->weight[i]);
 				correlations::FromQVector *cq = 0;
@@ -504,7 +517,7 @@ QWCumuV3::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 }
 
 
-void
+bool
 QWCumuV3::analyzeGen(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
 	using namespace edm;
@@ -541,9 +554,9 @@ QWCumuV3::analyzeGen(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 		if (bFlipEta_) t->Eta[t->Mult] = - t->Eta[t->Mult];
 
 		if ( (t->Pt[t->Mult] > rfpptmin_) && (t->Pt[t->Mult] < rfpptmax_) && t->Eta[t->Mult] > rfpmineta_ && t->Eta[t->Mult] < rfpmaxeta_ ) {
-			t->RFP[t->Mult] = 1;
+			t->RFP[t->Mult] = true;
 		} else {
-			t->RFP[t->Mult] = 0;
+			t->RFP[t->Mult] = false;
 		}
 
 		t->weight[t->Mult] = 1.;
@@ -551,11 +564,12 @@ QWCumuV3::analyzeGen(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
 		t->Mult++;
 	}
+	return true;
 }
 
 
 // ------------ method called for each event  ------------
-	void
+bool
 QWCumuV3::analyzeData(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
 	using namespace edm;
@@ -566,7 +580,7 @@ QWCumuV3::analyzeData(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	Handle<VertexCollection> vertexCollection;
 	iEvent.getByLabel(vertexSrc_, vertexCollection);
 	const VertexCollection * recoVertices = vertexCollection.product();
-	if ( recoVertices->size() > nvtx_ ) return;
+	if ( recoVertices->size() > nvtx_ ) return false;
 
 	int primaryvtx = 0;
 	math::XYZPoint v1( (*recoVertices)[primaryvtx].position().x(), (*recoVertices)[primaryvtx].position().y(), (*recoVertices)[primaryvtx].position().z() );
@@ -581,9 +595,9 @@ QWCumuV3::analyzeData(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 //	}
 	double vz = (*recoVertices)[primaryvtx].z();
 	if (fabs(vz) < minvz_ || fabs(vz) > maxvz_) {
-		return;
+		return false;
 	}
-	
+
 	// centrality
 	int bin = 0;
 	int cbin = 0;
@@ -592,7 +606,7 @@ QWCumuV3::analyzeData(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	if ( bCentNoff ) {
 		cbin = getNoffCent( iEvent, iSetup, t->Noff);
 		if ( (t->Noff < Noffmin_) or (t->Noff >= Noffmax_) ) {
-			return;
+			return false;
 		}
 	} else {
 		edm::Handle<int> ch;
@@ -610,7 +624,7 @@ QWCumuV3::analyzeData(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	//cout << __LINE__ << "\t" << bin << endl;
 
 	for(TrackCollection::const_iterator itTrack = tracks->begin();
-			itTrack != tracks->end();                      
+			itTrack != tracks->end();
 			++itTrack) {
 //		cout << "!!! " << __LINE__ << endl;
 		if ( itTrack->charge() == 0 ) continue;
@@ -628,20 +642,20 @@ QWCumuV3::analyzeData(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 		if ( fabs( d0/derror ) > d0d0error_ ) continue;
 		if ( itTrack->ptError()/itTrack->pt() > pterrorpt_ ) continue;
 
-		t->RFP[t->Mult] = 1;
+		t->RFP[t->Mult] = true;
 //		cout << "!!! " << __LINE__ << endl;
 		t->Charge[t->Mult] = itTrack->charge();
 		if ( (charge_ == 1) && (t->Charge[t->Mult]<0) ) {
-			t->RFP[t->Mult] = 0;
+			t->RFP[t->Mult] = false;
 		}
 		if ( (charge_ == -1) && (t->Charge[t->Mult]>0) ) {
-			t->RFP[t->Mult] = 0;
+			t->RFP[t->Mult] = false;
 		}
 
 //		cout << "!!! " << __LINE__ << endl;
 		t->Pt[t->Mult] = itTrack->pt();
 		if ( t->Pt[t->Mult] >= ptbins[nPtBins] || t->Pt[t->Mult] <= ptbins[0] ) {
-			t->RFP[t->Mult] = 0;
+			t->RFP[t->Mult] = false;
 		}
 		t->Eta[t->Mult] = itTrack->eta();
 		if (bFlipEta_) t->Eta[t->Mult] = - t->Eta[t->Mult];
@@ -650,7 +664,7 @@ QWCumuV3::analyzeData(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 			double eff = hEff_cbin[bin]->GetBinContent( hEff_cbin[bin]->FindBin(t->Eta[t->Mult], t->Pt[t->Mult] ) ) ;
 			if ( eff > effCut_ ) {
 				if ( gRandom->Rndm() < (eff-effCut_)/eff ) {
-					t->RFP[t->Mult] = 0;
+					t->RFP[t->Mult] = false;
 				}
 			}
 		}
@@ -666,7 +680,7 @@ QWCumuV3::analyzeData(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 			t->rFak[t->Mult] = 0.;
 		}
 		if ( t->rEff[t->Mult] <= 0.1 or TMath::IsNaN(t->rEff[t->Mult]) ) {
-			t->RFP[t->Mult] = 0;
+			t->RFP[t->Mult] = false;
 		}
 		double weight = (1.-t->rFak[t->Mult])/t->rEff[t->Mult];
 
@@ -683,7 +697,7 @@ QWCumuV3::analyzeData(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 		weight *= wacc;
 
 		if ( (t->Pt[t->Mult] < rfpptmin_) || (t->Pt[t->Mult] > rfpptmax_) || itTrack->eta() < rfpmineta_ || itTrack->eta() > rfpmaxeta_ ) {
-			t->RFP[t->Mult] = 0;
+			t->RFP[t->Mult] = false;
 		}
 
 		t->weight[t->Mult] = weight;
@@ -697,6 +711,7 @@ QWCumuV3::analyzeData(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 		t->Mult++;
 	}
 	if ( bSim_ ) Sim();
+	return true;
 }
 
 
@@ -826,11 +841,11 @@ QWCumuV3::Sim()
 		t->Eta[i] = 0.1;
 		if ( i < 5 ) {
 			t->Pt[i] = 0.4;
-			t->RFP[i] = 1;
+			t->RFP[i] = true;
 		}
 		else {
 			t->Pt[i] = 0.2;
-			t->RFP[i] = 0;
+			t->RFP[i] = false;
 		}
 		t->weight[i] = 1.;
 	}
@@ -881,56 +896,117 @@ QWCumuV3::Sim()
 }
 
 // ------------ method called once each job just before starting event loop  ------------
-	void 
+void
 QWCumuV3::beginJob()
 {
+	vEvt.reserve(150000);
 }
 
 // ------------ method called once each job just after ending the event loop  ------------
-	void 
-QWCumuV3::endJob() 
+void
+QWCumuV3::endJob()
 {
+	for ( auto&& evt : vEvt ) {
+		for ( int i = 0; i < evt.Mult; i++ ) evt.Pt[i] = getPtBin(evt.Pt[i]);
+	}
+	for ( auto it = vEvt.cbegin(); it != vEvt.cend(); ++it ) {
+		// same event
+
+		for ( int i = 0; i < it->Mult; ++i ) {
+			if ( it->Pt[i] < 0 ) continue;
+			for ( int j = 0; j < it->Mult; ++j ) {
+				if ( it->Pt[j] < 0 or i == j ) continue;
+				float dphi = it->Phi[j] - it->Phi[i];
+				while (dphi < - M_PI_4) dphi += M_2_PI;
+				while (dphi > M_2_PI - M_PI_4) dphi -= M_2_PI;
+				float deta = it->Eta[j] - it->Eta[i];
+
+				h2DPhiDEta[it->Cent][it->Pt[i]][it->Pt[j]]->Fill(dphi, deta, it->weight[i] * it->weight[j]);
+
+				if (it->RFP[i] and it->RFP[j]) {
+					h2DPhiDEtaRFP[it->Cent]->Fill(dphi, deta, it->weight[i] * it->weight[j]);
+				}
+			}
+			h2NDPhiDEta[it->Cent][it->Pt[i]]->Fill(1, it->weight[i]);
+			if ( it->RFP[i] ) {
+				h2NDPhiDEtaRFP[it->Cent]->Fill(1, it->weight[i] * it->weight[j]);
+			}
+		}
+		// mixed event
+		std::vector<std::vector<QWEvent>::const_iterator> pool;
+		pool.push_back(it);
+		for ( int imix = 0; imix < nmixed_; ++imix ) {
+			auto itM = getMix(it, pool);
+			if (itM == vEvt.cend()) break;
+			for ( int i = 0; i < it->Mult; ++i ) {
+				if ( it->Pt[i] < 0 ) continue;
+				for ( int j = 0; j < itM->Mult; ++j ) {
+					if ( itM->Pt[j] < 0 ) continue;
+					float dphi = itM->Phi[j] - it->Phi[i];
+					while (dphi < - M_PI_4) dphi += M_2_PI;
+					while (dphi > M_2_PI - M_PI_4) dphi -= M_2_PI;
+					float deta = itM->Eta[j] - it->Eta[i];
+
+					h2DPhiDEtaMix[c][it->Pt[i]][itM->Pt[j]]->Fill(dphi, deta, it->weight[i] * itM->weight[j] );
+					if ( it->RFP[i] and itM->FRP[j] ) {
+						h2DPhiDEtaRFPMix[it->Cent]->Fill(1, it->weight[i] * itM->weight[j] );
+					}
+				}
+				h2NDPhiDEtaMix[it->Cent][it->Pt[i]]->Fill(1, it->weight[i]);
+				if ( it->RFP[i] ) {
+					h2NDPhiDEtaRFPMix[it->Cent]->Fill(1, it->weight[i]);
+				}
+			}
+		}
+	}
 }
+
+auto QWCumuV3::getMix(auto it, auto&& poll) {
+	for ( int i = 0; i < ntry_; ++i ) {
+	}
+	return vEvt.cend();
+}
+
 
 // ------------ method called when starting to processes a run  ------------
-	void 
-QWCumuV3::beginRun(edm::Run const&, edm::EventSetup const&)
-{
-}
+//	void 
+//QWCumuV3::beginRun(edm::Run const&, edm::EventSetup const&)
+//{
+//}
 
 // ------------ method called when ending the processing of a run  ------------
-	void 
-QWCumuV3::endRun(edm::Run const&, edm::EventSetup const&)
-{
-}
+//	void 
+//QWCumuV3::endRun(edm::Run const&, edm::EventSetup const&)
+//{
+//}
 
 // ------------ method called when starting to processes a luminosity block  ------------
-	void 
-QWCumuV3::beginLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&)
-{
-}
+//	void 
+//QWCumuV3::beginLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&)
+//{
+//}
 
 // ------------ method called when ending the processing of a luminosity block  ------------
-	void 
-QWCumuV3::endLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&)
-{
-}
+//	void 
+//QWCumuV3::endLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&)
+//{
+//}
 
 // ------------ method fills 'descriptions' with the allowed parameters for the module  ------------
-void
-QWCumuV3::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
-	//The following says we do not know what parameters are allowed so do no validation
-	// Please change this to state exactly what you do use, even if it is no parameters
-	edm::ParameterSetDescription desc;
-	desc.setUnknown();
-	descriptions.addDefault(desc);
-
-	//Specify that only 'tracks' is allowed
-	//To use, remove the default given above and uncomment below
-	//ParameterSetDescription desc;
-	//desc.addUntracked<edm::InputTag>("tracks","ctfWithMaterialTracks");
-	//descriptions.addDefault(desc);
-}
+//void
+//QWCumuV3::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
+//	//The following says we do not know what parameters are allowed so do no validation
+//	// Please change this to state exactly what you do use, even if it is no parameters
+//	edm::ParameterSetDescription desc;
+//	desc.setUnknown();
+//	descriptions.addDefault(desc);
+//
+//	//Specify that only 'tracks' is allowed
+//	//To use, remove the default given above and uncomment below
+//	//ParameterSetDescription desc;
+//	//desc.addUntracked<edm::InputTag>("tracks","ctfWithMaterialTracks");
+//	//descriptions.addDefault(desc);
+//}
 
 //////////////////////////////////////////
 

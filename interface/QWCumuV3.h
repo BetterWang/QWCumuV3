@@ -25,20 +25,36 @@
 // class declaration
 //
 
-const int NMAX_TRK = 5000;
+const int NMAX_TRK = 300;
 typedef struct QWEvent_ {
 	int     Cent;
 	int     Mult;
-	double  vz;
+	float	vz;
 	int	Noff;
 	float	Pt[NMAX_TRK];
 	float	Eta[NMAX_TRK];
 	float	Phi[NMAX_TRK];
-	int     Charge[NMAX_TRK];
-	double	rEff[NMAX_TRK];
-	double	rFak[NMAX_TRK];
-	double	weight[NMAX_TRK];
-	int	RFP[NMAX_TRK];
+	char	Charge[NMAX_TRK];
+	float	rEff[NMAX_TRK];
+	float	rFak[NMAX_TRK];
+	float	weight[NMAX_TRK];
+	bool	RFP[NMAX_TRK];
+	QWEvent_() {
+		Cent = -1;
+		Mult = -1;
+		vz = -999.;
+		Noff = -1;
+		for ( int i = 0; i < NMAX_TRK; ++i ) {
+			Pt[i] = 0;
+			Eta[i] = -999;
+			Phi[i] = -999;
+			Charge[i] = -127;
+			rEff[i] = 0.;
+			rFak[i] = 0.;
+			weight[i] = 0.;
+			RFP[i] = false;
+		}
+	};
 } QWEvent;
 
 ///////////////// Class ////////////////////////////
@@ -48,23 +64,24 @@ class QWCumuV3 : public edm::EDAnalyzer {
 		explicit QWCumuV3(const edm::ParameterSet&);
 		~QWCumuV3();
 
-		static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
+//		static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
 
 	private:
-		virtual void beginJob() ;
-		virtual void analyze(const edm::Event&, const edm::EventSetup&);
-		virtual void analyzeData(const edm::Event&, const edm::EventSetup&);
-		virtual void analyzeGen(const edm::Event&, const edm::EventSetup&);
-		virtual void endJob() ;
+		virtual void beginJob() override;
+		virtual void analyze(const edm::Event&, const edm::EventSetup&) override;
+		bool analyzeData(const edm::Event&, const edm::EventSetup&);
+		bool analyzeGen(const edm::Event&, const edm::EventSetup&);
+		virtual void endJob() override;
 
-		virtual void beginRun(edm::Run const&, edm::EventSetup const&);
-		virtual void endRun(edm::Run const&, edm::EventSetup const&);
-		virtual void beginLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&);
-		virtual void endLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&);
+//		virtual void beginRun(edm::Run const&, edm::EventSetup const&);
+//		virtual void endRun(edm::Run const&, edm::EventSetup const&);
+//		virtual void beginLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&);
+//		virtual void endLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&);
 
 	/////////////////////////////////////////////
 		int getNoffCent(const edm::Event&, const edm::EventSetup&, int& Noff);
-		//TRandom3 * gRandom;
+
+		auto getMix(auto it, auto&& pool);
 		// ----------member data ---------------------------
 		edm::InputTag tracks_; //used to select what tracks to read from configuration file
 		edm::InputTag centrality_;	// centrality
@@ -85,6 +102,9 @@ class QWCumuV3 : public edm::EDAnalyzer {
 		double 	poiptmin_, poiptmax_;
 		int 	charge_;
 
+		int 	nmixed_;
+		int 	ntry_;
+
 		bool	bFak;
 		bool	bEff;
 		bool	bacc;
@@ -100,7 +120,6 @@ class QWCumuV3 : public edm::EDAnalyzer {
 		unsigned int	nvtx_;
 
 		double	effCut_;
-		QWEvent * t;
 		TFile	* fEffFak;
 		TFile	* facc;
 	/////////////////////////////////////////////
@@ -114,6 +133,16 @@ class QWCumuV3 : public edm::EDAnalyzer {
 		TH2D * hFak_cbin[nCentBins];
 
 		TH2D * hacc[nCentBins][nPtBins][2];
+
+		TH2D * h2DPhiDEta[nCentBins][nPtBins][nPtBins];
+		TH2D * h2DPhiDEtaRFP[nCentBins];
+		TH1D * h2NDPhiDEta[nCentBins][nPtBins][nPtBins];
+		TH1D * h2NDPhiDEtaRFP[nCentBins];
+
+		TH2D * h2DPhiDEtaMix[nCentBins][nPtBins][nPtBins];
+		TH2D * h2DPhiDEtaRFPMix[nCentBins];
+		TH1D * h2NDPhiDEtaMix[nCentBins][nPtBins][nPtBins];
+		TH1D * h2NDPhiDEtaRFPMix[nCentBins];
 
 //		TNtupleD * ntResult;
 		TTree * trV;
@@ -149,7 +178,7 @@ class QWCumuV3 : public edm::EDAnalyzer {
 		void doneQ();
 		void Sim();
 
+		std::vector<QWEvent> vEvt;
+		std::vector<QWEvent>::iterator t;
 };
-
-
 
