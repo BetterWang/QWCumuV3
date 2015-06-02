@@ -81,7 +81,7 @@ class QWCumuV3 : public edm::EDAnalyzer {
 	/////////////////////////////////////////////
 		int getNoffCent(const edm::Event&, const edm::EventSetup&, int& Noff);
 
-		auto getMix(auto it, auto&& pool);
+		inline std::vector<QWEvent>::const_iterator getMix(std::vector<std::vector<QWEvent>::const_iterator> &);
 		// ----------member data ---------------------------
 		edm::InputTag tracks_; //used to select what tracks to read from configuration file
 		edm::InputTag centrality_;	// centrality
@@ -136,12 +136,12 @@ class QWCumuV3 : public edm::EDAnalyzer {
 
 		TH2D * h2DPhiDEta[nCentBins][nPtBins][nPtBins];
 		TH2D * h2DPhiDEtaRFP[nCentBins];
-		TH1D * h2NDPhiDEta[nCentBins][nPtBins][nPtBins];
+		TH1D * h2NDPhiDEta[nCentBins][nPtBins];
 		TH1D * h2NDPhiDEtaRFP[nCentBins];
 
 		TH2D * h2DPhiDEtaMix[nCentBins][nPtBins][nPtBins];
 		TH2D * h2DPhiDEtaRFPMix[nCentBins];
-		TH1D * h2NDPhiDEtaMix[nCentBins][nPtBins][nPtBins];
+		TH1D * h2NDPhiDEtaMix[nCentBins][nPtBins];
 		TH1D * h2NDPhiDEtaRFPMix[nCentBins];
 
 //		TNtupleD * ntResult;
@@ -180,5 +180,7 @@ class QWCumuV3 : public edm::EDAnalyzer {
 
 		std::vector<QWEvent> vEvt;
 		std::vector<QWEvent>::iterator t;
+
+		TRandom3 rnd;
 };
 

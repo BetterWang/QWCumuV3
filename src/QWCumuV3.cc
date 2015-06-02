@@ -154,8 +154,6 @@ QWCumuV3::QWCumuV3(const edm::ParameterSet& iConfig)
 		}
 	}
 
-//	t = new QWEvent;
-//	memset(t, 0, sizeof(QWEvent));
 	edm::Service<TFileService> fs;
 	for ( int cent = 0; cent < nCentBins; cent++ ) {
 		hPt[cent] = fs->make<TH1D>(Form("hPt_%i", cent), "", 20000, 0, 100);
@@ -207,18 +205,20 @@ QWCumuV3::QWCumuV3(const edm::ParameterSet& iConfig)
 	for ( int c = 0; c < nCentBins; ++c ) {
 		for ( int itrig = 0; itrig < nPtBins; ++itrig ) {
 			for ( int iasso = 0; iasso < nPtBins; ++iasso ) {
-				h2DPhiDEta[c][itrig][iasso] = fs->make<TH2D>(Form("h2DPhiDEta_%i_%i_%i", c, itrig, iasso), 30, -M_PI_4, M_2_PI - M_PI_4, 48, -4.8, 4.8);
-				h2DPhiDEtaMix[c][itrig][iasso] = fs->make<TH2D>(Form("h2DPhiDEtaMix_%i_%i_%i", c, itrig, iasso), 30, -M_PI_4, M_2_PI - M_PI_4, 48, -4.8, 4.8);
+				h2DPhiDEta[c][itrig][iasso] = fs->make<TH2D>(Form("h2DPhiDEta_%i_%i_%i", c, itrig, iasso), "", 30, -M_PI_4, M_2_PI - M_PI_4, 48, -4.8, 4.8);
+				h2DPhiDEtaMix[c][itrig][iasso] = fs->make<TH2D>(Form("h2DPhiDEtaMix_%i_%i_%i", c, itrig, iasso), "", 30, -M_PI_4, M_2_PI - M_PI_4, 48, -4.8, 4.8);
 			}
-			h2NDPhiDEta[c][itrig] = fs->make<TH1D>(Form("h2NDPhiDEta_%i_%i", c, itrig), 1, 0, 10);
-			h2NDPhiDEtaMix[c][itrig] = fs->make<TH1D>(Form("h2NDPhiDEtaMix_%i_%i", c, itrig), 1, 0, 10);
+			h2NDPhiDEta[c][itrig] = fs->make<TH1D>(Form("h2NDPhiDEta_%i_%i", c, itrig), "", 1, 0, 10);
+			h2NDPhiDEtaMix[c][itrig] = fs->make<TH1D>(Form("h2NDPhiDEtaMix_%i_%i", c, itrig), "", 1, 0, 10);
 		}
-		h2DPhiDEtaRFP[c] = fs->make<TH2D>(Form("h2DPhiDEtaRFP_%i", c), 30, -M_PI_4, M_2_PI - M_PI_4, 48, -4.8, 4.8);
-		h2DPhiDEtaRFPMix[c] = fs->make<TH2D>(Form("h2DPhiDEtaRFPMix_%i", c), 30, -M_PI_4, M_2_PI - M_PI_4, 48, -4.8, 4.8);
+		h2DPhiDEtaRFP[c] = fs->make<TH2D>(Form("h2DPhiDEtaRFP_%i", c), "", 30, -M_PI_4, M_2_PI - M_PI_4, 48, -4.8, 4.8);
+		h2DPhiDEtaRFPMix[c] = fs->make<TH2D>(Form("h2DPhiDEtaRFPMix_%i", c), "", 30, -M_PI_4, M_2_PI - M_PI_4, 48, -4.8, 4.8);
 
-		h2NDPhiDEtaRFP[c] = fs->make<TH1D>(Form("h2NDPhiDEtaRFP_%i", c), 1, 0, 10);
-		h2NDPhiDEtaRFPMix[c] = fs->make<TH1D>(Form("h2NDPhiDEtaRFPMix_%i", c), 1, 0, 10);
+		h2NDPhiDEtaRFP[c] = fs->make<TH1D>(Form("h2NDPhiDEtaRFP_%i", c), "", 1, 0, 10);
+		h2NDPhiDEtaRFPMix[c] = fs->make<TH1D>(Form("h2NDPhiDEtaRFPMix_%i", c), "", 1, 0, 10);
 	}
+
+	rnd.SetSeed();
 }
 
 
@@ -296,7 +296,7 @@ QWCumuV3::getNoffCent(const edm::Event& iEvent, const edm::EventSetup& iSetup, i
 void
 QWCumuV3::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
-	t = vEvt.emplace_back();
+	t = vEvt.emplace(vEvt.end());
 	bool bAna = true;
 	if ( bGen_ ) bAna = analyzeGen(iEvent, iSetup);
 	else bAna = analyzeData(iEvent, iSetup);
@@ -378,7 +378,7 @@ QWCumuV3::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 						break;
 				}
 				correlations::Result r = cq->calculate(np*2+1, hc[n]);
-				qp += t->weight[i] * correlations::Complex( TMath::Cos(t->Phi[i] * n) , TMath::Sin(t->Phi[i] * n) ) * r.sum();
+				qp += double(t->weight[i]) * correlations::Complex( TMath::Cos(t->Phi[i] * n) , TMath::Sin(t->Phi[i] * n) ) * r.sum();
 				wt += t->weight[i] * r.weight();
 				delete cq;
 			}
@@ -408,7 +408,7 @@ QWCumuV3::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 							break;
 					}
 					correlations::Result r = cq->calculate(np*2+1, hc[n]);
-					qp += t->weight[i] * correlations::Complex( TMath::Cos(t->Phi[i] * n) , TMath::Sin(t->Phi[i] * n) ) * r.sum();
+					qp += double(t->weight[i]) * correlations::Complex( TMath::Cos(t->Phi[i] * n) , TMath::Sin(t->Phi[i] * n) ) * r.sum();
 					wt += t->weight[i] * r.weight();
 //					if ( n == 2 && np == 1 ) {
 //						cout << "!!! ipt = " << ipt << "\ti = " << i << "\twt = " << wt << "\tr.sum() = " << r.sum() << "\tr.weight() = " << r.weight() << "\tqp = " << qp << endl;
@@ -441,7 +441,7 @@ QWCumuV3::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 							break;
 					}
 					correlations::Result r = cq->calculate(np*2+1, hc[n]);
-					qp += t->weight[i] * correlations::Complex( TMath::Cos(t->Phi[i] * n) , TMath::Sin(t->Phi[i] * n) ) * r.sum();
+					qp += double(t->weight[i]) * correlations::Complex( TMath::Cos(t->Phi[i] * n) , TMath::Sin(t->Phi[i] * n) ) * r.sum();
 					wt += t->weight[i] * r.weight();
 					delete cq;
 				}
@@ -470,7 +470,7 @@ QWCumuV3::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 						break;
 				}
 				correlations::Result r = cq->calculate(np*2+1, hc[n]);
-				qp += t->weight[i] * correlations::Complex( TMath::Cos(t->Phi[i] * n) , TMath::Sin(t->Phi[i] * n) ) * r.sum();
+				qp += double(t->weight[i]) * correlations::Complex( TMath::Cos(t->Phi[i] * n) , TMath::Sin(t->Phi[i] * n) ) * r.sum();
 				wt += t->weight[i] * r.weight();
 				delete cq;
 			}
@@ -498,7 +498,7 @@ QWCumuV3::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 						break;
 				}
 				correlations::Result r = cq->calculate(np*2+1, hc[n]);
-				qp += t->weight[i] * correlations::Complex( TMath::Cos(t->Phi[i] * n) , TMath::Sin(t->Phi[i] * n) ) * r.sum();
+				qp += double(t->weight[i]) * correlations::Complex( TMath::Cos(t->Phi[i] * n) , TMath::Sin(t->Phi[i] * n) ) * r.sum();
 				wt += t->weight[i] * r.weight();
 				delete cq;
 			}
@@ -921,22 +921,22 @@ QWCumuV3::endJob()
 				while (dphi > M_2_PI - M_PI_4) dphi -= M_2_PI;
 				float deta = it->Eta[j] - it->Eta[i];
 
-				h2DPhiDEta[it->Cent][it->Pt[i]][it->Pt[j]]->Fill(dphi, deta, it->weight[i] * it->weight[j]);
+				h2DPhiDEta[it->Cent][int(it->Pt[i])][int(it->Pt[j])]->Fill(dphi, deta, it->weight[i] * it->weight[j]);
 
 				if (it->RFP[i] and it->RFP[j]) {
 					h2DPhiDEtaRFP[it->Cent]->Fill(dphi, deta, it->weight[i] * it->weight[j]);
 				}
 			}
-			h2NDPhiDEta[it->Cent][it->Pt[i]]->Fill(1, it->weight[i]);
+			h2NDPhiDEta[it->Cent][int(it->Pt[i])]->Fill(1, it->weight[i]);
 			if ( it->RFP[i] ) {
-				h2NDPhiDEtaRFP[it->Cent]->Fill(1, it->weight[i] * it->weight[j]);
+				h2NDPhiDEtaRFP[it->Cent]->Fill(1, it->weight[i]);
 			}
 		}
 		// mixed event
 		std::vector<std::vector<QWEvent>::const_iterator> pool;
 		pool.push_back(it);
 		for ( int imix = 0; imix < nmixed_; ++imix ) {
-			auto itM = getMix(it, pool);
+			auto itM = getMix(pool);
 			if (itM == vEvt.cend()) break;
 			for ( int i = 0; i < it->Mult; ++i ) {
 				if ( it->Pt[i] < 0 ) continue;
@@ -947,12 +947,12 @@ QWCumuV3::endJob()
 					while (dphi > M_2_PI - M_PI_4) dphi -= M_2_PI;
 					float deta = itM->Eta[j] - it->Eta[i];
 
-					h2DPhiDEtaMix[c][it->Pt[i]][itM->Pt[j]]->Fill(dphi, deta, it->weight[i] * itM->weight[j] );
-					if ( it->RFP[i] and itM->FRP[j] ) {
+					h2DPhiDEtaMix[it->Cent][int(it->Pt[i])][int(itM->Pt[j])]->Fill(dphi, deta, it->weight[i] * itM->weight[j] );
+					if ( it->RFP[i] and itM->RFP[j] ) {
 						h2DPhiDEtaRFPMix[it->Cent]->Fill(1, it->weight[i] * itM->weight[j] );
 					}
 				}
-				h2NDPhiDEtaMix[it->Cent][it->Pt[i]]->Fill(1, it->weight[i]);
+				h2NDPhiDEtaMix[it->Cent][int(it->Pt[i])]->Fill(1, it->weight[i]);
 				if ( it->RFP[i] ) {
 					h2NDPhiDEtaRFPMix[it->Cent]->Fill(1, it->weight[i]);
 				}
@@ -961,8 +961,15 @@ QWCumuV3::endJob()
 	}
 }
 
-auto QWCumuV3::getMix(auto it, auto&& poll) {
+std::vector<QWEvent>::const_iterator QWCumuV3::getMix(std::vector<std::vector<QWEvent>::const_iterator>& pool) {
 	for ( int i = 0; i < ntry_; ++i ) {
+		//std::vector<QWEvent>::const_iterator vi = std::advance(vEvt.begin(), Integer(vEvt.size()));
+		std::vector<QWEvent>::iterator vi = vEvt.begin();
+		std::advance( vi, rnd.Integer(vEvt.size()) );
+		if (std::find(pool.begin(), pool.end(), vi) != pool.end() ) {
+			pool.push_back(vi);
+			return vi;
+		}
 	}
 	return vEvt.cend();
 }
