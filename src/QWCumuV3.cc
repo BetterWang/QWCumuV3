@@ -207,17 +207,17 @@ QWCumuV3::QWCumuV3(const edm::ParameterSet& iConfig)
 	for ( int c = 0; c < nCentBins; ++c ) {
 		for ( int itrig = 0; itrig < nPtBins; ++itrig ) {
 			for ( int iasso = 0; iasso < nPtBins; ++iasso ) {
-				h2DPhiDEta[c][itrig][iasso] = fdTwoPartSame->make<TH2D>(Form("h2DPhiDEta_%i_%i_%i", c, itrig, iasso), "", 30, -M_PI_4, 2*M_PI - M_PI_4, 48, -4.8, 4.8);
-				h2DPhiDEtaMix[c][itrig][iasso] = fdTwoPartMixed->make<TH2D>(Form("h2DPhiDEta_%i_%i_%i", c, itrig, iasso), "", 30, -M_PI_4, 2*M_PI - M_PI_4, 48, -4.8, 4.8);
+				h2DPhiDEta[c][itrig][iasso] = fdTwoPartSame.make<TH2D>(Form("h2DPhiDEta_%i_%i_%i", c, itrig, iasso), "", 30, -M_PI_4, 2*M_PI - M_PI_4, 48, -4.8, 4.8);
+				h2DPhiDEtaMix[c][itrig][iasso] = fdTwoPartMixed.make<TH2D>(Form("h2DPhiDEta_%i_%i_%i", c, itrig, iasso), "", 30, -M_PI_4, 2*M_PI - M_PI_4, 48, -4.8, 4.8);
 			}
-			h2NDPhiDEta[c][itrig] = fdTwoPartSame->make<TH1D>(Form("h2NDPhiDEta_%i_%i", c, itrig), "", 1, 0, 10);
-			h2NDPhiDEtaMix[c][itrig] = fdTwoPartMixed->make<TH1D>(Form("h2NDPhiDEta_%i_%i", c, itrig), "", 1, 0, 10);
+			h2NDPhiDEta[c][itrig] = fdTwoPartSame.make<TH1D>(Form("h2NDPhiDEta_%i_%i", c, itrig), "", 1, 0, 10);
+			h2NDPhiDEtaMix[c][itrig] = fdTwoPartMixed.make<TH1D>(Form("h2NDPhiDEta_%i_%i", c, itrig), "", 1, 0, 10);
 		}
-		h2DPhiDEtaRFP[c] = fdTwoPartSame->make<TH2D>(Form("h2DPhiDEtaRFP_%i", c), "", 30, -M_PI_4, 2*M_PI - M_PI_4, 48, -4.8, 4.8);
-		h2DPhiDEtaRFPMix[c] = fdTwoPartMixed->make<TH2D>(Form("h2DPhiDEtaRFP_%i", c), "", 30, -M_PI_4, 2*M_PI - M_PI_4, 48, -4.8, 4.8);
+		h2DPhiDEtaRFP[c] = fdTwoPartSame.make<TH2D>(Form("h2DPhiDEtaRFP_%i", c), "", 30, -M_PI_4, 2*M_PI - M_PI_4, 48, -4.8, 4.8);
+		h2DPhiDEtaRFPMix[c] = fdTwoPartMixed.make<TH2D>(Form("h2DPhiDEtaRFP_%i", c), "", 30, -M_PI_4, 2*M_PI - M_PI_4, 48, -4.8, 4.8);
 
-		h2NDPhiDEtaRFP[c] = fdTwoPartSame->make<TH1D>(Form("h2NDPhiDEtaRFP_%i", c), "", 1, 0, 10);
-		h2NDPhiDEtaRFPMix[c] = fdTwoPartMixed->make<TH1D>(Form("h2NDPhiDEtaRFP_%i", c), "", 1, 0, 10);
+		h2NDPhiDEtaRFP[c] = fdTwoPartSame.make<TH1D>(Form("h2NDPhiDEtaRFP_%i", c), "", 1, 0, 10);
+		h2NDPhiDEtaRFPMix[c] = fdTwoPartMixed.make<TH1D>(Form("h2NDPhiDEtaRFP_%i", c), "", 1, 0, 10);
 	}
 
 	rnd.SetSeed();
@@ -911,9 +911,12 @@ QWCumuV3::endJob()
 	for ( auto&& evt : vEvt ) {
 		for ( int i = 0; i < evt.Mult; i++ ) evt.Pt[i] = getPtBin(evt.Pt[i]);
 	}
+
+	std::cout << "!! total events " << vEvt.size() << std::endl;
 	for ( auto it = vEvt.cbegin(); it != vEvt.cend(); ++it ) {
 		// same event
 
+		std::cout << "!! process same event" << std::distance(vEvt.cbegin(), it) << std::endl;
 		for ( int i = 0; i < it->Mult; ++i ) {
 			if ( it->Pt[i] < 0 ) continue;
 			for ( int j = 0; j < it->Mult; ++j ) {
@@ -940,6 +943,7 @@ QWCumuV3::endJob()
 		for ( int imix = 0; imix < nmixed_; ++imix ) {
 			auto itM = getMix(pool);
 			if (itM == vEvt.cend()) break;
+			std::cout << "!! process mixed event " << imix  << " " << std::distance(vEvt.cbegin(), itM) << std::endl;
 			for ( int i = 0; i < it->Mult; ++i ) {
 				if ( it->Pt[i] < 0 ) continue;
 				for ( int j = 0; j < itM->Mult; ++j ) {
