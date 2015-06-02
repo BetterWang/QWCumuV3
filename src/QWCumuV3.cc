@@ -202,20 +202,22 @@ QWCumuV3::QWCumuV3(const edm::ParameterSet& iConfig)
 
 	initQ();
 
+	TFileDirectory fdTwoPartSame = fs->mkdir("TwoPart/same");
+	TFileDirectory fdTwoPartMixed = fs->mkdir("TwoPart/mixed");
 	for ( int c = 0; c < nCentBins; ++c ) {
 		for ( int itrig = 0; itrig < nPtBins; ++itrig ) {
 			for ( int iasso = 0; iasso < nPtBins; ++iasso ) {
-				h2DPhiDEta[c][itrig][iasso] = fs->make<TH2D>(Form("h2DPhiDEta_%i_%i_%i", c, itrig, iasso), "", 30, -M_PI_4, 2*M_PI - M_PI_4, 48, -4.8, 4.8);
-				h2DPhiDEtaMix[c][itrig][iasso] = fs->make<TH2D>(Form("h2DPhiDEtaMix_%i_%i_%i", c, itrig, iasso), "", 30, -M_PI_4, 2*M_PI - M_PI_4, 48, -4.8, 4.8);
+				h2DPhiDEta[c][itrig][iasso] = fdTwoPartSame->make<TH2D>(Form("h2DPhiDEta_%i_%i_%i", c, itrig, iasso), "", 30, -M_PI_4, 2*M_PI - M_PI_4, 48, -4.8, 4.8);
+				h2DPhiDEtaMix[c][itrig][iasso] = fdTwoPartMixed->make<TH2D>(Form("h2DPhiDEta_%i_%i_%i", c, itrig, iasso), "", 30, -M_PI_4, 2*M_PI - M_PI_4, 48, -4.8, 4.8);
 			}
-			h2NDPhiDEta[c][itrig] = fs->make<TH1D>(Form("h2NDPhiDEta_%i_%i", c, itrig), "", 1, 0, 10);
-			h2NDPhiDEtaMix[c][itrig] = fs->make<TH1D>(Form("h2NDPhiDEtaMix_%i_%i", c, itrig), "", 1, 0, 10);
+			h2NDPhiDEta[c][itrig] = fdTwoPartSame->make<TH1D>(Form("h2NDPhiDEta_%i_%i", c, itrig), "", 1, 0, 10);
+			h2NDPhiDEtaMix[c][itrig] = fdTwoPartMixed->make<TH1D>(Form("h2NDPhiDEta_%i_%i", c, itrig), "", 1, 0, 10);
 		}
-		h2DPhiDEtaRFP[c] = fs->make<TH2D>(Form("h2DPhiDEtaRFP_%i", c), "", 30, -M_PI_4, 2*M_PI - M_PI_4, 48, -4.8, 4.8);
-		h2DPhiDEtaRFPMix[c] = fs->make<TH2D>(Form("h2DPhiDEtaRFPMix_%i", c), "", 30, -M_PI_4, 2*M_PI - M_PI_4, 48, -4.8, 4.8);
+		h2DPhiDEtaRFP[c] = fdTwoPartSame->make<TH2D>(Form("h2DPhiDEtaRFP_%i", c), "", 30, -M_PI_4, 2*M_PI - M_PI_4, 48, -4.8, 4.8);
+		h2DPhiDEtaRFPMix[c] = fdTwoPartMixed->make<TH2D>(Form("h2DPhiDEtaRFP_%i", c), "", 30, -M_PI_4, 2*M_PI - M_PI_4, 48, -4.8, 4.8);
 
-		h2NDPhiDEtaRFP[c] = fs->make<TH1D>(Form("h2NDPhiDEtaRFP_%i", c), "", 1, 0, 10);
-		h2NDPhiDEtaRFPMix[c] = fs->make<TH1D>(Form("h2NDPhiDEtaRFPMix_%i", c), "", 1, 0, 10);
+		h2NDPhiDEtaRFP[c] = fdTwoPartSame->make<TH1D>(Form("h2NDPhiDEtaRFP_%i", c), "", 1, 0, 10);
+		h2NDPhiDEtaRFPMix[c] = fdTwoPartMixed->make<TH1D>(Form("h2NDPhiDEtaRFP_%i", c), "", 1, 0, 10);
 	}
 
 	rnd.SetSeed();
