@@ -205,14 +205,14 @@ QWCumuV3::QWCumuV3(const edm::ParameterSet& iConfig)
 	for ( int c = 0; c < nCentBins; ++c ) {
 		for ( int itrig = 0; itrig < nPtBins; ++itrig ) {
 			for ( int iasso = 0; iasso < nPtBins; ++iasso ) {
-				h2DPhiDEta[c][itrig][iasso] = fs->make<TH2D>(Form("h2DPhiDEta_%i_%i_%i", c, itrig, iasso), "", 30, -M_PI_4, M_2_PI - M_PI_4, 48, -4.8, 4.8);
-				h2DPhiDEtaMix[c][itrig][iasso] = fs->make<TH2D>(Form("h2DPhiDEtaMix_%i_%i_%i", c, itrig, iasso), "", 30, -M_PI_4, M_2_PI - M_PI_4, 48, -4.8, 4.8);
+				h2DPhiDEta[c][itrig][iasso] = fs->make<TH2D>(Form("h2DPhiDEta_%i_%i_%i", c, itrig, iasso), "", 30, -M_PI_4, 2*M_PI - M_PI_4, 48, -4.8, 4.8);
+				h2DPhiDEtaMix[c][itrig][iasso] = fs->make<TH2D>(Form("h2DPhiDEtaMix_%i_%i_%i", c, itrig, iasso), "", 30, -M_PI_4, 2*M_PI - M_PI_4, 48, -4.8, 4.8);
 			}
 			h2NDPhiDEta[c][itrig] = fs->make<TH1D>(Form("h2NDPhiDEta_%i_%i", c, itrig), "", 1, 0, 10);
 			h2NDPhiDEtaMix[c][itrig] = fs->make<TH1D>(Form("h2NDPhiDEtaMix_%i_%i", c, itrig), "", 1, 0, 10);
 		}
-		h2DPhiDEtaRFP[c] = fs->make<TH2D>(Form("h2DPhiDEtaRFP_%i", c), "", 30, -M_PI_4, M_2_PI - M_PI_4, 48, -4.8, 4.8);
-		h2DPhiDEtaRFPMix[c] = fs->make<TH2D>(Form("h2DPhiDEtaRFPMix_%i", c), "", 30, -M_PI_4, M_2_PI - M_PI_4, 48, -4.8, 4.8);
+		h2DPhiDEtaRFP[c] = fs->make<TH2D>(Form("h2DPhiDEtaRFP_%i", c), "", 30, -M_PI_4, 2*M_PI - M_PI_4, 48, -4.8, 4.8);
+		h2DPhiDEtaRFPMix[c] = fs->make<TH2D>(Form("h2DPhiDEtaRFPMix_%i", c), "", 30, -M_PI_4, 2*M_PI - M_PI_4, 48, -4.8, 4.8);
 
 		h2NDPhiDEtaRFP[c] = fs->make<TH1D>(Form("h2NDPhiDEtaRFP_%i", c), "", 1, 0, 10);
 		h2NDPhiDEtaRFPMix[c] = fs->make<TH1D>(Form("h2NDPhiDEtaRFPMix_%i", c), "", 1, 0, 10);
@@ -917,8 +917,8 @@ QWCumuV3::endJob()
 			for ( int j = 0; j < it->Mult; ++j ) {
 				if ( it->Pt[j] < 0 or i == j ) continue;
 				float dphi = it->Phi[j] - it->Phi[i];
-				while (dphi < - M_PI_4) dphi += M_2_PI;
-				while (dphi > M_2_PI - M_PI_4) dphi -= M_2_PI;
+				while (dphi < - M_PI_4) dphi += 2*M_PI;
+				while (dphi > 2*M_PI - M_PI_4) dphi -= 2*M_PI;
 				float deta = it->Eta[j] - it->Eta[i];
 
 				h2DPhiDEta[it->Cent][int(it->Pt[i])][int(it->Pt[j])]->Fill(dphi, deta, it->weight[i] * it->weight[j]);
@@ -943,8 +943,8 @@ QWCumuV3::endJob()
 				for ( int j = 0; j < itM->Mult; ++j ) {
 					if ( itM->Pt[j] < 0 ) continue;
 					float dphi = itM->Phi[j] - it->Phi[i];
-					while (dphi < - M_PI_4) dphi += M_2_PI;
-					while (dphi > M_2_PI - M_PI_4) dphi -= M_2_PI;
+					while (dphi < - M_PI_4) dphi += 2*M_PI;
+					while (dphi > 2*M_PI - M_PI_4) dphi -= 2*M_PI;
 					float deta = itM->Eta[j] - it->Eta[i];
 
 					h2DPhiDEtaMix[it->Cent][int(it->Pt[i])][int(itM->Pt[j])]->Fill(dphi, deta, it->weight[i] * itM->weight[j] );
