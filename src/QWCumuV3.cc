@@ -412,9 +412,6 @@ QWCumuV3::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 					correlations::Result r = cq->calculate(np*2+1, hc[n]);
 					qp += double(t->weight[i]) * correlations::Complex( TMath::Cos(t->Phi[i] * n) , TMath::Sin(t->Phi[i] * n) ) * r.sum();
 					wt += t->weight[i] * r.weight();
-//					if ( n == 2 && np == 1 ) {
-//						cout << "!!! ipt = " << ipt << "\ti = " << i << "\twt = " << wt << "\tr.sum() = " << r.sum() << "\tr.weight() = " << r.weight() << "\tqp = " << qp << endl;
-//					}
 					delete cq;
 				}
 				rQp[n][np][ipt] = qp.real();
@@ -590,11 +587,6 @@ QWCumuV3::analyzeData(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	double vyError = (*recoVertices)[primaryvtx].yError();
 	double vzError = (*recoVertices)[primaryvtx].zError();
 
-//	for ( unsigned int i = 0; i < recoVertices->size(); i++ ) {
-//		size_t daughter = (*recoVertices)[i].tracksSize();
-//		cout << "i = " << i << "\tnTracks = " << daughter <<"\t vz = " << (*recoVertices)[i].position().z() << endl;
-//		//cout << "i = " << i << "\ttrkSize = " << "\t vz = " << (*recoVertices)[i].position().z() << endl;
-//	}
 	double vz = (*recoVertices)[primaryvtx].z();
 	if (fabs(vz) < minvz_ || fabs(vz) > maxvz_) {
 		return false;
@@ -623,29 +615,24 @@ QWCumuV3::analyzeData(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	iEvent.getByLabel(tracks_,tracks);
 	t->Cent = bin;
 	t->vz = vz;
-	//cout << __LINE__ << "\t" << bin << endl;
 
 	for(TrackCollection::const_iterator itTrack = tracks->begin();
 			itTrack != tracks->end();
 			++itTrack) {
-//		cout << "!!! " << __LINE__ << endl;
 		if ( itTrack->charge() == 0 ) continue;
 		if ( !itTrack->quality(reco::TrackBase::highPurity) ) continue;
 
-//		cout << "!!! " << __LINE__ << endl;
 		double d0 = -1.* itTrack->dxy(v1);
 		double derror=sqrt(itTrack->dxyError()*itTrack->dxyError()+vxError*vyError);
 		double dz=itTrack->dz(v1);
 		double dzerror=sqrt(itTrack->dzError()*itTrack->dzError()+vzError*vzError);
 
-//		cout << "!!! " << __LINE__ << endl;
 		if ( fabs(itTrack->eta()) > 2.4 ) continue;
 		if ( fabs( dz/dzerror ) > dzdzerror_ ) continue;
 		if ( fabs( d0/derror ) > d0d0error_ ) continue;
 		if ( itTrack->ptError()/itTrack->pt() > pterrorpt_ ) continue;
 
 		t->RFP[t->Mult] = true;
-//		cout << "!!! " << __LINE__ << endl;
 		t->Charge[t->Mult] = itTrack->charge();
 		if ( (charge_ == 1) && (t->Charge[t->Mult]<0) ) {
 			t->RFP[t->Mult] = false;
@@ -654,7 +641,6 @@ QWCumuV3::analyzeData(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 			t->RFP[t->Mult] = false;
 		}
 
-//		cout << "!!! " << __LINE__ << endl;
 		t->Pt[t->Mult] = itTrack->pt();
 		if ( t->Pt[t->Mult] >= ptbins[nPtBins] || t->Pt[t->Mult] <= ptbins[0] ) {
 			t->RFP[t->Mult] = false;
@@ -830,11 +816,6 @@ QWCumuV3::doneQ()
 void
 QWCumuV3::Sim()
 {
-//	if ( t->Mult == 0 ) {
-//		cout << "!!! Evt skipped" << endl;
-//		return;
-//	}
-
 	cout << "!!! in the Sim" << endl;
 
 	t->Mult = 10;
@@ -912,11 +893,10 @@ QWCumuV3::endJob()
 		for ( int i = 0; i < evt.Mult; i++ ) evt.Pt[i] = getPtBin(evt.Pt[i]);
 	}
 
-	std::cout << "!! total events " << vEvt.size() << std::endl;
+	//std::cout << "==> total events " << vEvt.size() << std::endl;
 	for ( auto it = vEvt.cbegin(); it != vEvt.cend(); ++it ) {
 		// same event
 
-		std::cout << "!! process same event" << std::distance(vEvt.cbegin(), it) << std::endl;
 		for ( int i = 0; i < it->Mult; ++i ) {
 			if ( it->Pt[i] < 0 ) continue;
 			for ( int j = 0; j < it->Mult; ++j ) {
@@ -943,7 +923,7 @@ QWCumuV3::endJob()
 		for ( int imix = 0; imix < nmixed_; ++imix ) {
 			auto itM = getMix(pool);
 			if (itM == vEvt.cend()) break;
-			std::cout << "!! process mixed event " << imix  << " " << std::distance(vEvt.cbegin(), itM) << std::endl;
+			//std::cout << "!! process mixed event " << imix  << " " << std::distance(vEvt.cbegin(), itM) << std::endl;
 			for ( int i = 0; i < it->Mult; ++i ) {
 				if ( it->Pt[i] < 0 ) continue;
 				for ( int j = 0; j < itM->Mult; ++j ) {
@@ -969,60 +949,18 @@ QWCumuV3::endJob()
 
 std::vector<QWEvent>::const_iterator QWCumuV3::getMix(std::vector<std::vector<QWEvent>::const_iterator>& pool) {
 	for ( int i = 0; i < ntry_; ++i ) {
-		//std::vector<QWEvent>::const_iterator vi = std::advance(vEvt.begin(), Integer(vEvt.size()));
 		std::vector<QWEvent>::iterator vi = vEvt.begin();
-		std::advance( vi, rnd.Integer(vEvt.size()) );
-		if (std::find(pool.begin(), pool.end(), vi) != pool.end() ) {
+		int idx = rnd.Integer(vEvt.size());
+		//std::cout << "-----> In the mix " << idx << std::endl;
+		std::advance( vi, idx );
+		if (std::find(pool.begin(), pool.end(), vi) == pool.end() ) {
 			pool.push_back(vi);
+			//std::cout << "-----> " << pool.size();
 			return vi;
 		}
 	}
 	return vEvt.cend();
 }
-
-
-// ------------ method called when starting to processes a run  ------------
-//	void 
-//QWCumuV3::beginRun(edm::Run const&, edm::EventSetup const&)
-//{
-//}
-
-// ------------ method called when ending the processing of a run  ------------
-//	void 
-//QWCumuV3::endRun(edm::Run const&, edm::EventSetup const&)
-//{
-//}
-
-// ------------ method called when starting to processes a luminosity block  ------------
-//	void 
-//QWCumuV3::beginLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&)
-//{
-//}
-
-// ------------ method called when ending the processing of a luminosity block  ------------
-//	void 
-//QWCumuV3::endLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&)
-//{
-//}
-
-// ------------ method fills 'descriptions' with the allowed parameters for the module  ------------
-//void
-//QWCumuV3::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
-//	//The following says we do not know what parameters are allowed so do no validation
-//	// Please change this to state exactly what you do use, even if it is no parameters
-//	edm::ParameterSetDescription desc;
-//	desc.setUnknown();
-//	descriptions.addDefault(desc);
-//
-//	//Specify that only 'tracks' is allowed
-//	//To use, remove the default given above and uncomment below
-//	//ParameterSetDescription desc;
-//	//desc.addUntracked<edm::InputTag>("tracks","ctfWithMaterialTracks");
-//	//descriptions.addDefault(desc);
-//}
-
-//////////////////////////////////////////
-
 
 //define this as a plug-in
 DEFINE_FWK_MODULE(QWCumuV3);
