@@ -95,6 +95,7 @@ QWCumuV3::QWCumuV3(const edm::ParameterSet& iConfig)
 	bGen_ = iConfig.getUntrackedParameter<bool>("bGen_", false);
 	nvtx_ = iConfig.getUntrackedParameter<int>("nvtx_", 100);
 	bFlipEta_ = iConfig.getUntrackedParameter<bool>("bFlipEta_", false);
+	bDo2P_ = iConfig.getUntrackedParameter<bool>("bDo2P_", false);
 
 	nmixed_ = iConfig.getUntrackedParameter<int>("nmixed_", 15);
 	ntry_ = iConfig.getUntrackedParameter<int>("ntry_", nmixed_*5);
@@ -302,7 +303,7 @@ QWCumuV3::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	bool bAna = true;
 	if ( bGen_ ) bAna = analyzeGen(iEvent, iSetup);
 	else bAna = analyzeData(iEvent, iSetup);
-	if ( !bAna || t->Mult == 0 ) {
+	if ( !bAna || t->Mult == 0 || !bDo2P_ ) {
 		vEvt.pop_back();
 		return;
 	}
@@ -882,13 +883,18 @@ QWCumuV3::Sim()
 void
 QWCumuV3::beginJob()
 {
-	vEvt.reserve(150000);
+	if ( bDo2P_ ) {
+		vEvt.reserve(150000);
+	} else {
+		vEvt.reserve(2);
+	}
 }
 
 // ------------ method called once each job just after ending the event loop  ------------
 void
 QWCumuV3::endJob()
 {
+	if (!bDo2P_) return;
 	for ( auto&& evt : vEvt ) {
 		for ( int i = 0; i < evt.Mult; i++ ) evt.Pt[i] = getPtBin(evt.Pt[i]);
 	}

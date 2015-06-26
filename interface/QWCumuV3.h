@@ -116,6 +116,7 @@ class QWCumuV3 : public edm::EDAnalyzer {
 		int	cmode_;
 		bool	bGen_;
 		bool	bFlipEta_;
+		bool	bDo2P_;
 
 		unsigned int	nvtx_;
 
