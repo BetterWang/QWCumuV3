@@ -414,9 +414,9 @@ QWCumuV3::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 				wt = 0;
 				for ( int i = 0; i < t->Mult; i++ ) {
 					if ( t->Pt[i] < poiptmin_ or t->Pt[i] > poiptmax_ ) continue;
-					if ( t->Eta[i] < etabins[ieta] || t->Eta[i] > etabins[ieta+1] || t->RFP[i] != 1 ) continue;
+					if ( t->Eta[i] < etabins[ieta] || t->Eta[i] > etabins[ieta+1] ) continue;
 					correlations::QVector tq = q[n];
-					tq.unfill(t->Phi[i], t->weight[i]);
+					if ( t->RFP[i] ) tq.unfill(t->Phi[i], t->weight[i]);
 					correlations::FromQVector *cq = 0;
 					switch ( cmode_ ) {
 						case 1:
@@ -443,7 +443,7 @@ QWCumuV3::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 			for ( int i = 0; i < t->Mult; i++ ) {
 				qp = 0;
 				wt = 0;
-				if ( t->Charge[i] > 0 || t->RFP[i] != 1 ) continue;
+				if ( t->Charge[i] > 0 || !t->RFP[i] ) continue;
 				correlations::QVector tq = q[n];
 				tq.unfill(t->Phi[i], t->weight[i]);
 				correlations::FromQVector *cq = 0;
@@ -471,7 +471,7 @@ QWCumuV3::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 			qp = 0;
 			wt = 0;
 			for ( int i = 0; i < t->Mult; i++ ) {
-				if ( t->Charge[i] < 0 || t->RFP[i] != 1 ) continue;
+				if ( t->Charge[i] < 0 || !t->RFP[i] ) continue;
 				correlations::QVector tq = q[n];
 				tq.unfill(t->Phi[i], t->weight[i]);
 				correlations::FromQVector *cq = 0;
