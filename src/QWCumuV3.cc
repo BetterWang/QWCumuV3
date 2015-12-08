@@ -56,9 +56,9 @@ using namespace std;
 //
 QWCumuV3::QWCumuV3(const edm::ParameterSet& iConfig)
 	:
-		tracks_(iConfig.getUntrackedParameter<edm::InputTag>("tracks_"))
-	,	centrality_(iConfig.getParameter<edm::InputTag>("centrality_"))
-	,	vertexSrc_(iConfig.getUntrackedParameter<edm::InputTag>("vertexSrc_"))
+		trackToken_( consumes<reco::TrackCollection>(iConfig.getUntrackedParameter<edm::InputTag>("tracks_")) )
+	,	centralityToken_( consumes<int>(iConfig.getParameter<edm::InputTag>("centrality_")) )
+	,	vertexToken_( consumes<reco::VertexCollection>(iConfig.getUntrackedParameter<edm::InputTag>("vertexSrc_")) )
 	,	bacc(false)
 {
 	//now do what ever initialization is needed
@@ -97,6 +97,7 @@ QWCumuV3::QWCumuV3(const edm::ParameterSet& iConfig)
 
 	string streff = fweight_.label();
 	if ( streff == string("NA") ) {
+		cout << "!!! eff NA" << endl;
 		bFak = false;
 		bEff = false;
 		fEffFak = 0;
@@ -161,14 +162,14 @@ QWCumuV3::QWCumuV3(const edm::ParameterSet& iConfig)
 		hPt[cent] = fs->make<TH1D>(Form("hPt_%i", cent), "", 20000, 0, 100);
 		if ( bPhiEta ) {
 			for ( int i = 0; i < nPtBins; i++ ) {
-				cout << "!! new histo cent = " << cent << " of " << nCentBins << "\t ipt = " << i  << " of " << nPtBins << endl;
-				hPhiEta[cent][i][0] = fs->make<TH2D>(Form("hPhiEta_%i_%i_0", cent, i), "", 512, -Pi, Pi, 480, -2.4, 2.4);
-				hPhiEta[cent][i][1] = fs->make<TH2D>(Form("hPhiEta_%i_%i_1", cent, i), "", 512, -Pi, Pi, 480, -2.4, 2.4);
+				//cout << "!! new histo cent = " << cent << " of " << nCentBins << "\t ipt = " << i  << " of " << nPtBins << endl;
+				hPhiEta[cent][i][0] = fs->make<TH2D>(Form("hPhiEta_%i_%i_0", cent, i), "", 64, -Pi, Pi, 48, -2.4, 2.4);
+				hPhiEta[cent][i][1] = fs->make<TH2D>(Form("hPhiEta_%i_%i_1", cent, i), "", 64, -Pi, Pi, 48, -2.4, 2.4);
 			}
 		}
 	}
-	for ( int cent = 0; cent < 20; cent++ ) {
-		cout << "!! new histo cent = " << cent << endl;
+	for ( int cent = 0; cent < nCentBins; cent++ ) {
+		//cout << "!! new histo cent = " << cent << endl;
 		hdNdPtdEta[cent] = fs->make<TH2D>(Form("hdNdPtdEta_%i", cent), Form("hdNdPtdEta_%i", cent), nEtaBins, etabins, 38, fakpt );
 		hdNdPtdEtaPt[cent] = fs->make<TH2D>(Form("hdNdPtdEtaPt_%i", cent), Form("hdNdPtdEta_%i", cent), nEtaBins, etabins, 38, fakpt );
 	}
@@ -206,13 +207,6 @@ QWCumuV3::QWCumuV3(const edm::ParameterSet& iConfig)
 
 	initQ();
 
-//	cout << cq2->name() << endl;
-//	ntResult = new TNtupleD("ntResult",cq2->name(),"Noff:Mult:Cent:C22:C24:C26:C28:iC22:iC24:iC26:iC28:wC22:wC24:wC26:wC28:C32:C34:C36:C38:iC32:iC34:iC36:iC38:wC32:wC34:wC36:wC38");
-//	ntResult = fs->make<TNtupleD>("ntResult",cq2->name(),"Noff:Mult:Cent:C22:C24:C26:C28:iC22:iC24:iC26:iC28:wC22:wC24:wC26:wC28:C32:C34:C36:C38:iC32:iC34:iC36:iC38:wC32:wC34:wC36:wC38");
-//	ntResult->SetAutoFlush(-3000000);
-//	ntResult->SetAutoSave(-30000000);
-
-//	cout << "!! initQ" << endl;
 }
 
 
@@ -238,7 +232,7 @@ QWCumuV3::getNoffCent(const edm::Event& iEvent, const edm::EventSetup& iSetup, i
 //	int Noff = 0;
 
 	Handle<VertexCollection> vertexCollection;
-	iEvent.getByLabel(vertexSrc_, vertexCollection);
+	iEvent.getByToken(vertexToken_, vertexCollection);
 	const VertexCollection * recoVertices = vertexCollection.product();
 
 	int primaryvtx = 0;
@@ -249,9 +243,9 @@ QWCumuV3::getNoffCent(const edm::Event& iEvent, const edm::EventSetup& iSetup, i
 
 
 	Handle<TrackCollection> tracks;
-	iEvent.getByLabel(tracks_,tracks);
+	iEvent.getByToken(trackToken_,tracks);
 	for(TrackCollection::const_iterator itTrack = tracks->begin();
-		itTrack != tracks->end();                      
+		itTrack != tracks->end();
 		++itTrack) {
 
 		if ( !itTrack->quality(reco::TrackBase::highPurity) ) continue;
@@ -399,9 +393,6 @@ QWCumuV3::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 					correlations::Result r = cq->calculate(np*2+1, hc[n]);
 					qp += t->weight[i] * correlations::Complex( TMath::Cos(t->Phi[i] * n) , TMath::Sin(t->Phi[i] * n) ) * r.sum();
 					wt += t->weight[i] * r.weight();
-//					if ( n == 2 && np == 1 ) {
-//						cout << "!!! ipt = " << ipt << "\ti = " << i << "\twt = " << wt << "\tr.sum() = " << r.sum() << "\tr.weight() = " << r.weight() << "\tqp = " << qp << endl;
-//					}
 					delete cq;
 				}
 				rQp[n][np][ipt] = qp.real();
@@ -438,7 +429,7 @@ QWCumuV3::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 				iQeta[n][np][ieta] = qp.imag();
 				wQeta[n][np][ieta] = wt;
 			}
-	
+
 			// charge - differential
 			for ( int i = 0; i < t->Mult; i++ ) {
 				qp = 0;
@@ -515,7 +506,7 @@ QWCumuV3::analyzeGen(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	t->Mult = 0;
 	// track
 	Handle< std::vector<GenParticle> > tracks;
-	iEvent.getByLabel(tracks_,tracks);
+	iEvent.getByToken(trackToken_,tracks);
 	t->Noff = 0;
 	for ( std::vector<GenParticle>::const_iterator itTrack = tracks->begin();
 			itTrack != tracks->end();
@@ -566,8 +557,9 @@ QWCumuV3::analyzeData(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	t->Mult = 0;
 	// vertex
 	Handle<VertexCollection> vertexCollection;
-	iEvent.getByLabel(vertexSrc_, vertexCollection);
+	iEvent.getByToken(vertexToken_, vertexCollection);
 	const VertexCollection * recoVertices = vertexCollection.product();
+	//cout << __LINE__ << " vtx.size() = " << recoVertices->size() << endl;
 	if ( recoVertices->size() > nvtx_ ) return;
 
 	int primaryvtx = 0;
@@ -583,9 +575,10 @@ QWCumuV3::analyzeData(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 //	}
 	double vz = (*recoVertices)[primaryvtx].z();
 	if (fabs(vz) < minvz_ || fabs(vz) > maxvz_) {
+		//cout << __LINE__ << " vz = " << vz << endl;
 		return;
 	}
-	
+
 	// centrality
 	int bin = 0;
 	int cbin = 0;
@@ -598,21 +591,23 @@ QWCumuV3::analyzeData(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 		}
 	} else {
 		edm::Handle<int> ch;
-		iEvent.getByLabel(centrality_,ch);
+		iEvent.getByToken(centralityToken_,ch);
 		bin = *(ch.product());
-		while ( centbins[cbin+1] < bin*2.5+0.1 ) cbin++;
+		if ( bin < 0 or bin >= 200 ) return;
+		while ( centbins[cbin+1] < bin*.5+0.1 ) cbin++;
+		t->Noff = bin;
 	}
 	bin = cbin;
 
 	// track
 	Handle<TrackCollection> tracks;
-	iEvent.getByLabel(tracks_,tracks);
+	iEvent.getByToken(trackToken_,tracks);
 	t->Cent = bin;
 	t->vz = vz;
 	//cout << __LINE__ << "\t" << bin << endl;
 
 	for(TrackCollection::const_iterator itTrack = tracks->begin();
-			itTrack != tracks->end();                      
+			itTrack != tracks->end();
 			++itTrack) {
 //		cout << "!!! " << __LINE__ << endl;
 		if ( itTrack->charge() == 0 ) continue;

@@ -30,7 +30,7 @@ typedef struct QWEvent_ {
 	int     Cent;
 	int     Mult;
 	double  vz;
-	int 	Noff;
+	int	Noff;
 	double  Pt[NMAX_TRK];
 	double  Eta[NMAX_TRK];
 	double  Phi[NMAX_TRK];
@@ -66,24 +66,26 @@ class QWCumuV3 : public edm::EDAnalyzer {
 		int getNoffCent(const edm::Event&, const edm::EventSetup&, int& Noff);
 		//TRandom3 * gRandom;
 		// ----------member data ---------------------------
-		edm::InputTag tracks_; //used to select what tracks to read from configuration file
-		edm::InputTag centrality_;	// centrality
-		edm::InputTag vertexSrc_;
-		edm::InputTag correctHist_;
+		edm::EDGetTokenT<reco::TrackCollection>		trackToken_;
+		edm::EDGetTokenT<int>				centralityToken_;
+		edm::EDGetTokenT<reco::VertexCollection>	vertexToken_;
+		//edm::InputTag tracks_; //used to select what tracks to read from configuration file
+		//edm::InputTag centrality_;	// centrality
+		///edm::InputTag vertexSrc_;
 
 		edm::InputTag fweight_;
 		edm::InputTag facceptance_;
 	/////////////////////////////////////////////
-		double 	minvz_, maxvz_;
-		double 	dzdzerror_;
-		double 	d0d0error_;
-		double 	chi2_;
-		double 	pterrorpt_;
-		double 	rfpmineta_, rfpmaxeta_;
-		double 	poimineta_, poimaxeta_;
-		double 	rfpptmin_, rfpptmax_;
-		double 	poiptmin_, poiptmax_;
-		int 	charge_;
+		double	minvz_, maxvz_;
+		double	dzdzerror_;
+		double	d0d0error_;
+		double	chi2_;
+		double	pterrorpt_;
+		double	rfpmineta_, rfpmaxeta_;
+		double	poimineta_, poimaxeta_;
+		double	rfpptmin_, rfpptmax_;
+		double	poiptmin_, poiptmax_;
+		int	charge_;
 
 		bool	bFak;
 		bool	bEff;
@@ -91,8 +93,8 @@ class QWCumuV3 : public edm::EDAnalyzer {
 		bool	bPhiEta;
 		bool	bCentNoff;
 		bool	bSim_;
-		int 	Noffmin_;
-		int 	Noffmax_;
+		int	Noffmin_;
+		int	Noffmax_;
 		int	cmode_;
 		bool	bGen_;
 		bool	bFlipEta_;
@@ -141,9 +143,9 @@ class QWCumuV3 : public edm::EDAnalyzer {
 		double iQc[7][4][2];
 		double wQc[7][4][2];
 
-		correlations::HarmonicVector 	hc[7];
+		correlations::HarmonicVector	hc[7];
 		correlations::QVector		q[7];
-		correlations::FromQVector 	*cq[7];
+		correlations::FromQVector	*cq[7];
 
 		void initQ();
 		void doneQ();
