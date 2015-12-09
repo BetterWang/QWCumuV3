@@ -86,13 +86,13 @@ process.centralityBin.centralityVariable = cms.string("HFtowers")
 
 process.load('HeavyIonsAnalysis.Configuration.collisionEventSelection_cff')
 
-process.eventSelection = cms.Sequence(
-        process.hfCoincFilter3
-        + process.primaryVertexFilter
-)
-
+#process.eventSelection = cms.Sequence(
+#        process.hfCoincFilter3
+#        + process.primaryVertexFilter
+#)
+#
 #process.p = cms.Path(process.PAcollisionEventSelection*process.pACentrality*process.cumulant)
-process.pMBexpress = cms.Path(process.hltMBexpress*process.eventSelection*process.cumulantMB)
+process.pMBexpress = cms.Path(process.hltMBexpress*process.collisionEventSelectionAOD*process.cumulantMB)
 
 process.schedule = cms.Schedule(
 	process.pMBexpress,
