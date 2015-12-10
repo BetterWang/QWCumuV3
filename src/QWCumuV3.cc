@@ -180,6 +180,8 @@ QWCumuV3::QWCumuV3(const edm::ParameterSet& iConfig)
 //		trV->SetAutoFlush(1000000);
 	trV->Branch("Noff", &gNoff, "Noff/I");
 	trV->Branch("Mult", &gMult, "Mult/I");
+//	trV->Branch("RunId", &t->RunId, "RunId/I");
+//	trV->Branch("EventId", &t->EventId, "EventId/I");
 
 	for ( int n = 1; n < 7; n++ ) {
 		for ( int np = 0; np < 4; np++ ) {
@@ -492,6 +494,8 @@ QWCumuV3::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	gMult = t->Mult;
 	trV->Fill();
 
+	t->RunId = iEvent.id().run();
+	t->EventId = iEvent.id().event();
 	doneQ();
 
 }
@@ -604,29 +608,24 @@ QWCumuV3::analyzeData(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	iEvent.getByToken(trackToken_,tracks);
 	t->Cent = bin;
 	t->vz = vz;
-	//cout << __LINE__ << "\t" << bin << endl;
 
 	for(TrackCollection::const_iterator itTrack = tracks->begin();
 			itTrack != tracks->end();
 			++itTrack) {
-//		cout << "!!! " << __LINE__ << endl;
 		if ( itTrack->charge() == 0 ) continue;
 		if ( !itTrack->quality(reco::TrackBase::highPurity) ) continue;
 
-//		cout << "!!! " << __LINE__ << endl;
 		double d0 = -1.* itTrack->dxy(v1);
 		double derror=sqrt(itTrack->dxyError()*itTrack->dxyError()+vxError*vyError);
 		double dz=itTrack->dz(v1);
 		double dzerror=sqrt(itTrack->dzError()*itTrack->dzError()+vzError*vzError);
 
-//		cout << "!!! " << __LINE__ << endl;
 		if ( fabs(itTrack->eta()) > 2.4 ) continue;
 		if ( fabs( dz/dzerror ) > dzdzerror_ ) continue;
 		if ( fabs( d0/derror ) > d0d0error_ ) continue;
 		if ( itTrack->ptError()/itTrack->pt() > pterrorpt_ ) continue;
 
 		t->RFP[t->Mult] = 1;
-//		cout << "!!! " << __LINE__ << endl;
 		t->Charge[t->Mult] = itTrack->charge();
 		if ( (charge_ == 1) && (t->Charge[t->Mult]<0) ) {
 			t->RFP[t->Mult] = 0;
@@ -635,7 +634,6 @@ QWCumuV3::analyzeData(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 			t->RFP[t->Mult] = 0;
 		}
 
-//		cout << "!!! " << __LINE__ << endl;
 		t->Pt[t->Mult] = itTrack->pt();
 		if ( t->Pt[t->Mult] >= ptbins[nPtBins] || t->Pt[t->Mult] <= ptbins[0] ) {
 			t->RFP[t->Mult] = 0;
@@ -657,6 +655,7 @@ QWCumuV3::analyzeData(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 		} else {
 			t->rEff[t->Mult] = 1.;
 		}
+
 		if ( bFak ) {
 			t->rFak[t->Mult] = hFak_cbin[bin]->GetBinContent( hFak_cbin[bin]->FindBin(t->Eta[t->Mult], t->Pt[t->Mult] ) );
 		} else {
@@ -671,6 +670,7 @@ QWCumuV3::analyzeData(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
 		double wacc = 1.;
 		int ipt=0;
+
 		while ( t->Pt[t->Mult] > ptbins[ipt+1] ) ipt++;
 		if ( bacc ) {
 			wacc = 1./hacc[t->Cent][ipt][t->Charge[t->Mult]>0]->GetBinContent(hacc[t->Cent][ipt][t->Charge[t->Mult]>0]->FindBin(phi, t->Eta[t->Mult]));

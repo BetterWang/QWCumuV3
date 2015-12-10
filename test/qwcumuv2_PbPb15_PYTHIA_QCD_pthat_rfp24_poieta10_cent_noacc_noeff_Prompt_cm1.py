@@ -19,7 +19,7 @@ process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(-1))
 process.MessageLogger.cerr.FwkReport.reportEvery = 100
 
 from Configuration.AlCa.GlobalTag_condDBv2 import GlobalTag
-process.GlobalTag = GlobalTag(process.GlobalTag, '75X_dataRun2_ExpressHI_v2', '')
+process.GlobalTag = GlobalTag(process.GlobalTag, '75X_dataRun2_v12', '')
 
 process.options = cms.untracked.PSet(
     Rethrow = cms.untracked.vstring('ProductNotFound')
@@ -29,9 +29,13 @@ process.options = cms.untracked.PSet(
 #for line in open('flist').read().splitlines():
 #	fN.append('file:'+line);
 #
+readFiles = cms.untracked.vstring()
 process.source = cms.Source("PoolSource",
-        fileNames = cms.untracked.vstring("/store/express/HIRun2015/HIExpressPhysics/FEVT/Express-v1/000/262/921/00000/FC48569A-9697-E511-A314-02163E0145DF.root")
+        fileNames = readFiles
 )
+readFiles.extend( [
+        'file:step3_474.root' ] );
+
 
 #import FWCore.PythonUtilities.LumiList as LumiList
 #import FWCore.ParameterSet.Types as CfgTypes
@@ -63,8 +67,8 @@ process.cumulantMB = cms.EDAnalyzer('QWCumuV3'
 	, rfpmaxeta_ = cms.untracked.double(2.4)
 	, bPhiEta_ = cms.untracked.bool(True)
 	, bCentNoff_ = cms.untracked.bool(False)
-	, poimineta_ = cms.untracked.double(-1.0)
-	, poimaxeta_ = cms.untracked.double(1.0)
+	, poimineta_ = cms.untracked.double(-2.4)
+	, poimaxeta_ = cms.untracked.double(2.4)
 	, poiptmin_ = cms.untracked.double(0.3)
 	, poiptmax_ = cms.untracked.double(3.0)
 	, pterrorpt_ = cms.untracked.double(0.1)
@@ -92,7 +96,7 @@ process.load('HeavyIonsAnalysis.Configuration.collisionEventSelection_cff')
 #)
 #
 #process.p = cms.Path(process.PAcollisionEventSelection*process.pACentrality*process.cumulant)
-process.pMBexpress = cms.Path(process.hltMBexpress*process.collisionEventSelectionAOD*process.centralityBin*process.cumulantMB)
+process.pMBexpress = cms.Path(process.centralityBin*process.collisionEventSelectionAOD*process.cumulantMB)
 
 process.schedule = cms.Schedule(
 	process.pMBexpress,

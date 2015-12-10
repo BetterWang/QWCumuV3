@@ -25,7 +25,7 @@
 // class declaration
 //
 
-const int NMAX_TRK = 5000;
+const int NMAX_TRK = 10000;
 typedef struct QWEvent_ {
 	int     Cent;
 	int     Mult;
@@ -39,6 +39,8 @@ typedef struct QWEvent_ {
 	double	rFak[NMAX_TRK];
 	double	weight[NMAX_TRK];
 	int	RFP[NMAX_TRK];
+	int     RunId;
+	int     EventId;
 } QWEvent;
 
 ///////////////// Class ////////////////////////////
