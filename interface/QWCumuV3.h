@@ -12,6 +12,7 @@
 #include <TRandom3.h>
 #include <TFile.h>
 #include "QWConstV3.h"
+#include <RecoHI/HiEvtPlaneAlgos/interface/HiEvtPlaneList.h>
 //
 // constants, enums and typedefs
 //
@@ -55,8 +56,9 @@ class QWCumuV3 : public edm::EDAnalyzer {
 	private:
 		virtual void beginJob() ;
 		virtual void analyze(const edm::Event&, const edm::EventSetup&);
-		virtual void analyzeData(const edm::Event&, const edm::EventSetup&);
-		virtual void analyzeGen(const edm::Event&, const edm::EventSetup&);
+		void analyzeData(const edm::Event&, const edm::EventSetup&);
+		void analyzeGen(const edm::Event&, const edm::EventSetup&);
+		void analyzeEP(const edm::Event&, const edm::EventSetup&);
 		virtual void endJob() ;
 
 		virtual void beginRun(edm::Run const&, edm::EventSetup const&);
@@ -71,6 +73,7 @@ class QWCumuV3 : public edm::EDAnalyzer {
 		edm::EDGetTokenT<reco::TrackCollection>		trackToken_;
 		edm::EDGetTokenT<int>				centralityToken_;
 		edm::EDGetTokenT<reco::VertexCollection>	vertexToken_;
+		edm::EDGetTokenT<reco::EvtPlaneCollection>	epToken_;
 		//edm::InputTag tracks_; //used to select what tracks to read from configuration file
 		//edm::InputTag centrality_;	// centrality
 		///edm::InputTag vertexSrc_;
@@ -100,6 +103,7 @@ class QWCumuV3 : public edm::EDAnalyzer {
 		int	cmode_;
 		bool	bGen_;
 		bool	bFlipEta_;
+		bool	bEP_;
 
 		unsigned int	nvtx_;
 
@@ -118,6 +122,9 @@ class QWCumuV3 : public edm::EDAnalyzer {
 		TH2D * hFak_cbin[nCentBins];
 
 		TH2D * hacc[nCentBins][nPtBins][2];
+
+		TH2D * hEP[hi::NumEPNames][7];
+		TH2D * hSP[hi::NumEPNames][7];
 
 //		TNtupleD * ntResult;
 		TTree * trV;

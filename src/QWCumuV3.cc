@@ -39,6 +39,7 @@ Implementation:
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 #include "DataFormats/VertexReco/interface/Vertex.h"
 #include "DataFormats/VertexReco/interface/VertexFwd.h"
+#include "DataFormats/HeavyIonEvent/interface/EvtPlane.h"
 #include "TH1.h"
 #include "TH2.h"
 #include "TNtuple.h"
@@ -59,7 +60,9 @@ QWCumuV3::QWCumuV3(const edm::ParameterSet& iConfig)
 		trackToken_( consumes<reco::TrackCollection>(iConfig.getUntrackedParameter<edm::InputTag>("tracks_")) )
 	,	centralityToken_( consumes<int>(iConfig.getParameter<edm::InputTag>("centrality_")) )
 	,	vertexToken_( consumes<reco::VertexCollection>(iConfig.getUntrackedParameter<edm::InputTag>("vertexSrc_")) )
+	,	epToken_( consumes<reco::EvtPlaneCollection>(iConfig.getUntrackedParameter<edm::InputTag>("epSrc", string("hiEvtPlane") )) )
 	,	bacc(false)
+	,	bEP_(false)
 {
 	//now do what ever initialization is needed
 	minvz_ = iConfig.getUntrackedParameter<double>("minvz_", -15.);
@@ -94,6 +97,7 @@ QWCumuV3::QWCumuV3(const edm::ParameterSet& iConfig)
 	bGen_ = iConfig.getUntrackedParameter<bool>("bGen_", false);
 	nvtx_ = iConfig.getUntrackedParameter<int>("nvtx_", 100);
 	bFlipEta_ = iConfig.getUntrackedParameter<bool>("bFlipEta_", false);
+	bEP_ = iConfig.getUntrackedParameter<bool>("bEP", false);
 
 	string streff = fweight_.label();
 	if ( streff == string("NA") ) {
@@ -170,8 +174,8 @@ QWCumuV3::QWCumuV3(const edm::ParameterSet& iConfig)
 	}
 	for ( int cent = 0; cent < nCentBins; cent++ ) {
 		//cout << "!! new histo cent = " << cent << endl;
-		hdNdPtdEta[cent] = fs->make<TH2D>(Form("hdNdPtdEta_%i", cent), Form("hdNdPtdEta_%i", cent), nEtaBins, etabins, 38, fakpt );
-		hdNdPtdEtaPt[cent] = fs->make<TH2D>(Form("hdNdPtdEtaPt_%i", cent), Form("hdNdPtdEta_%i", cent), nEtaBins, etabins, 38, fakpt );
+		hdNdPtdEta[cent] = fs->make<TH2D>(Form("hdNdPtdEta_%i", cent), Form("hdNdPtdEta_%i", cent), nEtaBins, etabins, nPtBins, ptbins);
+		hdNdPtdEtaPt[cent] = fs->make<TH2D>(Form("hdNdPtdEtaPt_%i", cent), Form("hdNdPtdEta_%i", cent), nEtaBins, etabins, nPtBins, ptbins);
 	}
 
 
@@ -209,6 +213,12 @@ QWCumuV3::QWCumuV3(const edm::ParameterSet& iConfig)
 
 	initQ();
 
+	for ( int n = 1; n < 7; n++ ) {
+		for ( int iep = 0; iep < hi::NumEPNames; iep++ ) {
+			hEP[iep][n] = new TH2D(Form("hEP_%i_%i", iep, n), "", nCentBins, centbins, nPtBins, ptbins);
+			hSP[iep][n] = new TH2D(Form("hSP_%i_%i", iep, n), "", nCentBins, centbins, nPtBins, ptbins);
+		}
+	}
 }
 
 
@@ -492,14 +502,24 @@ QWCumuV3::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
 	gNoff = t->Noff;
 	gMult = t->Mult;
-	trV->Fill();
 
-	t->RunId = iEvent.id().run();
-	t->EventId = iEvent.id().event();
+//	t->RunId = iEvent.id().run();
+//	t->EventId = iEvent.id().event();
+	trV->Fill();
 	doneQ();
 
+	if (bEP_) {
+		analyzeEP(iEvent, iSetup);
+	}
 }
 
+void
+QWCumuV3::analyzeEP(const edm::Event& iEvent, const edm::EventSetup& iSetup)
+{
+	Handle<reco::EvtPlaneCollection> epCollection;
+	iEvent.getByToken(epToken_, epCollection);
+	const reco::EvtPlaneCollection * ep = epCollection.product();
+}
 
 void
 QWCumuV3::analyzeGen(const edm::Event& iEvent, const edm::EventSetup& iSetup)
