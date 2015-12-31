@@ -44,6 +44,7 @@ Implementation:
 #include "TH2.h"
 #include "TNtuple.h"
 #include "TComplex.h"
+#include <complex>
 
 
 #include "QWAna/QWCumuV3/interface/QWCumuV3.h"
@@ -98,6 +99,7 @@ QWCumuV3::QWCumuV3(const edm::ParameterSet& iConfig)
 	nvtx_ = iConfig.getUntrackedParameter<int>("nvtx_", 100);
 	bFlipEta_ = iConfig.getUntrackedParameter<bool>("bFlipEta_", false);
 	bEP_ = iConfig.getUntrackedParameter<bool>("bEP", false);
+	EPlvl_ = iConfig.getUntrackedParameter<int>("EPlvl_", 0);
 
 	string streff = fweight_.label();
 	if ( streff == string("NA") ) {
@@ -163,7 +165,7 @@ QWCumuV3::QWCumuV3(const edm::ParameterSet& iConfig)
 	//
 	edm::Service<TFileService> fs;
 	for ( int cent = 0; cent < nCentBins; cent++ ) {
-		hPt[cent] = fs->make<TH1D>(Form("hPt_%i", cent), "", 20000, 0, 100);
+		hPt[cent] = fs->make<TH1D>(Form("hPt_%i", cent), "", nPtBins, ptbins);
 		if ( bPhiEta ) {
 			for ( int i = 0; i < nPtBins; i++ ) {
 				//cout << "!! new histo cent = " << cent << " of " << nCentBins << "\t ipt = " << i  << " of " << nPtBins << endl;
@@ -213,11 +215,21 @@ QWCumuV3::QWCumuV3(const edm::ParameterSet& iConfig)
 
 	initQ();
 
-	for ( int n = 1; n < 7; n++ ) {
-		for ( int iep = 0; iep < hi::NumEPNames; iep++ ) {
-			hEP[iep][n] = new TH2D(Form("hEP_%i_%i", iep, n), "", nCentBins, centbins, nPtBins, ptbins);
-			hSP[iep][n] = new TH2D(Form("hSP_%i_%i", iep, n), "", nCentBins, centbins, nPtBins, ptbins);
+	if ( bEP_ ) {
+		for ( int n = 1; n < 7; n++ ) {
+			for ( int iep = 0; iep < hi::NumEPNames; iep++ ) {
+				hEP[iep][n] = new TH2D(Form("hEP_%i_%i", iep, n), "", nCentBins, centbins, nPtBins, ptbins);
+				hSP[iep][n] = new TH2D(Form("hSP_%i_%i", iep, n), "", nCentBins, centbins, nPtBins, ptbins);
+				iEP[iep][n] = new TH2D(Form("iEP_%i_%i", iep, n), "", nCentBins, centbins, nPtBins, ptbins);
+				iSP[iep][n] = new TH2D(Form("iSP_%i_%i", iep, n), "", nCentBins, centbins, nPtBins, ptbins);
+			}
 		}
+		hEPresAB = new TH2D("hEPresAB", "hEPresAB", nCentNoff, centbins, hi::NumEPNames, 0, hi::NumEPNames);
+		hEPresAC = new TH2D("hEPresAC", "hEPresAC", nCentNoff, centbins, hi::NumEPNames, 0, hi::NumEPNames);
+		hEPresBC = new TH2D("hEPresBC", "hEPresBC", nCentNoff, centbins, hi::NumEPNames, 0, hi::NumEPNames);
+		hSPresAB = new TH2D("hSPresAB", "hSPresAB", nCentNoff, centbins, hi::NumEPNames, 0, hi::NumEPNames);
+		hSPresAC = new TH2D("hSPresAC", "hSPresAC", nCentNoff, centbins, hi::NumEPNames, 0, hi::NumEPNames);
+		hSPresBC = new TH2D("hSPresBC", "hSPresBC", nCentNoff, centbins, hi::NumEPNames, 0, hi::NumEPNames);
 	}
 }
 
@@ -518,7 +530,46 @@ QWCumuV3::analyzeEP(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
 	Handle<reco::EvtPlaneCollection> epCollection;
 	iEvent.getByToken(epToken_, epCollection);
+	if ( ! epCollection.isValid() ) return;
 	const reco::EvtPlaneCollection * ep = epCollection.product();
+	if ( ep->size() != hi::NumEPNames ) return;
+	std::complex<double> Qn[nPtBins][7] = {};
+	std::complex<double> QA[hi::NumEPNames];
+	for ( int iep = 0; iep < hi::NumEPNames; iep++ ) {
+		QA[i].real(ep[i].qx(EPlvl_));
+		QA[i].imag(ep[i].qy(EPlvl_));
+	}
+	for ( int i = 0; i < t->Mult; i++ ) {
+		if ( t->Eta[i] > poimaxeta_ or t->Eta[i] < poimineta_ ) continue;
+		int ipt=0;
+		while ( t->Pt[t->Mult] > ptbins[ipt+1] ) ipt++;
+		for ( int n = 1; n < 7; n++ ) {
+			std::complex<double> Q(cos(n*t->Phi[i], sin(n*t->Phi[i])));
+			Qn[ipt][n] += t->weight[i]*Q;
+		}
+	}
+	for ( int n = 1; n < 7; n++ ) {
+		for ( int iep = 0; iep < hi::NumEPNames; iep++ ) {
+			for ( int ipt = 0; ipt < nPtBins; ipt++ ) {
+				std::complex<double> Q = Qn[ipt][n] * std::conj(QA[iep]);
+				hEP[iep][n]->Fill(t->Noff/2., ipt, Q.real()/std::abs(QA));
+				iEP[iep][n]->Fill(t->Noff/2., ipt, Q.imag()/std::abs(QA));
+				hSP[iep][n]->Fill(t->Noff/2., ipt, Q.real());
+				iSP[iep][n]->Fill(t->Noff/2., ipt, Q.imag());
+			}
+		}
+	}
+	for ( int iep = 0; iep < hi::NumEPNames; iep++ ) {
+		std::complex<double> QB = QA[hi::RCMate1[iep]];
+		std::complex<double> QC = QA[hi::RCMate2[iep]];
+		hEPresAB->Fill(t->Cent, iep, (QA[iep]*std:conj(QB)).real() / std::abs(QA[iep]) / std::abs(QB));
+		hEPresAC->Fill(t->Cent, iep, (QA[iep]*std:conj(QC)).real() / std::abs(QA[iep]) / std::abs(QC));
+		hEPresBC->Fill(t->Cent, iep, (QB*std:conj(QC)).real() / std::abs(QB) / std::abs(QC));
+
+		hSPresAB->Fill(t->Cent, iep, (QA[iep]*std:conj(QB)).real() );
+		hSPresAC->Fill(t->Cent, iep, (QA[iep]*std:conj(QC)).real() );
+		hSPresBC->Fill(t->Cent, iep, (QB*std:conj(QC)).real() );
+	}
 }
 
 void

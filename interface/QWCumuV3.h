@@ -104,6 +104,7 @@ class QWCumuV3 : public edm::EDAnalyzer {
 		bool	bGen_;
 		bool	bFlipEta_;
 		bool	bEP_;
+		int	EPlvl_;
 
 		unsigned int	nvtx_;
 
@@ -125,6 +126,16 @@ class QWCumuV3 : public edm::EDAnalyzer {
 
 		TH2D * hEP[hi::NumEPNames][7];
 		TH2D * hSP[hi::NumEPNames][7];
+		TH2D * iEP[hi::NumEPNames][7];
+		TH2D * iSP[hi::NumEPNames][7];
+
+		TH2D * hEPresAB;
+		TH2D * hEPresAC;
+		TH2D * hEPresBC;
+
+		TH2D * hSPresAB;
+		TH2D * hSPresAC;
+		TH2D * hSPresBC;
 
 //		TNtupleD * ntResult;
 		TTree * trV;
