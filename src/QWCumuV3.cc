@@ -222,6 +222,7 @@ QWCumuV3::QWCumuV3(const edm::ParameterSet& iConfig)
 				hSP[iep][n] = fs->make<TH2D>(Form("hSP_%i_%i", iep, n), "", nCentBins, centbins, nPtBins, ptbins);
 				iEP[iep][n] = fs->make<TH2D>(Form("iEP_%i_%i", iep, n), "", nCentBins, centbins, nPtBins, ptbins);
 				iSP[iep][n] = fs->make<TH2D>(Form("iSP_%i_%i", iep, n), "", nCentBins, centbins, nPtBins, ptbins);
+				hMult[iep][n] = fs->make<TH2D>(Form("hMult_%i_%i", iep, n), "", nCentBins, centbins, nPtBins, ptbins);
 			}
 		}
 		hEPresAB = fs->make<TH2D>("hEPresAB", "hEPresAB", nCentNoff, centbins, hi::NumEPNames, 0, hi::NumEPNames);
@@ -230,6 +231,8 @@ QWCumuV3::QWCumuV3(const edm::ParameterSet& iConfig)
 		hSPresAB = fs->make<TH2D>("hSPresAB", "hSPresAB", nCentNoff, centbins, hi::NumEPNames, 0, hi::NumEPNames);
 		hSPresAC = fs->make<TH2D>("hSPresAC", "hSPresAC", nCentNoff, centbins, hi::NumEPNames, 0, hi::NumEPNames);
 		hSPresBC = fs->make<TH2D>("hSPresBC", "hSPresBC", nCentNoff, centbins, hi::NumEPNames, 0, hi::NumEPNames);
+
+		hMultRes = fs->make<TH2D>("hMultRes", "hMultRes", nCentNoff, centbins, hi::NumEPNames, 0, hi::NumEPNames);
 	}
 }
 
@@ -542,7 +545,7 @@ QWCumuV3::analyzeEP(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	for ( int i = 0; i < t->Mult; i++ ) {
 		if ( t->Eta[i] > poimaxeta_ or t->Eta[i] < poimineta_ ) continue;
 		int ipt=0;
-		while ( t->Pt[t->Mult] > ptbins[ipt+1] ) ipt++;
+		while ( t->Pt[i] > ptbins[ipt+1] ) ipt++;
 		for ( int n = 1; n < 7; n++ ) {
 			std::complex<double> Q(cos(n*t->Phi[i]), sin(n*t->Phi[i]));
 			Qn[ipt][n] += t->weight[i]*Q;
@@ -556,6 +559,7 @@ QWCumuV3::analyzeEP(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 				iEP[iep][n]->Fill(t->Noff/2., ipt, Q.imag()/std::abs(QA[iep]));
 				hSP[iep][n]->Fill(t->Noff/2., ipt, Q.real());
 				iSP[iep][n]->Fill(t->Noff/2., ipt, Q.imag());
+				hMult[iep][n]->Fill(t->Noff/2., ipt );
 			}
 		}
 	}
@@ -569,6 +573,8 @@ QWCumuV3::analyzeEP(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 		hSPresAB->Fill(t->Cent, iep, (QA[iep]*std::conj(QB)).real() );
 		hSPresAC->Fill(t->Cent, iep, (QA[iep]*std::conj(QC)).real() );
 		hSPresBC->Fill(t->Cent, iep, (QB*std::conj(QC)).real() );
+
+		hMultRes->Fill(t->Cent, iep);
 	}
 }
 
