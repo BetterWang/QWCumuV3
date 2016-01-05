@@ -222,7 +222,6 @@ QWCumuV3::QWCumuV3(const edm::ParameterSet& iConfig)
 				hSP[iep][n] = fs->make<TH2D>(Form("hSP_%i_%i", iep, n), "", nCentBins, centbins, nPtBins, ptbins);
 				iEP[iep][n] = fs->make<TH2D>(Form("iEP_%i_%i", iep, n), "", nCentBins, centbins, nPtBins, ptbins);
 				iSP[iep][n] = fs->make<TH2D>(Form("iSP_%i_%i", iep, n), "", nCentBins, centbins, nPtBins, ptbins);
-				hMult[iep][n] = fs->make<TH2D>(Form("hMult_%i_%i", iep, n), "", nCentBins, centbins, nPtBins, ptbins);
 			}
 		}
 		hEPresAB = fs->make<TH2D>("hEPresAB", "hEPresAB", nCentNoff, centbins, hi::NumEPNames, 0, hi::NumEPNames);
@@ -232,6 +231,7 @@ QWCumuV3::QWCumuV3(const edm::ParameterSet& iConfig)
 		hSPresAC = fs->make<TH2D>("hSPresAC", "hSPresAC", nCentNoff, centbins, hi::NumEPNames, 0, hi::NumEPNames);
 		hSPresBC = fs->make<TH2D>("hSPresBC", "hSPresBC", nCentNoff, centbins, hi::NumEPNames, 0, hi::NumEPNames);
 
+		hMult    = fs->make<TH2D>("hMult", "", nCentBins, centbins, nPtBins, ptbins);
 		hMultRes = fs->make<TH2D>("hMultRes", "hMultRes", nCentNoff, centbins, hi::NumEPNames, 0, hi::NumEPNames);
 	}
 }
@@ -538,6 +538,7 @@ QWCumuV3::analyzeEP(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	if ( ep->size() != hi::NumEPNames ) return;
 	std::complex<double> Qn[nPtBins][7] = {};
 	std::complex<double> QA[hi::NumEPNames];
+	int QnMult[nPtBins] = {};
 	for ( int iep = 0; iep < hi::NumEPNames; iep++ ) {
 		QA[iep].real((*ep)[iep].qx(EPlvl_));
 		QA[iep].imag((*ep)[iep].qy(EPlvl_));
@@ -550,18 +551,19 @@ QWCumuV3::analyzeEP(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 			std::complex<double> Q(cos(n*t->Phi[i]), sin(n*t->Phi[i]));
 			Qn[ipt][n] += t->weight[i]*Q;
 		}
+		QnMult[ipt]++;
 	}
-	for ( int n = 1; n < 7; n++ ) {
+	for ( int ipt = 0; ipt < nPtBins; ipt++ ) {
 		for ( int iep = 0; iep < hi::NumEPNames; iep++ ) {
-			for ( int ipt = 0; ipt < nPtBins; ipt++ ) {
+			for ( int n = 1; n < 7; n++ ) {
 				std::complex<double> Q = Qn[ipt][n] * std::conj(QA[iep]);
-				hEP[iep][n]->Fill(t->Noff/2., ipt, Q.real()/std::abs(QA[iep]));
-				iEP[iep][n]->Fill(t->Noff/2., ipt, Q.imag()/std::abs(QA[iep]));
-				hSP[iep][n]->Fill(t->Noff/2., ipt, Q.real());
-				iSP[iep][n]->Fill(t->Noff/2., ipt, Q.imag());
-				hMult[iep][n]->Fill(t->Noff/2., ipt );
+				hEP[iep][n]->Fill(t->Noff/2., ptbins[ipt], Q.real()/std::abs(QA[iep]));
+				iEP[iep][n]->Fill(t->Noff/2., ptbins[ipt], Q.imag()/std::abs(QA[iep]));
+				hSP[iep][n]->Fill(t->Noff/2., ptbins[ipt], Q.real());
+				iSP[iep][n]->Fill(t->Noff/2., ptbins[ipt], Q.imag());
 			}
 		}
+		hMult->Fill(t->Noff/2., ptbins[ipt]+0.1 , QnMult[ipt]);
 	}
 	for ( int iep = 0; iep < hi::NumEPNames; iep++ ) {
 		std::complex<double> QB = QA[hi::RCMate1[iep]];
