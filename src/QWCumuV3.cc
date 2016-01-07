@@ -224,15 +224,15 @@ QWCumuV3::QWCumuV3(const edm::ParameterSet& iConfig)
 				iSP[iep][n] = fs->make<TH2D>(Form("iSP_%i_%i", iep, n), "", nCentBins, centbins, nPtBins, ptbins);
 			}
 		}
-		hEPresAB = fs->make<TH2D>("hEPresAB", "hEPresAB", nCentNoff, centbins, hi::NumEPNames, 0, hi::NumEPNames);
-		hEPresAC = fs->make<TH2D>("hEPresAC", "hEPresAC", nCentNoff, centbins, hi::NumEPNames, 0, hi::NumEPNames);
-		hEPresBC = fs->make<TH2D>("hEPresBC", "hEPresBC", nCentNoff, centbins, hi::NumEPNames, 0, hi::NumEPNames);
-		hSPresAB = fs->make<TH2D>("hSPresAB", "hSPresAB", nCentNoff, centbins, hi::NumEPNames, 0, hi::NumEPNames);
-		hSPresAC = fs->make<TH2D>("hSPresAC", "hSPresAC", nCentNoff, centbins, hi::NumEPNames, 0, hi::NumEPNames);
-		hSPresBC = fs->make<TH2D>("hSPresBC", "hSPresBC", nCentNoff, centbins, hi::NumEPNames, 0, hi::NumEPNames);
+		hEPresAB = fs->make<TH2D>("hEPresAB", "hEPresAB", nCentBins, centbins, hi::NumEPNames, 0, hi::NumEPNames);
+		hEPresAC = fs->make<TH2D>("hEPresAC", "hEPresAC", nCentBins, centbins, hi::NumEPNames, 0, hi::NumEPNames);
+		hEPresBC = fs->make<TH2D>("hEPresBC", "hEPresBC", nCentBins, centbins, hi::NumEPNames, 0, hi::NumEPNames);
+		hSPresAB = fs->make<TH2D>("hSPresAB", "hSPresAB", nCentBins, centbins, hi::NumEPNames, 0, hi::NumEPNames);
+		hSPresAC = fs->make<TH2D>("hSPresAC", "hSPresAC", nCentBins, centbins, hi::NumEPNames, 0, hi::NumEPNames);
+		hSPresBC = fs->make<TH2D>("hSPresBC", "hSPresBC", nCentBins, centbins, hi::NumEPNames, 0, hi::NumEPNames);
 
 		hMult    = fs->make<TH2D>("hMult", "", nCentBins, centbins, nPtBins, ptbins);
-		hMultRes = fs->make<TH2D>("hMultRes", "hMultRes", nCentNoff, centbins, hi::NumEPNames, 0, hi::NumEPNames);
+		hMultRes = fs->make<TH2D>("hMultRes", "hMultRes", nCentBins, centbins, hi::NumEPNames, 0, hi::NumEPNames);
 	}
 }
 
