@@ -1,7 +1,7 @@
 from CRABClient.UserUtilities import config, getUsernameFromSiteDB
 config = config()
 
-config.General.requestName = 'HIHardProbes_Skim_cumu_v2'
+config.General.requestName = 'HIHardProbes_Skim_cumu_v3'
 config.General.workArea = 'CrabArea'
 config.General.transferOutputs = True
 config.General.transferLogs = True

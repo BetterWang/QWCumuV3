@@ -217,11 +217,11 @@ QWCumuV3::QWCumuV3(const edm::ParameterSet& iConfig)
 
 	if ( bEP_ ) {
 		for ( int n = 1; n < 7; n++ ) {
-			for ( int iep = 0; iep < hi::NumEPNames; iep++ ) {
-				hEP[iep][n] = fs->make<TH2D>(Form("hEP_%i_%i", iep, n), "", nCentBins, centbins, nPtBins, ptbins);
-				hSP[iep][n] = fs->make<TH2D>(Form("hSP_%i_%i", iep, n), "", nCentBins, centbins, nPtBins, ptbins);
-				iEP[iep][n] = fs->make<TH2D>(Form("iEP_%i_%i", iep, n), "", nCentBins, centbins, nPtBins, ptbins);
-				iSP[iep][n] = fs->make<TH2D>(Form("iSP_%i_%i", iep, n), "", nCentBins, centbins, nPtBins, ptbins);
+			for ( int ipt = 0; ipt < nPtBins; ipt++ ) {
+				hEP[ipt][n] = fs->make<TH2D>(Form("hEP_%i_%i", ipt, n), "", nCentBins, centbins, hi::NumEPNames, 0, hi::NumEPNames);
+				hSP[ipt][n] = fs->make<TH2D>(Form("hSP_%i_%i", ipt, n), "", nCentBins, centbins, hi::NumEPNames, 0, hi::NumEPNames);
+				iEP[ipt][n] = fs->make<TH2D>(Form("iEP_%i_%i", ipt, n), "", nCentBins, centbins, hi::NumEPNames, 0, hi::NumEPNames);
+				iSP[ipt][n] = fs->make<TH2D>(Form("iSP_%i_%i", ipt, n), "", nCentBins, centbins, hi::NumEPNames, 0, hi::NumEPNames);
 			}
 		}
 		hEPresAB = fs->make<TH2D>("hEPresAB", "hEPresAB", nCentBins, centbins, hi::NumEPNames, 0, hi::NumEPNames);
@@ -557,10 +557,10 @@ QWCumuV3::analyzeEP(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 		for ( int iep = 0; iep < hi::NumEPNames; iep++ ) {
 			for ( int n = 1; n < 7; n++ ) {
 				std::complex<double> Q = Qn[ipt][n] * std::conj(QA[iep]);
-				hEP[iep][n]->Fill(t->Noff/2., ptbins[ipt], Q.real()/std::abs(QA[iep]));
-				iEP[iep][n]->Fill(t->Noff/2., ptbins[ipt], Q.imag()/std::abs(QA[iep]));
-				hSP[iep][n]->Fill(t->Noff/2., ptbins[ipt], Q.real());
-				iSP[iep][n]->Fill(t->Noff/2., ptbins[ipt], Q.imag());
+				hEP[ipt][n]->Fill(t->Noff/2., iep, Q.real()/std::abs(QA[iep]));
+				iEP[ipt][n]->Fill(t->Noff/2., iep, Q.imag()/std::abs(QA[iep]));
+				hSP[ipt][n]->Fill(t->Noff/2., iep, Q.real());
+				iSP[ipt][n]->Fill(t->Noff/2., iep, Q.imag());
 			}
 		}
 		hMult->Fill(t->Noff/2., ptbins[ipt]+0.1 , QnMult[ipt]);

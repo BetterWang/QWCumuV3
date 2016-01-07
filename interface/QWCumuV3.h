@@ -124,10 +124,10 @@ class QWCumuV3 : public edm::EDAnalyzer {
 
 		TH2D * hacc[nCentBins][nPtBins][2];
 
-		TH2D * hEP[hi::NumEPNames][7];
-		TH2D * hSP[hi::NumEPNames][7];
-		TH2D * iEP[hi::NumEPNames][7];
-		TH2D * iSP[hi::NumEPNames][7];
+		TH2D * hEP[nPtBins][7];
+		TH2D * hSP[nPtBins][7];
+		TH2D * iEP[nPtBins][7];
+		TH2D * iSP[nPtBins][7];
 		TH2D * hMult;
 
 		TH2D * hEPresAB;
