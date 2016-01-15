@@ -107,6 +107,7 @@ class QWCumuV3 : public edm::EDAnalyzer {
 		int	EPlvl_;
 
 		unsigned int	nvtx_;
+		int	sGenPreset_;
 
 		double	effCut_;
 		QWEvent * t;
