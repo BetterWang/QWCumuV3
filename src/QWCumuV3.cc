@@ -58,7 +58,7 @@ using namespace std;
 //
 QWCumuV3::QWCumuV3(const edm::ParameterSet& iConfig)
 	:
-		trackToken_( consumes<reco::TrackCollection>(iConfig.getUntrackedParameter<edm::InputTag>("tracks_")) )
+		trackTag_( iConfig.getUntrackedParameter<edm::InputTag>("tracks_") )
 	,	centralityToken_( consumes<int>(iConfig.getParameter<edm::InputTag>("centrality_")) )
 	,	vertexToken_( consumes<reco::VertexCollection>(iConfig.getUntrackedParameter<edm::InputTag>("vertexSrc_")) )
 	,	epToken_( consumes<reco::EvtPlaneCollection>(iConfig.getUntrackedParameter<edm::InputTag>("epSrc", string("hiEvtPlane") )) )
@@ -101,6 +101,12 @@ QWCumuV3::QWCumuV3(const edm::ParameterSet& iConfig)
 	bFlipEta_ = iConfig.getUntrackedParameter<bool>("bFlipEta_", false);
 	bEP_ = iConfig.getUntrackedParameter<bool>("bEP", false);
 	EPlvl_ = iConfig.getUntrackedParameter<int>("EPlvl_", 0);
+
+	if ( bGen_ ) {
+		trackGenToken_ = consumes<reco::GenParticle>(trackTag_);
+	} else {
+		trackToken_ = consumes<reco::TrackCollection>(trackTag_);
+	}
 
 	string streff = fweight_.label();
 	if ( streff == string("NA") ) {
@@ -590,7 +596,7 @@ QWCumuV3::analyzeGen(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	t->Mult = 0;
 	// track
 	Handle< std::vector<GenParticle> > tracks;
-	iEvent.getByToken(trackToken_,tracks);
+	iEvent.getByToken(trackGenToken_,tracks);
 	t->Noff = 100;
 //	for ( std::vector<GenParticle>::const_iterator itTrack = tracks->begin();
 //			itTrack != tracks->end();
