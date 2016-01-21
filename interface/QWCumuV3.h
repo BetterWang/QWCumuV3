@@ -70,7 +70,9 @@ class QWCumuV3 : public edm::EDAnalyzer {
 		int getNoffCent(const edm::Event&, const edm::EventSetup&, int& Noff);
 		//TRandom3 * gRandom;
 		// ----------member data ---------------------------
+		edm::InputTag					trackTag_;
 		edm::EDGetTokenT<reco::TrackCollection>		trackToken_;
+		edm::EDGetTokenT<reco::GenParticle>		trackGenToken_;
 		edm::EDGetTokenT<int>				centralityToken_;
 		edm::EDGetTokenT<reco::VertexCollection>	vertexToken_;
 		edm::EDGetTokenT<reco::EvtPlaneCollection>	epToken_;
@@ -107,6 +109,7 @@ class QWCumuV3 : public edm::EDAnalyzer {
 		int	EPlvl_;
 
 		unsigned int	nvtx_;
+		int	sGenPreset_;
 
 		double	effCut_;
 		QWEvent * t;

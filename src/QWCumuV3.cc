@@ -58,7 +58,7 @@ using namespace std;
 //
 QWCumuV3::QWCumuV3(const edm::ParameterSet& iConfig)
 	:
-		trackToken_( consumes<reco::TrackCollection>(iConfig.getUntrackedParameter<edm::InputTag>("tracks_")) )
+		trackTag_( iConfig.getUntrackedParameter<edm::InputTag>("tracks_") )
 	,	centralityToken_( consumes<int>(iConfig.getParameter<edm::InputTag>("centrality_")) )
 	,	vertexToken_( consumes<reco::VertexCollection>(iConfig.getUntrackedParameter<edm::InputTag>("vertexSrc_")) )
 	,	epToken_( consumes<reco::EvtPlaneCollection>(iConfig.getUntrackedParameter<edm::InputTag>("epSrc", string("hiEvtPlane") )) )
@@ -96,10 +96,17 @@ QWCumuV3::QWCumuV3(const edm::ParameterSet& iConfig)
 	effCut_ = iConfig.getUntrackedParameter<double>("effCut_", -1.0);
 	cmode_ = iConfig.getUntrackedParameter<int>("cmode_", 1);
 	bGen_ = iConfig.getUntrackedParameter<bool>("bGen_", false);
+	sGenPreset_ = iConfig.getUntrackedParameter<int>("sGenPreset", 0);
 	nvtx_ = iConfig.getUntrackedParameter<int>("nvtx_", 100);
 	bFlipEta_ = iConfig.getUntrackedParameter<bool>("bFlipEta_", false);
 	bEP_ = iConfig.getUntrackedParameter<bool>("bEP", false);
 	EPlvl_ = iConfig.getUntrackedParameter<int>("EPlvl_", 0);
+
+	if ( bGen_ ) {
+		trackGenToken_ = consumes<reco::GenParticle>(trackTag_);
+	} else {
+		trackToken_ = consumes<reco::TrackCollection>(trackTag_);
+	}
 
 	string streff = fweight_.label();
 	if ( streff == string("NA") ) {
@@ -589,19 +596,19 @@ QWCumuV3::analyzeGen(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	t->Mult = 0;
 	// track
 	Handle< std::vector<GenParticle> > tracks;
-	iEvent.getByToken(trackToken_,tracks);
-	t->Noff = 0;
-	for ( std::vector<GenParticle>::const_iterator itTrack = tracks->begin();
-			itTrack != tracks->end();
-			++itTrack
-			)
-	{
-		if ( itTrack->status()!=1 ) continue;
-		if ( itTrack->charge() == 0 ) continue;
-		if ( fabs(itTrack->eta()) > 2.4 ) continue;
-		if ( itTrack->pt() < 0.4 ) continue;
-		t->Noff++;
-	}
+	iEvent.getByToken(trackGenToken_,tracks);
+	t->Noff = 100;
+//	for ( std::vector<GenParticle>::const_iterator itTrack = tracks->begin();
+//			itTrack != tracks->end();
+//			++itTrack
+//			)
+//	{
+//		if ( itTrack->status()!=1 ) continue;
+//		if ( itTrack->charge() == 0 ) continue;
+//		if ( fabs(itTrack->eta()) > 2.4 ) continue;
+//		if ( itTrack->pt() < 0.4 ) continue;
+//		t->Noff++;
+//	}
 	t->Cent = 0;
 	for ( std::vector<GenParticle>::const_iterator itTrack = tracks->begin();
 			itTrack != tracks->end();
@@ -626,6 +633,29 @@ QWCumuV3::analyzeGen(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 		t->Phi[t->Mult] = itTrack->phi();
 
 		t->Mult++;
+	}
+	if ( sGenPreset_ == 1 ) {
+		// phi weight
+		for ( int i = 0; i < t->Mult; i++ ) {
+			if ( t->Phi[i] >= 1 and t->Phi[i] < 2 ) {
+				if ( gRandom->Rndm() < 0.5 ) {
+					t->weight[i] = 0;
+				} else {
+					t->weight[i] = 2.;
+				}
+			}
+		}
+	} else if ( sGenPreset_ == 2 ) {
+		// pT weight
+		for ( int i = 0; i < t->Mult; i++ ) {
+			if ( t->Pt[i] >= 1 and t->Pt[i] < 2 ) {
+				if ( gRandom->Rndm() < 0.5 ) {
+					t->weight[i] = 0;
+				} else {
+					t->weight[i] = 2.;
+				}
+			}
+		}
 	}
 }
 
