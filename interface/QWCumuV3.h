@@ -100,6 +100,7 @@ class QWCumuV3 : public edm::EDAnalyzer {
 		bool	bPhiEta;
 		bool	bCentNoff;
 		bool	bSim_;
+		bool	bCaloMatching_;
 		int	Noffmin_;
 		int	Noffmax_;
 		int	cmode_;
@@ -107,6 +108,7 @@ class QWCumuV3 : public edm::EDAnalyzer {
 		bool	bFlipEta_;
 		bool	bEP_;
 		int	EPlvl_;
+		std::vector<int> algoParameters_;
 
 		unsigned int	nvtx_;
 		int	sGenPreset_;
@@ -177,6 +179,7 @@ class QWCumuV3 : public edm::EDAnalyzer {
 		void doneQ();
 		void Sim();
 
+		bool QWCumuV3::CaloMatch();
 };
 
 

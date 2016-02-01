@@ -20,6 +20,7 @@ Implementation:
 
 // system include files
 #include <memory>
+#include <algorithm>
 
 // user include files
 #include "FWCore/Framework/interface/Frameworkfwd.h"
@@ -64,6 +65,7 @@ QWCumuV3::QWCumuV3(const edm::ParameterSet& iConfig)
 	,	epToken_( consumes<reco::EvtPlaneCollection>(iConfig.getUntrackedParameter<edm::InputTag>("epSrc", string("hiEvtPlane") )) )
 	,	bacc(false)
 	,	bEP_(false)
+	,	algoParameters_(iConfig.getParameter<std::vector<int> >("algoParameters"))
 {
 	//now do what ever initialization is needed
 	minvz_ = iConfig.getUntrackedParameter<double>("minvz_", -15.);
@@ -91,6 +93,7 @@ QWCumuV3::QWCumuV3(const edm::ParameterSet& iConfig)
 	bPhiEta = iConfig.getUntrackedParameter<bool>("bPhiEta_", false);
 	bCentNoff = iConfig.getUntrackedParameter<bool>("bCentNoff_", false);
 	bSim_ = iConfig.getUntrackedParameter<bool>("bSim_", false);
+	bCaloMatching_ = iConfig.getUntrackedParameter<bool>("bCaloMaching", false);
 	Noffmin_ = iConfig.getUntrackedParameter<int>("Noffmin_", 0);
 	Noffmax_ = iConfig.getUntrackedParameter<int>("Noffmax_", 5000);
 	effCut_ = iConfig.getUntrackedParameter<double>("effCut_", -1.0);
@@ -243,6 +246,12 @@ QWCumuV3::QWCumuV3(const edm::ParameterSet& iConfig)
 	}
 }
 
+bool
+QWCumuV3::CaloMatch()
+{
+	if ( !bCaloMatching_ ) return true;
+	return false;
+}
 
 QWCumuV3::~QWCumuV3()
 {
@@ -294,6 +303,7 @@ QWCumuV3::getNoffCent(const edm::Event& iEvent, const edm::EventSetup& iSetup, i
 		if ( fabs( dz/dzerror ) > 3. ) continue;
 		if ( fabs( d0/derror ) > 3. ) continue;
 		if ( itTrack->ptError()/itTrack->pt() > 0.1 ) continue;
+		if ( itTrack->numberOfValidHits() < 11 ) continue;
 //		bool b_pix = itTrack->numberOfValidHits() < 7;
 //		if ( b_pix ) {
 //			if ( fabs( dz/dzerror ) > dzdzerror_ ) continue;
@@ -671,22 +681,20 @@ QWCumuV3::analyzeData(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	// vertex
 	Handle<VertexCollection> vertexCollection;
 	iEvent.getByToken(vertexToken_, vertexCollection);
-	const VertexCollection * recoVertices = vertexCollection.product();
-	//cout << __LINE__ << " vtx.size() = " << recoVertices->size() << endl;
-	if ( recoVertices->size() > nvtx_ ) return;
+	VertexCollection recoVertices = *vertexCollection;
+	if ( recoVertices.size() > nvtx_ ) return;
+	sort(recoVertices.begin(), recoVertices.end(), [](const reco::Vertex &a, const reco::Vertex &b){
+			if ( a.tracksSize() == b.tracksSize() ) return a.chi2() < b.chi2() ? true:false;
+			return a.tracksSize() > b.tracksSize() ? true:false;
+			});
 
 	int primaryvtx = 0;
-	math::XYZPoint v1( (*recoVertices)[primaryvtx].position().x(), (*recoVertices)[primaryvtx].position().y(), (*recoVertices)[primaryvtx].position().z() );
-	double vxError = (*recoVertices)[primaryvtx].xError();
-	double vyError = (*recoVertices)[primaryvtx].yError();
-	double vzError = (*recoVertices)[primaryvtx].zError();
+	math::XYZPoint v1( recoVertices[primaryvtx].position().x(), recoVertices[primaryvtx].position().y(), recoVertices[primaryvtx].position().z() );
+	double vxError = recoVertices[primaryvtx].xError();
+	double vyError = recoVertices[primaryvtx].yError();
+	double vzError = recoVertices[primaryvtx].zError();
 
-//	for ( unsigned int i = 0; i < recoVertices->size(); i++ ) {
-//		size_t daughter = (*recoVertices)[i].tracksSize();
-//		cout << "i = " << i << "\tnTracks = " << daughter <<"\t vz = " << (*recoVertices)[i].position().z() << endl;
-//		//cout << "i = " << i << "\ttrkSize = " << "\t vz = " << (*recoVertices)[i].position().z() << endl;
-//	}
-	double vz = (*recoVertices)[primaryvtx].z();
+	double vz = recoVertices[primaryvtx].z();
 	if (fabs(vz) < minvz_ || fabs(vz) > maxvz_) {
 		//cout << __LINE__ << " vz = " << vz << endl;
 		return;
@@ -733,6 +741,10 @@ QWCumuV3::analyzeData(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 		if ( fabs( dz/dzerror ) > dzdzerror_ ) continue;
 		if ( fabs( d0/derror ) > d0d0error_ ) continue;
 		if ( itTrack->ptError()/itTrack->pt() > pterrorpt_ ) continue;
+		if ( itTrack->numberOfValidHits() < 11 ) continue;
+		if ( itTrack->normalizedChi2() / itTrack->hitPattern().trackerLayersWithMeasurement() > 0.15 ) continue;
+		if ( find( algoParameters_.begin(), algoParameters_.end(), itTrack->algo() ) == algoParameters_.end() ) continue;
+		if ( !CaloMatch() ) continue;
 
 		t->RFP[t->Mult] = 1;
 		t->Charge[t->Mult] = itTrack->charge();
