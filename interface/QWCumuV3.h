@@ -79,6 +79,7 @@ class QWCumuV3 : public edm::EDAnalyzer {
 		//edm::InputTag tracks_; //used to select what tracks to read from configuration file
 		//edm::InputTag centrality_;	// centrality
 		///edm::InputTag vertexSrc_;
+		edm::EDGetTokenT<reco::PFCandidateCollection>	pfToken_;
 
 		edm::InputTag fweight_;
 		edm::InputTag facceptance_;
@@ -114,6 +115,7 @@ class QWCumuV3 : public edm::EDAnalyzer {
 		int	sGenPreset_;
 
 		double	effCut_;
+		double	reso_;
 		QWEvent * t;
 		TFile	* fEffFak;
 		TFile	* facc;

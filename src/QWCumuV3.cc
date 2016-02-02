@@ -104,6 +104,7 @@ QWCumuV3::QWCumuV3(const edm::ParameterSet& iConfig)
 	bFlipEta_ = iConfig.getUntrackedParameter<bool>("bFlipEta_", false);
 	bEP_ = iConfig.getUntrackedParameter<bool>("bEP", false);
 	EPlvl_ = iConfig.getUntrackedParameter<int>("EPlvl_", 0);
+	reso_ = iConfig.getUntrackedParameter<double>("reso", 0.2);
 
 	if ( bGen_ ) {
 		trackGenToken_ = consumes<reco::GenParticle>(trackTag_);
@@ -244,13 +245,32 @@ QWCumuV3::QWCumuV3(const edm::ParameterSet& iConfig)
 		hMult    = fs->make<TH2D>("hMult", "", nCentBins, centbins, nPtBins, ptbins);
 		hMultRes = fs->make<TH2D>("hMultRes", "hMultRes", nCentBins, centbins, hi::NumEPNames, 0, hi::NumEPNames);
 	}
+	if ( bCaloMatching_ ) {
+		pfToken_ = consumes<reco::PFCandidateCollection>(iConfig.getUntrackedParameter<edm::InputTag>("pfTag"));
+	}
 }
 
 bool
-QWCumuV3::CaloMatch()
+QWCumuV3::CaloMatch(const reco::Track & track, const edm::Event & iEvent, unsigned int idx)
 {
 	if ( !bCaloMatching_ ) return true;
-	return false;
+	edm::Handle<reco::PFCandidateCollection> pfCand;
+	iEvent.getByToken( pfToken_, pfCand );
+	double energy = 0;
+	for ( reco::PFCandidateCollection::const_iterator it = pfCand->begin();
+			it != pfCand->end();
+			++it ) {
+		if ( (it->particleId() != reco::PFCandidate::h) ||
+				(it->particleId() != reco::PFCandidate::e) ||
+				(it->particleId() != reco::PFCandidate::mu) ) continue;
+		if ( idx == pfCand->TrackRef().key() ) {
+			energy = it->ecalEnergy() + it->hcalEnergy();
+			break;
+		}
+	}
+
+	if( track.pt() < 20 || ( energy/( track.pt()*TMath::CosH(track.eta() ) ) > reso_ && (energy)/(TMath::CosH(track.eta())) > (track.pt() - 80.0) )  ) return true;
+	else return false;
 }
 
 QWCumuV3::~QWCumuV3()
@@ -744,7 +764,7 @@ QWCumuV3::analyzeData(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 		if ( itTrack->numberOfValidHits() < 11 ) continue;
 		if ( itTrack->normalizedChi2() / itTrack->hitPattern().trackerLayersWithMeasurement() > 0.15 ) continue;
 		if ( find( algoParameters_.begin(), algoParameters_.end(), itTrack->algo() ) == algoParameters_.end() ) continue;
-		if ( !CaloMatch() ) continue;
+		if ( !CaloMatch(*itTrack, iEvent, itTrack - tracks->begin()) ) continue;
 
 		t->RFP[t->Mult] = 1;
 		t->Charge[t->Mult] = itTrack->charge();
