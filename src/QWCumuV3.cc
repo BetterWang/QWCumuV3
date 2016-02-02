@@ -35,6 +35,8 @@ Implementation:
 #include "FWCore/Utilities/interface/InputTag.h"
 #include "DataFormats/TrackReco/interface/Track.h"
 #include "DataFormats/TrackReco/interface/TrackFwd.h"
+#include <DataFormats/ParticleFlowCandidate/interface/PFCandidateFwd.h>
+#include <DataFormats/ParticleFlowCandidate/interface/PFCandidate.h>
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
@@ -263,7 +265,7 @@ QWCumuV3::CaloMatch(const reco::Track & track, const edm::Event & iEvent, unsign
 		if ( (it->particleId() != reco::PFCandidate::h) ||
 				(it->particleId() != reco::PFCandidate::e) ||
 				(it->particleId() != reco::PFCandidate::mu) ) continue;
-		if ( idx == pfCand->TrackRef().key() ) {
+		if ( idx == it->trackRef().key() ) {
 			energy = it->ecalEnergy() + it->hcalEnergy();
 			break;
 		}

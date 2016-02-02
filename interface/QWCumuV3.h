@@ -181,7 +181,7 @@ class QWCumuV3 : public edm::EDAnalyzer {
 		void doneQ();
 		void Sim();
 
-		bool QWCumuV3::CaloMatch();
+		bool CaloMatch(const reco::Track&, const edm::Event&, unsigned int idx);
 };
 
 
