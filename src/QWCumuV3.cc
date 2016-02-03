@@ -66,7 +66,6 @@ QWCumuV3::QWCumuV3(const edm::ParameterSet& iConfig)
 	,	vertexToken_( consumes<reco::VertexCollection>(iConfig.getUntrackedParameter<edm::InputTag>("vertexSrc_")) )
 	,	epToken_( consumes<reco::EvtPlaneCollection>(iConfig.getUntrackedParameter<edm::InputTag>("epSrc", string("hiEvtPlane") )) )
 	,	bacc(false)
-	,	bEP_(false)
 	,	algoParameters_(iConfig.getParameter<std::vector<int> >("algoParameters"))
 {
 	//now do what ever initialization is needed
@@ -202,26 +201,26 @@ QWCumuV3::QWCumuV3(const edm::ParameterSet& iConfig)
 //	trV->Branch("RunId", &t->RunId, "RunId/I");
 //	trV->Branch("EventId", &t->EventId, "EventId/I");
 
-	for ( int n = 1; n < 7; n++ ) {
+	for ( int n = 2; n < 7; n++ ) {
 		for ( int np = 0; np < 4; np++ ) {
 			trV->Branch(Form("rQ%i%i", n, 2+2*np), &rQ[n][np], Form("rQ%i%i/D", n, 2+2*np));
-			trV->Branch(Form("iQ%i%i", n, 2+2*np), &iQ[n][np], Form("iQ%i%i/D", n, 2+2*np));
+//			trV->Branch(Form("iQ%i%i", n, 2+2*np), &iQ[n][np], Form("iQ%i%i/D", n, 2+2*np));
 			trV->Branch(Form("wQ%i%i", n, 2+2*np), &wQ[n][np], Form("wQ%i%i/D", n, 2+2*np));
 
 			trV->Branch(Form("rX%i%i", n, 2+2*np), &rX[n][np], Form("rX%i%i/D", n, 2+2*np));
-			trV->Branch(Form("iX%i%i", n, 2+2*np), &iX[n][np], Form("iX%i%i/D", n, 2+2*np));
+//			trV->Branch(Form("iX%i%i", n, 2+2*np), &iX[n][np], Form("iX%i%i/D", n, 2+2*np));
 			trV->Branch(Form("wX%i%i", n, 2+2*np), &wX[n][np], Form("wX%i%i/D", n, 2+2*np));
 
 			trV->Branch(Form("rQ%i%ic", n, 2+2*np), rQc[n][np], Form("rQ%i%ic[2]/D", n, 2+2*np));
-			trV->Branch(Form("iQ%i%ic", n, 2+2*np), iQc[n][np], Form("iQ%i%ic[2]/D", n, 2+2*np));
+//			trV->Branch(Form("iQ%i%ic", n, 2+2*np), iQc[n][np], Form("iQ%i%ic[2]/D", n, 2+2*np));
 			trV->Branch(Form("wQ%i%ic", n, 2+2*np), wQc[n][np], Form("wQ%i%ic[2]/D", n, 2+2*np));
 
 			trV->Branch(Form("rQ%i%ip", n, 2+2*np), rQp[n][np], Form("rQ%i%ip[24]/D", n, 2+2*np));
-			trV->Branch(Form("iQ%i%ip", n, 2+2*np), iQp[n][np], Form("iQ%i%ip[24]/D", n, 2+2*np));
+//			trV->Branch(Form("iQ%i%ip", n, 2+2*np), iQp[n][np], Form("iQ%i%ip[24]/D", n, 2+2*np));
 			trV->Branch(Form("wQ%i%ip", n, 2+2*np), wQp[n][np], Form("wQ%i%ip[24]/D", n, 2+2*np));
 
 			trV->Branch(Form("rQ%i%ieta", n, 2+2*np), rQeta[n][np], Form("rQ%i%ieta[24]/D", n, 2+2*np));
-			trV->Branch(Form("iQ%i%ieta", n, 2+2*np), iQeta[n][np], Form("iQ%i%ieta[24]/D", n, 2+2*np));
+//			trV->Branch(Form("iQ%i%ieta", n, 2+2*np), iQeta[n][np], Form("iQ%i%ieta[24]/D", n, 2+2*np));
 			trV->Branch(Form("wQ%i%ieta", n, 2+2*np), wQeta[n][np], Form("wQ%i%ieta[24]/D", n, 2+2*np));
 		}
 	}
