@@ -294,10 +294,14 @@ QWCumuV3::getNoffCent(const edm::Event& iEvent, const edm::EventSetup& iSetup, i
 	using namespace edm;
 	using namespace reco;
 //	int Noff = 0;
-
 	Handle<VertexCollection> vertexCollection;
 	iEvent.getByToken(vertexToken_, vertexCollection);
-	const VertexCollection * recoVertices = vertexCollection.product();
+	VertexCollection recoVertices = *vertexCollection;
+	if ( recoVertices.size() > nvtx_ ) return;
+	sort(recoVertices.begin(), recoVertices.end(), [](const reco::Vertex &a, const reco::Vertex &b){
+			if ( a.tracksSize() == b.tracksSize() ) return a.chi2() < b.chi2() ? true:false;
+			return a.tracksSize() > b.tracksSize() ? true:false;
+			});
 
 	int primaryvtx = 0;
 	math::XYZPoint v1( (*recoVertices)[primaryvtx].position().x(), (*recoVertices)[primaryvtx].position().y(), (*recoVertices)[primaryvtx].position().z() );
@@ -325,17 +329,6 @@ QWCumuV3::getNoffCent(const edm::Event& iEvent, const edm::EventSetup& iSetup, i
 		if ( fabs( d0/derror ) > 3. ) continue;
 		if ( itTrack->ptError()/itTrack->pt() > 0.1 ) continue;
 		if ( itTrack->numberOfValidHits() < 11 ) continue;
-//		bool b_pix = itTrack->numberOfValidHits() < 7;
-//		if ( b_pix ) {
-//			if ( fabs( dz/dzerror ) > dzdzerror_ ) continue;
-//			if ( itTrack->normalizedChi2() > chi2_ ) continue;
-//		} else {
-//			// full track
-//			if ( fabs( dz/dzerror ) > 3. ) continue;
-//			if ( fabs( d0/derror ) > 3. ) continue;
-//			if ( itTrack->ptError()/itTrack->pt() > pterrorpt_ ) continue;
-//			if ( itTrack->numberOfValidHits() < 12 ) continue;
-//		}
 
 		Noff++;
 	}
@@ -762,10 +755,7 @@ QWCumuV3::analyzeData(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 		if ( fabs( dz/dzerror ) > dzdzerror_ ) continue;
 		if ( fabs( d0/derror ) > d0d0error_ ) continue;
 		if ( itTrack->ptError()/itTrack->pt() > pterrorpt_ ) continue;
-		if ( itTrack->numberOfValidHits() < 11 ) continue;
-		if ( itTrack->normalizedChi2() / itTrack->hitPattern().trackerLayersWithMeasurement() > 0.15 ) continue;
-		if ( find( algoParameters_.begin(), algoParameters_.end(), itTrack->algo() ) == algoParameters_.end() ) continue;
-		if ( !CaloMatch(*itTrack, iEvent, itTrack - tracks->begin()) ) continue;
+		if ( itTrack->normalizedChi2() / itTrack->hitPattern().trackerLayersWithMeasurement() > chi2_ ) continue;
 
 		t->RFP[t->Mult] = 1;
 		t->Charge[t->Mult] = itTrack->charge();
