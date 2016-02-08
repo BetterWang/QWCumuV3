@@ -744,7 +744,7 @@ QWCumuV3::analyzeData(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	// track
 	Handle<TrackCollection> tracks;
 	iEvent.getByToken(trackToken_,tracks);
-	t->Cent = bin;
+	t->Cent = t->Noff/2;
 	t->vz = vz;
 
 	for(TrackCollection::const_iterator itTrack = tracks->begin();
