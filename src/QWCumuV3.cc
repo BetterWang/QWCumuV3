@@ -297,17 +297,16 @@ QWCumuV3::getNoffCent(const edm::Event& iEvent, const edm::EventSetup& iSetup, i
 	Handle<VertexCollection> vertexCollection;
 	iEvent.getByToken(vertexToken_, vertexCollection);
 	VertexCollection recoVertices = *vertexCollection;
-	if ( recoVertices.size() > nvtx_ ) return;
 	sort(recoVertices.begin(), recoVertices.end(), [](const reco::Vertex &a, const reco::Vertex &b){
 			if ( a.tracksSize() == b.tracksSize() ) return a.chi2() < b.chi2() ? true:false;
 			return a.tracksSize() > b.tracksSize() ? true:false;
 			});
 
 	int primaryvtx = 0;
-	math::XYZPoint v1( (*recoVertices)[primaryvtx].position().x(), (*recoVertices)[primaryvtx].position().y(), (*recoVertices)[primaryvtx].position().z() );
-	double vxError = (*recoVertices)[primaryvtx].xError();
-	double vyError = (*recoVertices)[primaryvtx].yError();
-	double vzError = (*recoVertices)[primaryvtx].zError();
+	math::XYZPoint v1( recoVertices[primaryvtx].position().x(), recoVertices[primaryvtx].position().y(), recoVertices[primaryvtx].position().z() );
+	double vxError = recoVertices[primaryvtx].xError();
+	double vyError = recoVertices[primaryvtx].yError();
+	double vzError = recoVertices[primaryvtx].zError();
 
 
 	Handle<TrackCollection> tracks;
@@ -710,7 +709,6 @@ QWCumuV3::analyzeData(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
 	double vz = recoVertices[primaryvtx].z();
 	if (fabs(vz) < minvz_ || fabs(vz) > maxvz_) {
-		//cout << __LINE__ << " vz = " << vz << endl;
 		return;
 	}
 
