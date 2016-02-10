@@ -261,8 +261,8 @@ QWCumuV3::CaloMatch(const reco::Track & track, const edm::Event & iEvent, unsign
 	for ( reco::PFCandidateCollection::const_iterator it = pfCand->begin();
 			it != pfCand->end();
 			++it ) {
-		if ( (it->particleId() != reco::PFCandidate::h) ||
-				(it->particleId() != reco::PFCandidate::e) ||
+		if ( (it->particleId() != reco::PFCandidate::h) and
+				(it->particleId() != reco::PFCandidate::e) and
 				(it->particleId() != reco::PFCandidate::mu) ) continue;
 		if ( idx == it->trackRef().key() ) {
 			energy = it->ecalEnergy() + it->hcalEnergy();
