@@ -606,15 +606,15 @@ QWCumuV3::analyzeEP(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	for ( int iep = 0; iep < hi::NumEPNames; iep++ ) {
 		std::complex<double> QB = QA[hi::RCMate1[iep]];
 		std::complex<double> QC = QA[hi::RCMate2[iep]];
-		hEPresAB->Fill(t->Cent, iep, (QA[iep]*std::conj(QB)).real() / std::abs(QA[iep]) / std::abs(QB));
-		hEPresAC->Fill(t->Cent, iep, (QA[iep]*std::conj(QC)).real() / std::abs(QA[iep]) / std::abs(QC));
-		hEPresBC->Fill(t->Cent, iep, (QB*std::conj(QC)).real() / std::abs(QB) / std::abs(QC));
+		hEPresAB->Fill(t->Noff/2, iep, (QA[iep]*std::conj(QB)).real() / std::abs(QA[iep]) / std::abs(QB));
+		hEPresAC->Fill(t->Noff/2, iep, (QA[iep]*std::conj(QC)).real() / std::abs(QA[iep]) / std::abs(QC));
+		hEPresBC->Fill(t->Noff/2, iep, (QB*std::conj(QC)).real() / std::abs(QB) / std::abs(QC));
 
-		hSPresAB->Fill(t->Cent, iep, (QA[iep]*std::conj(QB)).real() );
-		hSPresAC->Fill(t->Cent, iep, (QA[iep]*std::conj(QC)).real() );
-		hSPresBC->Fill(t->Cent, iep, (QB*std::conj(QC)).real() );
+		hSPresAB->Fill(t->Noff/2, iep, (QA[iep]*std::conj(QB)).real() );
+		hSPresAC->Fill(t->Noff/2, iep, (QA[iep]*std::conj(QC)).real() );
+		hSPresBC->Fill(t->Noff/2, iep, (QB*std::conj(QC)).real() );
 
-		hMultRes->Fill(t->Cent, iep);
+		hMultRes->Fill(t->Noff/2, iep);
 	}
 }
 
@@ -744,7 +744,7 @@ QWCumuV3::analyzeData(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	// track
 	Handle<TrackCollection> tracks;
 	iEvent.getByToken(trackToken_,tracks);
-	t->Cent = t->Noff/2;
+	t->Cent = bin;
 	t->vz = vz;
 
 	for(TrackCollection::const_iterator itTrack = tracks->begin();
@@ -815,9 +815,9 @@ QWCumuV3::analyzeData(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
 		while ( t->Pt[t->Mult] > ptbins[ipt+1] ) ipt++;
 		if ( bacc ) {
-			wacc = 1./hacc[t->Cent][ipt][t->Charge[t->Mult]>0]->GetBinContent(hacc[t->Cent][ipt][t->Charge[t->Mult]>0]->FindBin(phi, t->Eta[t->Mult]));
+			wacc = 1./hacc[bin][ipt][t->Charge[t->Mult]>0]->GetBinContent(hacc[bin][ipt][t->Charge[t->Mult]>0]->FindBin(phi, t->Eta[t->Mult]));
 		}
-		if ( bPhiEta ) hPhiEta[t->Cent][ipt][t->Charge[t->Mult]>0]->Fill(phi, t->Eta[t->Mult], wacc);
+		if ( bPhiEta ) hPhiEta[bin][ipt][t->Charge[t->Mult]>0]->Fill(phi, t->Eta[t->Mult], wacc);
 
 		weight *= wacc;
 
@@ -831,7 +831,7 @@ QWCumuV3::analyzeData(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 		hdNdPtdEtaPt[bin]->Fill(t->Eta[t->Mult], t->Pt[t->Mult], t->Pt[t->Mult]);
 
 		t->Phi[t->Mult] = phi;
-		hPt[t->Cent]->Fill(t->Pt[t->Mult]);
+		hPt[bin]->Fill(t->Pt[t->Mult]);
 
 		t->Mult++;
 	}
