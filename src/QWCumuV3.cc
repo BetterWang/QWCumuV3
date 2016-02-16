@@ -764,7 +764,7 @@ QWCumuV3::analyzeData(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 		if ( itTrack->ptError()/itTrack->pt() > pterrorpt_ ) continue;
 		if ( itTrack->numberOfValidHits() < 11 ) continue;
 		if ( itTrack->normalizedChi2() / itTrack->hitPattern().trackerLayersWithMeasurement() > 0.15 ) continue;
-		if ( find( algoParameters_.begin(), algoParameters_.end(), itTrack->algo() ) == algoParameters_.end() ) continue;
+		if ( find( algoParameters_.begin(), algoParameters_.end(), itTrack->originalAlgo() ) == algoParameters_.end() ) continue;
 		if ( !CaloMatch(*itTrack, iEvent, itTrack - tracks->begin()) ) continue;
 
 		t->RFP[t->Mult] = 1;
