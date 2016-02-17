@@ -695,6 +695,7 @@ QWCumuV3::analyzeGen(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	void
 QWCumuV3::analyzeData(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
+	//cout << "==> do event" << endl;
 	using namespace edm;
 	using namespace reco;
 
@@ -735,7 +736,10 @@ QWCumuV3::analyzeData(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 		edm::Handle<int> ch;
 		iEvent.getByToken(centralityToken_,ch);
 		bin = *(ch.product());
-		if ( bin < 0 or bin >= 200 ) return;
+		if ( bin < 0 or bin >= 200 ) {
+			//cout << __LINE__ << " bin = " << bin << endl;
+			return;
+		}
 		while ( centbins[cbin+1] < bin*.5+0.1 ) cbin++;
 		t->Noff = bin;
 	}
