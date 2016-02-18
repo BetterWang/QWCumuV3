@@ -114,7 +114,7 @@ class QWCumuV3 : public edm::EDAnalyzer {
 		unsigned int	nvtx_;
 		int	sGenPreset_;
 
-		double	effCut_;
+//		double	effCut_;
 		double	reso_;
 		QWEvent * t;
 		TFile	* fEffFak;
@@ -126,8 +126,8 @@ class QWCumuV3 : public edm::EDAnalyzer {
 		TH2D	* hdNdPtdEta[nCentBins];
 		TH2D	* hdNdPtdEtaPt[nCentBins];
 
-		TH2D * hEff_cbin[nCentBins];
-		TH2D * hFak_cbin[nCentBins];
+		TH2D * hEff_cbin[200];
+		TH2D * hFak_cbin[200];
 
 		TH2D * hacc[nCentBins][nPtBins][2];
 

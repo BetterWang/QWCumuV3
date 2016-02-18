@@ -97,7 +97,7 @@ QWCumuV3::QWCumuV3(const edm::ParameterSet& iConfig)
 	bCaloMatching_ = iConfig.getUntrackedParameter<bool>("bCaloMaching", false);
 	Noffmin_ = iConfig.getUntrackedParameter<int>("Noffmin_", 0);
 	Noffmax_ = iConfig.getUntrackedParameter<int>("Noffmax_", 5000);
-	effCut_ = iConfig.getUntrackedParameter<double>("effCut_", -1.0);
+//	effCut_ = iConfig.getUntrackedParameter<double>("effCut_", -1.0);
 	cmode_ = iConfig.getUntrackedParameter<int>("cmode_", 1);
 	bGen_ = iConfig.getUntrackedParameter<bool>("bGen_", false);
 	sGenPreset_ = iConfig.getUntrackedParameter<int>("sGenPreset", 0);
@@ -129,13 +129,27 @@ QWCumuV3::QWCumuV3(const edm::ParameterSet& iConfig)
 			if ( bFak ) cout << "!!! Apply Fak correction" << endl;
 			if ( bEff ) cout << "!!! Apply Eff correction" << endl;
 			for ( int i = 0; i < 20; i++ ) {
-				if ( streff == string("TrackCorrections_HIJING_538_OFFICIAL_Mar24.root") || streff == string("trkEff_pp_all_42X_origin.root") ) {
-					hEff_cbin[i] = (TH2D*) fEffFak->Get("rTotalEff3D");
-					hFak_cbin[i] = (TH2D*) fEffFak->Get(Form("rFak_cbin%i", i));
-				}
-				if ( streff == string("trkEffNew2012_HI_hiGoodTightMerged_xsec_smoothv5true.root") ) {
-					hEff_cbin[i] = (TH2D*) fEffFak->Get("Tot_4");
-					hFak_cbin[i] = (TH2D*) fEffFak->Get("Fak_4");
+				if ( streff == string("PbPb_MB_TT_5TeV_v2.root") or streff == string("PbPb_dijet_TT_5TeV_v2.root") ) {
+					TH2D * h = (TH2D*) fEffFak->Get("rTotalEff3D_0_5");
+					for ( int c = 0; c < 10; c++ ) {
+						hEff_cbin[c] = h;
+					}
+					h = (TH2D*) fEffFak->Get("rTotalEff3D_5_10");
+					for ( int c = 10; c < 20; c++ ) {
+						hEff_cbin[c] = h;
+					}
+					h = (TH2D*) fEffFak->Get("rTotalEff3D_10_30");
+					for ( int c = 20; c < 60; c++ ) {
+						hEff_cbin[c] = h;
+					}
+					h = (TH2D*) fEffFak->Get("rTotalEff3D_30_50");
+					for ( int c = 60; c < 100; c++ ) {
+						hEff_cbin[c] = h;
+					}
+					h = (TH2D*) fEffFak->Get("rTotalEff3D_50_100");
+					for ( int c = 100; c < 200; c++ ) {
+						hEff_cbin[c] = h;
+					}
 				}
 			}
 			cout << "!!! eff histo done" << endl;
@@ -163,8 +177,8 @@ QWCumuV3::QWCumuV3(const edm::ParameterSet& iConfig)
 	}
 
 	if ( bEff == true ) {
+		cout << "-> with weights" << endl;
 		for ( int n = 1; n < 7; n++ ) {
-			cout << "-> with weights" << endl;
 			q[n] = correlations::QVector(0, 0, true);
 		}
 	}
@@ -787,17 +801,17 @@ QWCumuV3::analyzeData(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 		t->Eta[t->Mult] = itTrack->eta();
 		if (bFlipEta_) t->Eta[t->Mult] = - t->Eta[t->Mult];
 
-		if (effCut_>0.)  {
-			double eff = hEff_cbin[bin]->GetBinContent( hEff_cbin[bin]->FindBin(t->Eta[t->Mult], t->Pt[t->Mult] ) ) ;
-			if ( eff > effCut_ ) {
-				if ( gRandom->Rndm() < (eff-effCut_)/eff ) {
-					t->RFP[t->Mult] = 0;
-				}
-			}
-		}
+//		if (effCut_>0.)  {
+//			double eff = hEff_cbin[t->Noff]->GetBinContent( hEff_cbin[t->Noff]->FindBin(t->Eta[t->Mult], t->Pt[t->Mult] ) ) ;
+//			if ( eff > effCut_ ) {
+//				if ( gRandom->Rndm() < (eff-effCut_)/eff ) {
+//					t->RFP[t->Mult] = 0;
+//				}
+//			}
+//		}
 
 		if ( bEff ) {
-			t->rEff[t->Mult] = hEff_cbin[bin]->GetBinContent( hEff_cbin[bin]->FindBin(t->Eta[t->Mult], t->Pt[t->Mult] ) );
+			t->rEff[t->Mult] = hEff_cbin[t->Noff]->GetBinContent( hEff_cbin[t->Noff]->FindBin(t->Eta[t->Mult], t->Pt[t->Mult] ) );
 		} else {
 			t->rEff[t->Mult] = 1.;
 		}
