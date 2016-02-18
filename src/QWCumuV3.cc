@@ -127,32 +127,34 @@ QWCumuV3::QWCumuV3(const edm::ParameterSet& iConfig)
 		} else {
 			cout << "!!! Using particle weight " << streff << endl;
 			if ( bFak ) cout << "!!! Apply Fak correction" << endl;
-			if ( bEff ) cout << "!!! Apply Eff correction" << endl;
-			for ( int i = 0; i < 20; i++ ) {
-				if ( streff == string("PbPb_MB_TT_5TeV_v2.root") or streff == string("PbPb_dijet_TT_5TeV_v2.root") ) {
-					TH2D * h = (TH2D*) fEffFak->Get("rTotalEff3D_0_5");
-					for ( int c = 0; c < 10; c++ ) {
-						hEff_cbin[c] = h;
-					}
-					h = (TH2D*) fEffFak->Get("rTotalEff3D_5_10");
-					for ( int c = 10; c < 20; c++ ) {
-						hEff_cbin[c] = h;
-					}
-					h = (TH2D*) fEffFak->Get("rTotalEff3D_10_30");
-					for ( int c = 20; c < 60; c++ ) {
-						hEff_cbin[c] = h;
-					}
-					h = (TH2D*) fEffFak->Get("rTotalEff3D_30_50");
-					for ( int c = 60; c < 100; c++ ) {
-						hEff_cbin[c] = h;
-					}
-					h = (TH2D*) fEffFak->Get("rTotalEff3D_50_100");
-					for ( int c = 100; c < 200; c++ ) {
-						hEff_cbin[c] = h;
+			if ( bEff ) {
+				cout << "!!! Apply Eff correction" << endl;
+				for ( int i = 0; i < 20; i++ ) {
+					if ( streff == string("PbPb_MB_TT_5TeV_v2.root") or streff == string("PbPb_dijet_TT_5TeV_v2.root") ) {
+						TH2D * h = (TH2D*) fEffFak->Get("rTotalEff3D_0_5");
+						for ( int c = 0; c < 10; c++ ) {
+							hEff_cbin[c] = h;
+						}
+						h = (TH2D*) fEffFak->Get("rTotalEff3D_5_10");
+						for ( int c = 10; c < 20; c++ ) {
+							hEff_cbin[c] = h;
+						}
+						h = (TH2D*) fEffFak->Get("rTotalEff3D_10_30");
+						for ( int c = 20; c < 60; c++ ) {
+							hEff_cbin[c] = h;
+						}
+						h = (TH2D*) fEffFak->Get("rTotalEff3D_30_50");
+						for ( int c = 60; c < 100; c++ ) {
+							hEff_cbin[c] = h;
+						}
+						h = (TH2D*) fEffFak->Get("rTotalEff3D_50_100");
+						for ( int c = 100; c < 200; c++ ) {
+							hEff_cbin[c] = h;
+						}
 					}
 				}
+				cout << "!!! eff histo done" << endl;
 			}
-			cout << "!!! eff histo done" << endl;
 		}
 	}
 	string stracc = facceptance_.label();
