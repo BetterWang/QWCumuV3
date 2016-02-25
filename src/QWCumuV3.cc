@@ -456,6 +456,7 @@ QWCumuV3::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 				wt = 0;
 				for ( int i = 0; i < t->Mult; i++ ) {
 					if ( t->Eta[i] < poimineta_ or t->Eta[i] > poimaxeta_ ) continue;
+					if ( t->Pt[i] < poiptmin_ or t->Pt[i] > poiptmax_ ) continue;
 					if ( t->Pt[i] < ptbins[ipt] || t->Pt[i] > ptbins[ipt+1] ) continue;
 					correlations::QVector tq = q[n];
 					if ( t->RFP[i] ) tq.unfill(t->Phi[i], t->weight[i]);
