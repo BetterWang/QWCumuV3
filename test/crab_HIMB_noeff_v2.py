@@ -34,29 +34,17 @@ config.General.requestName = 'HIMB1_cal_noeff_v6'
 config.Data.inputDataset = '/HIMinimumBias1/HIRun2015-PromptReco-v1/AOD'
 config.Data.inputDBS = 'global'
 config.Data.unitsPerJob = 20
-#try:
-#        crabCommand('submit', config = config)
-#except HTTPException as hte:
-#        print "Failed submitting task: %s" % (hte.headers)
-#except ClientException as cle:
-#        print "Failed submitting task: %s" % (cle)
-#
+try:
+        crabCommand('submit', config = config)
+except HTTPException as hte:
+        print "Failed submitting task: %s" % (hte.headers)
+except ClientException as cle:
+        print "Failed submitting task: %s" % (cle)
+
 
 # MB2
 config.General.requestName = 'HIMB2_cal_noeff_v6'
 config.Data.inputDataset = '/HIMinimumBias2/HIRun2015-PromptReco-v1/AOD'
-config.Data.inputDBS = 'global'
-#try:
-#        crabCommand('submit', config = config)
-#except HTTPException as hte:
-#        print "Failed submitting task: %s" % (hte.headers)
-#except ClientException as cle:
-#        print "Failed submitting task: %s" % (cle)
-#
-
-# MB4
-config.General.requestName = 'HIMB4_cal_noeff_v6'
-config.Data.inputDataset = '/HIMinimumBias4/HIRun2015-PromptReco-v1/AOD'
 config.Data.inputDBS = 'global'
 try:
         crabCommand('submit', config = config)
@@ -66,3 +54,15 @@ except ClientException as cle:
         print "Failed submitting task: %s" % (cle)
 
 
+# MB4
+config.General.requestName = 'HIMB4_cal_noeff_v6'
+config.Data.inputDataset = '/HIMinimumBias4/HIRun2015-PromptReco-v1/AOD'
+config.Data.inputDBS = 'global'
+#try:
+#        crabCommand('submit', config = config)
+#except HTTPException as hte:
+#        print "Failed submitting task: %s" % (hte.headers)
+#except ClientException as cle:
+#        print "Failed submitting task: %s" % (cle)
+#
+#
