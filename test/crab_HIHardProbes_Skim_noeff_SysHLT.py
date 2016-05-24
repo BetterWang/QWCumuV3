@@ -5,7 +5,7 @@ from httplib import HTTPException
 
 config = config()
 
-config.General.requestName = 'HIHardProbes_Skim_cumu_noeff_sysHLT_v11'
+config.General.requestName = 'HIHardProbes_Skim_cumu_noeff_sysHLT_v12'
 config.General.workArea = 'CrabArea'
 config.General.transferOutputs = True
 config.General.transferLogs = True

@@ -286,7 +286,7 @@ QWCumuV3::CaloMatch(const reco::Track & track, const edm::Event & iEvent, unsign
 		}
 	}
 
-	if( track.pt() < 20 || ( energy/( track.pt()*TMath::CosH(track.eta() ) ) > reso_ && (energy)/(TMath::CosH(track.eta())) > (track.pt() - 80.0) )  ) return true;
+	if( track.pt() < 20 || ( energy/( track.pt()*TMath::CosH(track.eta() ) ) > reso_ )  ) return true;
 	else return false;
 }
 

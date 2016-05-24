@@ -45,6 +45,7 @@ import HLTrigger.HLTfilters.hltHighLevel_cfi
 
 process.hltHP10_1420 = HLTrigger.HLTfilters.hltHighLevel_cfi.hltHighLevel.clone()
 process.hltHP10_1420.HLTPaths = [
+	"HLT_HIFullTrack12_L1Centrality010_v*",
 	"HLT_HIFullTrack12_L1MinimumBiasHF*_AND_v*",
 ]
 process.hltHP10_1420.andOr = cms.bool(True)
@@ -52,6 +53,7 @@ process.hltHP10_1420.throw = cms.bool(False)
 
 process.hltHP10_2026 = process.hltHP10_1420.clone()
 process.hltHP10_2026.HLTPaths = [
+	"HLT_HIFullTrack18_L1Centrality010_v*",
 	"HLT_HIFullTrack18_L1MinimumBiasHF*_AND_v*",
 ]
 
@@ -123,6 +125,8 @@ process.cumulant1420 = cms.EDAnalyzer('QWCumuV3'
 	, poiptmin_ = cms.untracked.double(14.0)
 	, poiptmax_ = cms.untracked.double(20.0)
 	, pterrorpt_ = cms.untracked.double(0.1)
+	, dzdzerror_ = cms.untracked.double(5.0)
+	, d0d0error_ = cms.untracked.double(5.0)
 	, Noffmin_ = cms.untracked.int32(0)
 	, Noffmax_ = cms.untracked.int32(5000)
 #	, fweight_ = cms.untracked.InputTag('PbPb_dijet_TT_5TeV_v2.root')
@@ -132,7 +136,7 @@ process.cumulant1420 = cms.EDAnalyzer('QWCumuV3'
 	, bEP = cms.untracked.bool(False)
 	, EPlvl_ = cms.untracked.int32(0)
 	, bCaloMaching = cms.untracked.bool(True)
-	, reso = cms.untracked.double(0.2)
+	, reso = cms.untracked.double(0.5)
         , algoParameters = cms.vint32(4,5,6,7)
 	, pfTag = cms.untracked.InputTag('particleFlowTmp')
 )
@@ -201,20 +205,21 @@ process.centralityFilter100.selectedBins = cms.vint32(
         180, 181, 182, 183, 184, 185, 186, 187, 188, 189,
         190, 191, 192, 193, 194, 195, 196, 197, 198, 199)
 
-process.hardprobe10_1420 = cms.Path(process.eventSelection*process.hltHP10_1420*process.centralityBin*process.centralityFilter10*process.cumulant1420)
-process.hardprobe10_2026 = cms.Path(process.eventSelection*process.hltHP10_2026*process.centralityBin*process.centralityFilter10*process.cumulant2026)
-process.hardprobe10_2635 = cms.Path(process.eventSelection*process.hltHP10_2635*process.centralityBin*process.centralityFilter10*process.cumulant2635)
-process.hardprobe10_35   = cms.Path(process.eventSelection*process.hltHP10_35  *process.centralityBin*process.centralityFilter10*process.cumulant35)
+process.hardprobe10_1420 = cms.Path(process.hltHP10_1420*process.eventSelection*process.centralityBin*process.centralityFilter10*process.cumulant1420)
+process.hardprobe10_2026 = cms.Path(process.hltHP10_2026*process.eventSelection*process.centralityBin*process.centralityFilter10*process.cumulant2026)
+process.hardprobe10_2635 = cms.Path(process.hltHP10_2635*process.eventSelection*process.centralityBin*process.centralityFilter10*process.cumulant2635)
+process.hardprobe10_35   = cms.Path(process.hltHP10_35  *process.eventSelection*process.centralityBin*process.centralityFilter10*process.cumulant35)
 
-process.hardprobe30_1420 = cms.Path(process.eventSelection*process.hltHP30_1420*process.centralityBin*process.centralityFilter30*process.cumulant1420)
-process.hardprobe30_2026 = cms.Path(process.eventSelection*process.hltHP30_2026*process.centralityBin*process.centralityFilter30*process.cumulant2026)
-process.hardprobe30_2635 = cms.Path(process.eventSelection*process.hltHP30_2635*process.centralityBin*process.centralityFilter30*process.cumulant2635)
-process.hardprobe30_35   = cms.Path(process.eventSelection*process.hltHP30_35  *process.centralityBin*process.centralityFilter30*process.cumulant35)
+process.hardprobe30_1420 = cms.Path(process.hltHP30_1420*process.eventSelection*process.centralityBin*process.centralityFilter30*process.cumulant1420)
+process.hardprobe30_2026 = cms.Path(process.hltHP30_2026*process.eventSelection*process.centralityBin*process.centralityFilter30*process.cumulant2026)
+process.hardprobe30_2635 = cms.Path(process.hltHP30_2635*process.eventSelection*process.centralityBin*process.centralityFilter30*process.cumulant2635)
+process.hardprobe30_35   = cms.Path(process.hltHP30_35  *process.eventSelection*process.centralityBin*process.centralityFilter30*process.cumulant35)
 
-process.hardprobe100_1420 = cms.Path(process.eventSelection*process.hltHP100_1420*process.centralityBin*process.centralityFilter100*process.cumulant1420)
-process.hardprobe100_2026 = cms.Path(process.eventSelection*process.hltHP100_2026*process.centralityBin*process.centralityFilter100*process.cumulant2026)
-process.hardprobe100_2635 = cms.Path(process.eventSelection*process.hltHP100_2635*process.centralityBin*process.centralityFilter100*process.cumulant2635)
-process.hardprobe100_35   = cms.Path(process.eventSelection*process.hltHP100_35  *process.centralityBin*process.centralityFilter100*process.cumulant35)
+process.hardprobe100_1420 = cms.Path(process.hltHP100_1420*process.eventSelection*process.centralityBin*process.centralityFilter100*process.cumulant1420)
+process.hardprobe100_2026 = cms.Path(process.hltHP100_2026*process.eventSelection*process.centralityBin*process.centralityFilter100*process.cumulant2026)
+process.hardprobe100_2635 = cms.Path(process.hltHP100_2635*process.eventSelection*process.centralityBin*process.centralityFilter100*process.cumulant2635)
+process.hardprobe100_35   = cms.Path(process.hltHP100_35  *process.eventSelection*process.centralityBin*process.centralityFilter100*process.cumulant35)
+
 
 process.schedule = cms.Schedule(
 	process.hardprobe10_1420,
