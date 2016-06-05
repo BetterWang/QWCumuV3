@@ -27,6 +27,6 @@ const Int_t nEtaBins = sizeof(etabins)/sizeof(double)-1;
 //}; // 39 nbins=38
 
 
-const Int_t CentNoffCut[] = {100000, 350, 320, 300, 260, 240, 220, 185, 150, 120, 100, 80, 60, 50, 40, 30, 20, 10, 0};
+const Int_t CentNoffCut[] = {100000, 200, 190, 180, 170, 160, 150, 140, 130, 120, 110, 100, 90, 80, 70, 60, 50, 40, 30, 20, 10, 0};
 //const Int_t CentNoffCut[] = {100000,         300, 260,      220, 185, 150, 120, 110, 90, 35, 0};
 const Int_t nCentNoff = sizeof(CentNoffCut)/sizeof(Int_t);
