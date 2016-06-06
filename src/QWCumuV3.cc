@@ -783,10 +783,10 @@ QWCumuV3::analyzeData(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 		if ( fabs( dz/dzerror ) > dzdzerror_ ) continue;
 		if ( fabs( d0/derror ) > d0d0error_ ) continue;
 		if ( itTrack->ptError()/itTrack->pt() > pterrorpt_ ) continue;
-		if ( itTrack->numberOfValidHits() < 11 ) continue;
-		if ( itTrack->normalizedChi2() / itTrack->hitPattern().trackerLayersWithMeasurement() > 0.15 ) continue;
-		if ( find( algoParameters_.begin(), algoParameters_.end(), itTrack->originalAlgo() ) == algoParameters_.end() ) continue;
-		if ( !CaloMatch(*itTrack, iEvent, itTrack - tracks->begin()) ) continue;
+//		if ( itTrack->numberOfValidHits() < 11 ) continue;
+//		if ( itTrack->normalizedChi2() / itTrack->hitPattern().trackerLayersWithMeasurement() > 0.15 ) continue;
+//		if ( find( algoParameters_.begin(), algoParameters_.end(), itTrack->originalAlgo() ) == algoParameters_.end() ) continue;
+//		if ( !CaloMatch(*itTrack, iEvent, itTrack - tracks->begin()) ) continue;
 
 		t->RFP[t->Mult] = 1;
 		t->Charge[t->Mult] = itTrack->charge();
@@ -804,14 +804,6 @@ QWCumuV3::analyzeData(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 		t->Eta[t->Mult] = itTrack->eta();
 		if (bFlipEta_) t->Eta[t->Mult] = - t->Eta[t->Mult];
 
-//		if (effCut_>0.)  {
-//			double eff = hEff_cbin[t->Noff]->GetBinContent( hEff_cbin[t->Noff]->FindBin(t->Eta[t->Mult], t->Pt[t->Mult] ) ) ;
-//			if ( eff > effCut_ ) {
-//				if ( gRandom->Rndm() < (eff-effCut_)/eff ) {
-//					t->RFP[t->Mult] = 0;
-//				}
-//			}
-//		}
 
 		if ( bEff ) {
 			t->rEff[t->Mult] = hEff_cbin[t->Noff]->GetBinContent( hEff_cbin[t->Noff]->FindBin(t->Eta[t->Mult], t->Pt[t->Mult] ) );
