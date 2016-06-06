@@ -120,16 +120,16 @@ class QWCumuV3 : public edm::EDAnalyzer {
 		TFile	* fEffFak;
 		TFile	* facc;
 	/////////////////////////////////////////////
-		TH1D * hPt[nCentBins];
-		TH2D * hPhiEta[nCentBins][nPtBins][2];
+		TH1D * hPt[nCentNoff];
+		TH2D * hPhiEta[nCentNoff][nPtBins][2];
 
-		TH2D	* hdNdPtdEta[nCentBins];
-		TH2D	* hdNdPtdEtaPt[nCentBins];
+		TH2D	* hdNdPtdEta[nCentNoff];
+		TH2D	* hdNdPtdEtaPt[nCentNoff];
 
 		TH2D * hEff_cbin[200];
 		TH2D * hFak_cbin[200];
 
-		TH2D * hacc[nCentBins][nPtBins][2];
+		TH2D * hacc[nCentNoff][nPtBins][2];
 
 		TH2D * hEP[nPtBins][7];
 		TH2D * hSP[nPtBins][7];

@@ -175,7 +175,7 @@ QWCumuV3::QWCumuV3(const edm::ParameterSet& iConfig)
 		} else {
 			cout << "!!! Using acceptance weight " << stracc << endl;
 			bacc = true;
-			for ( int cent = 0; cent < nCentBins; cent++ ) {
+			for ( int cent = 0; cent < nCentNoff; cent++ ) {
 				for ( int ipt = 0; ipt < nPtBins; ipt++ ) {
 					hacc[cent][ipt][0] = (TH2D*) facc->Get(Form("hPhiEta_%i_%i_0", cent, ipt));
 					hacc[cent][ipt][1] = (TH2D*) facc->Get(Form("hPhiEta_%i_%i_1", cent, ipt));
@@ -198,7 +198,7 @@ QWCumuV3::QWCumuV3(const edm::ParameterSet& iConfig)
 	memset(t, 0, sizeof(QWEvent));
 	//
 	edm::Service<TFileService> fs;
-	for ( int cent = 0; cent < nCentBins; cent++ ) {
+	for ( int cent = 0; cent < nCentNoff; cent++ ) {
 		hPt[cent] = fs->make<TH1D>(Form("hPt_%i", cent), "", nPtBins, ptbins);
 		if ( bPhiEta ) {
 			for ( int i = 0; i < nPtBins; i++ ) {
@@ -208,7 +208,7 @@ QWCumuV3::QWCumuV3(const edm::ParameterSet& iConfig)
 			}
 		}
 	}
-	for ( int cent = 0; cent < nCentBins; cent++ ) {
+	for ( int cent = 0; cent < nCentNoff; cent++ ) {
 		//cout << "!! new histo cent = " << cent << endl;
 		hdNdPtdEta[cent] = fs->make<TH2D>(Form("hdNdPtdEta_%i", cent), Form("hdNdPtdEta_%i", cent), nEtaBins, etabins, nPtBins, ptbins);
 		hdNdPtdEtaPt[cent] = fs->make<TH2D>(Form("hdNdPtdEtaPt_%i", cent), Form("hdNdPtdEta_%i", cent), nEtaBins, etabins, nPtBins, ptbins);
@@ -252,21 +252,21 @@ QWCumuV3::QWCumuV3(const edm::ParameterSet& iConfig)
 	if ( bEP_ ) {
 		for ( int n = 1; n < 7; n++ ) {
 			for ( int ipt = 0; ipt < nPtBins; ipt++ ) {
-				hEP[ipt][n] = fs->make<TH2D>(Form("hEP_%i_%i", ipt, n), "", nCentBins, centbins, hi::NumEPNames, 0, hi::NumEPNames);
-				hSP[ipt][n] = fs->make<TH2D>(Form("hSP_%i_%i", ipt, n), "", nCentBins, centbins, hi::NumEPNames, 0, hi::NumEPNames);
-				iEP[ipt][n] = fs->make<TH2D>(Form("iEP_%i_%i", ipt, n), "", nCentBins, centbins, hi::NumEPNames, 0, hi::NumEPNames);
-				iSP[ipt][n] = fs->make<TH2D>(Form("iSP_%i_%i", ipt, n), "", nCentBins, centbins, hi::NumEPNames, 0, hi::NumEPNames);
+				hEP[ipt][n] = fs->make<TH2D>(Form("hEP_%i_%i", ipt, n), "", nCentNoff, centbins, hi::NumEPNames, 0, hi::NumEPNames);
+				hSP[ipt][n] = fs->make<TH2D>(Form("hSP_%i_%i", ipt, n), "", nCentNoff, centbins, hi::NumEPNames, 0, hi::NumEPNames);
+				iEP[ipt][n] = fs->make<TH2D>(Form("iEP_%i_%i", ipt, n), "", nCentNoff, centbins, hi::NumEPNames, 0, hi::NumEPNames);
+				iSP[ipt][n] = fs->make<TH2D>(Form("iSP_%i_%i", ipt, n), "", nCentNoff, centbins, hi::NumEPNames, 0, hi::NumEPNames);
 			}
 		}
-		hEPresAB = fs->make<TH2D>("hEPresAB", "hEPresAB", nCentBins, centbins, hi::NumEPNames, 0, hi::NumEPNames);
-		hEPresAC = fs->make<TH2D>("hEPresAC", "hEPresAC", nCentBins, centbins, hi::NumEPNames, 0, hi::NumEPNames);
-		hEPresBC = fs->make<TH2D>("hEPresBC", "hEPresBC", nCentBins, centbins, hi::NumEPNames, 0, hi::NumEPNames);
-		hSPresAB = fs->make<TH2D>("hSPresAB", "hSPresAB", nCentBins, centbins, hi::NumEPNames, 0, hi::NumEPNames);
-		hSPresAC = fs->make<TH2D>("hSPresAC", "hSPresAC", nCentBins, centbins, hi::NumEPNames, 0, hi::NumEPNames);
-		hSPresBC = fs->make<TH2D>("hSPresBC", "hSPresBC", nCentBins, centbins, hi::NumEPNames, 0, hi::NumEPNames);
+		hEPresAB = fs->make<TH2D>("hEPresAB", "hEPresAB", nCentNoff, centbins, hi::NumEPNames, 0, hi::NumEPNames);
+		hEPresAC = fs->make<TH2D>("hEPresAC", "hEPresAC", nCentNoff, centbins, hi::NumEPNames, 0, hi::NumEPNames);
+		hEPresBC = fs->make<TH2D>("hEPresBC", "hEPresBC", nCentNoff, centbins, hi::NumEPNames, 0, hi::NumEPNames);
+		hSPresAB = fs->make<TH2D>("hSPresAB", "hSPresAB", nCentNoff, centbins, hi::NumEPNames, 0, hi::NumEPNames);
+		hSPresAC = fs->make<TH2D>("hSPresAC", "hSPresAC", nCentNoff, centbins, hi::NumEPNames, 0, hi::NumEPNames);
+		hSPresBC = fs->make<TH2D>("hSPresBC", "hSPresBC", nCentNoff, centbins, hi::NumEPNames, 0, hi::NumEPNames);
 
-		hMult    = fs->make<TH2D>("hMult", "", nCentBins, centbins, nPtBins, ptbins);
-		hMultRes = fs->make<TH2D>("hMultRes", "hMultRes", nCentBins, centbins, hi::NumEPNames, 0, hi::NumEPNames);
+		hMult    = fs->make<TH2D>("hMult", "", nCentNoff, centbins, nPtBins, ptbins);
+		hMultRes = fs->make<TH2D>("hMultRes", "hMultRes", nCentNoff, centbins, hi::NumEPNames, 0, hi::NumEPNames);
 	}
 	if ( bCaloMatching_ ) {
 		pfToken_ = consumes<reco::PFCandidateCollection>(iConfig.getUntrackedParameter<edm::InputTag>("pfTag"));
@@ -321,7 +321,6 @@ QWCumuV3::getNoffCent(const edm::Event& iEvent, const edm::EventSetup& iSetup, i
 	Handle<VertexCollection> vertexCollection;
 	iEvent.getByToken(vertexToken_, vertexCollection);
 	const VertexCollection recoVertices = *vertexCollection;
-	if ( recoVertices.size() > nvtx_ ) return;
 	sort(recoVertices.begin(), recoVertices.end(), [](const reco::Vertex &a, const reco::Vertex &b){
 			if ( a.tracksSize() == b.tracksSize() ) return a.chi2() < b.chi2() ? true:false;
 			return a.tracksSize() > b.tracksSize() ? true:false;
