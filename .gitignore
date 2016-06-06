@@ -7,5 +7,6 @@ test/*
 !test/qw*.py
 !test/crab_*.py
 !test/run*.sh
+!test/ppMB_ridgeCut.root
 *.pyc
 tmp/

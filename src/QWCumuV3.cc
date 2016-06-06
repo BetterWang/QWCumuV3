@@ -152,7 +152,11 @@ QWCumuV3::QWCumuV3(const edm::ParameterSet& iConfig)
 							hEff_cbin[c] = h;
 						}
 					}
-					if ( streff == string("pp_MB_TT_5TeV.root") ) {
+					if ( streff == string("ppMB_ridgeCut.root") ) {
+						TH2D * h = (TH2D*) fEffFak->Get("rTotalEff2D");
+						for ( int c = 0; c < 200; c++ ) {
+							hEff_cbin[c] = h;
+						}
 					}
 				}
 				cout << "!!! eff histo done" << endl;
