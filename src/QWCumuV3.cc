@@ -129,9 +129,9 @@ QWCumuV3::QWCumuV3(const edm::ParameterSet& iConfig)
 			if ( bFak ) cout << "!!! Apply Fak correction" << endl;
 			if ( bEff ) cout << "!!! Apply Eff correction" << endl;
 			for ( int i = 0; i < 20; i++ ) {
-				if ( streff == string("TrackCorrections_HIJING_538_OFFICIAL_Mar24.root") || streff == string("trkEff_pp_all_42X_origin.root") ) {
+				if ( streff == string("TrackCorrections_HIJING_538_OFFICIAL_Mar24.root") || streff == string("trkEff_pp_all_74X_origin.root") ) {
 					hEff_cbin[i] = (TH2D*) fEffFak->Get("rTotalEff3D");
-					hFak_cbin[i] = (TH2D*) fEffFak->Get(Form("rFak_cbin%i", i));
+					hFak_cbin[i] = 0;
 				}
 				if ( streff == string("trkEffNew2012_HI_hiGoodTightMerged_xsec_smoothv5true.root") ) {
 					hEff_cbin[i] = (TH2D*) fEffFak->Get("Tot_4");
@@ -327,7 +327,7 @@ QWCumuV3::getNoffCent(const edm::Event& iEvent, const edm::EventSetup& iSetup, i
 		if ( fabs( dz/dzerror ) > 3. ) continue;
 		if ( fabs( d0/derror ) > 3. ) continue;
 		if ( itTrack->ptError()/itTrack->pt() > 0.1 ) continue;
-		if ( itTrack->numberOfValidHits() < 11 ) continue;
+//		if ( itTrack->numberOfValidHits() < 11 ) continue;
 
 		Noff++;
 	}

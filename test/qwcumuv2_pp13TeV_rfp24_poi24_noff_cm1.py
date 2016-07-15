@@ -46,6 +46,7 @@ import HLTrigger.HLTfilters.hltHighLevel_cfi
 process.hltHM60 = HLTrigger.HLTfilters.hltHighLevel_cfi.hltHighLevel.clone()
 process.hltHM60.HLTPaths = [
 	"HLT_PixelTracks_Multiplicity60_v*"
+#	"HLT_PixelTracks_Multiplicity60*_v*"
 ]
 process.hltHM60.andOr = cms.bool(True)
 process.hltHM60.throw = cms.bool(False)
@@ -54,6 +55,7 @@ process.hltHM85 = HLTrigger.HLTfilters.hltHighLevel_cfi.hltHighLevel.clone()
 process.hltHM85.HLTPaths = [
 	"HLT_PixelTracks_Multiplicity60_v*",
 	"HLT_PixelTracks_Multiplicity85_v*"
+#        "HLT_PixelTracks_Multiplicity85*_v*"
 ]
 process.hltHM85.andOr = cms.bool(True)
 process.hltHM85.throw = cms.bool(False)
@@ -64,6 +66,7 @@ process.hltHM135.HLTPaths = [
 	"HLT_PixelTracks_Multiplicity85_v*",
 	"HLT_PixelTracks_Multiplicity110_v*",
 	"HLT_PixelTracks_Multiplicity135_v*"
+#        "HLT_PixelTracks_Multiplicity110*_v*"
 ]
 process.hltHM135.andOr = cms.bool(True)
 process.hltHM135.throw = cms.bool(False)
@@ -88,8 +91,9 @@ process.cumu60 = cms.EDAnalyzer('QWCumuV3'
 	, pterrorpt_ = cms.untracked.double(0.1)
 	, Noffmin_ = cms.untracked.int32(60)
 	, Noffmax_ = cms.untracked.int32(105)
-#	, fweight_ = cms.untracked.InputTag('TrackCorrections_HIJING_538_OFFICIAL_Mar24.root')
+#	, fweight_ = cms.untracked.InputTag('trkEff_pp_all_74X_origin.root')
 	, bEff_ = cms.untracked.bool(False)
+	, bFak_ = cms.untracked.bool(False)
 	, cmode_ = cms.untracked.int32(1)
 	, bFlipEta_ = cms.untracked.bool(False)
 	, bEP = cms.untracked.bool(False)
@@ -120,9 +124,13 @@ process.TFileService = cms.Service("TFileService",
 #)
 #
 #process.p = cms.Path(process.PAcollisionEventSelection*process.pACentrality*process.cumulant)
-process.p60 = cms.Path(process.hltHM60*process.cumu60)
-process.p85 = cms.Path(process.hltHM85*process.cumu85)
-process.p135 = cms.Path(process.hltHM135*process.cumu135)
+
+process.load('ppPileupFilter.PPPileUpVertexFilter.PPPileUpVertexFilter_cff')
+
+
+process.p60 = cms.Path(process.hltHM60*process.pileupVertexFilterCut_dz10_GplusPP*process.cumu60)
+process.p85 = cms.Path(process.hltHM85*process.pileupVertexFilterCut_dz10_GplusPP*process.cumu85)
+process.p135 = cms.Path(process.hltHM135*process.pileupVertexFilterCut_dz10_GplusPP*process.cumu135)
 
 process.schedule = cms.Schedule(
 	process.p60,
