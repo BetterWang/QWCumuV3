@@ -89,6 +89,7 @@ QWCumuV3::QWCumuV3(const edm::ParameterSet& iConfig)
 	fweight_ = iConfig.getUntrackedParameter<edm::InputTag>("fweight_", string("NA"));
 	facceptance_ = iConfig.getUntrackedParameter<edm::InputTag>("facceptance_", string("NA"));
 	charge_ = iConfig.getUntrackedParameter<int>("charge_", 0);
+	dEtaGap_ = iConfig.getUntrackedParameter<double>("dEtaGap_", 2.0);
 	bFak = iConfig.getUntrackedParameter<bool>("bFak_", false);
 	bEff = iConfig.getUntrackedParameter<bool>("bEff_", false);
 	bPhiEta = iConfig.getUntrackedParameter<bool>("bPhiEta_", false);
@@ -218,6 +219,15 @@ QWCumuV3::QWCumuV3(const edm::ParameterSet& iConfig)
 //	trV->Branch("EventId", &t->EventId, "EventId/I");
 
 	for ( int n = 2; n < 7; n++ ) {
+		trV->Branch(Form("rQGap%i%i", n, 2), &rQGap[n], Form("rQGap%i%i/D", n, 2));
+		trV->Branch(Form("wQGap%i%i", n, 2), &wQGap[n], Form("wQGap%i%i/D", n, 2));
+
+		trV->Branch(Form("rQpGap%i%i", n, 2), &rQpGap[n], Form("rQpGap%i%i[24]/D", n, 2));
+		trV->Branch(Form("wQpGap%i%i", n, 2), &wQpGap[n], Form("wQpGap%i%i[24]/D", n, 2));
+
+		trV->Branch(Form("rQetaGap%i%i", n, 2), &rQetaGap[n], Form("rQetaGap%i%i[24]/D", n, 2));
+		trV->Branch(Form("wQetaGap%i%i", n, 2), &wQetaGap[n], Form("wQetaGap%i%i[24]/D", n, 2));
+
 		for ( int np = 0; np < 4; np++ ) {
 			trV->Branch(Form("rQ%i%i", n, 2+2*np), &rQ[n][np], Form("rQ%i%i/D", n, 2+2*np));
 //			trV->Branch(Form("iQ%i%i", n, 2+2*np), &iQ[n][np], Form("iQ%i%i/D", n, 2+2*np));
@@ -370,6 +380,8 @@ QWCumuV3::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	if ( t->Mult == 0 ) return;
 
 	for ( int n = 0; n < 7; n++ ) {
+		rQGap[n] = 0;
+		wQGap[n] = 0;
 		for ( int np = 0; np < 4; np++ ) {
 			rQ[n][np] = 0;
 			iQ[n][np] = 0;
@@ -395,12 +407,49 @@ QWCumuV3::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 				wQeta[n][np][j] = 0;
 			}
 		}
+		for ( int j = 0; j < 24; j++ ) {
+			rQpGap[n][j] = 0;
+			wQpGap[n][j] = 0;
+			rQetaGap[n][j] = 0;
+			wQetaGap[n][j] = 0;
+		}
 	}
 
 	for ( int i = 0; i < t->Mult; i++ ) {
 		if ( t->RFP[i] != 1 ) continue;
 		for ( int n = 1; n < 7; n++ ) {
 			q[n].fill(t->Phi[i], t->weight[i]);
+			// ref 2part gap
+			for ( int j = i+1; j < t->Mult; j++ ) {
+				if ( t->RFP[j] != 1 ) continue;
+				if ( fabs(t->Eta[i] - t->Eta[j]) < dEtaGap_ ) continue;
+				rQGap[n] += cos( n*( t->Phi[i] - t->Phi[j] ) ) * t->weight[i] * t->weight[j];
+				wQGap[n] += t->weight[i] * t->weight[j];
+			}
+			// pt diff 2part gap
+			for ( int ipt = 0; ipt < nPtBins; ipt++ ) {
+				for ( int j = i+1; j < t->Mult; j++ ) {
+					if ( fabs(t->Eta[i] - t->Eta[j]) < dEtaGap_ ) continue;
+					if ( t->Eta[j] < poimineta_ or t->Eta[j] > poimaxeta_ ) continue;
+					if ( t->Pt[j] < poiptmin_ or t->Pt[j] > poiptmax_ ) continue;
+					if ( t->Pt[j] < ptbins[ipt] || t->Pt[j] > ptbins[ipt+1] ) continue;
+
+					rQpGap[n][ipt] += cos( n*( t->Phi[i] - t->Phi[j] ) ) * t->weight[i] * t->weight[j];
+					wQpGap[n][ipt] += t->weight[i] * t->weight[j];
+				}
+			}
+
+			// eta diff 2part gap
+			for ( int ieta = 0; ieta < nEtaBins; ieta++ ) {
+				for ( int j = i+1; j < t->Mult; j++ ) {
+					if ( fabs(t->Eta[i] - t->Eta[j]) < dEtaGap_ ) continue;
+					if ( t->Pt[j] < rfpptmin_ or t->Pt[j] > rfpptmax_ ) continue;
+					if ( t->Eta[j] < etabins[ieta] || t->Eta[j] > etabins[ieta+1] ) continue;
+
+					rQetaGap[n][ieta] += cos( n*( t->Phi[i] - t->Phi[j] ) ) * t->weight[i] * t->weight[j];
+					wQetaGap[n][ieta] += t->weight[i] * t->weight[j];
+				}
+			}
 		}
 	}
 
@@ -486,7 +535,7 @@ QWCumuV3::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 				qp = 0;
 				wt = 0;
 				for ( int i = 0; i < t->Mult; i++ ) {
-					if ( t->Pt[i] < poiptmin_ or t->Pt[i] > poiptmax_ ) continue;
+					if ( t->Pt[i] < rfpptmin_ or t->Pt[i] > rfpptmax_ ) continue;
 					if ( t->Eta[i] < etabins[ieta] || t->Eta[i] > etabins[ieta+1] ) continue;
 					correlations::QVector tq = q[n];
 					if ( t->RFP[i] ) tq.unfill(t->Phi[i], t->weight[i]);
@@ -773,20 +822,42 @@ QWCumuV3::analyzeData(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 			++itTrack) {
 		if ( itTrack->charge() == 0 ) continue;
 		if ( !itTrack->quality(reco::TrackBase::highPurity) ) continue;
-
-		double d0 = -1.* itTrack->dxy(v1);
-		double derror=sqrt(itTrack->dxyError()*itTrack->dxyError()+vxError*vyError);
-		double dz=itTrack->dz(v1);
-		double dzerror=sqrt(itTrack->dzError()*itTrack->dzError()+vzError*vzError);
-
 		if ( fabs(itTrack->eta()) > 2.4 ) continue;
-		if ( fabs( dz/dzerror ) > dzdzerror_ ) continue;
-		if ( fabs( d0/derror ) > d0d0error_ ) continue;
-		if ( itTrack->ptError()/itTrack->pt() > pterrorpt_ ) continue;
-		if ( itTrack->numberOfValidHits() < 11 ) continue;
-		if ( itTrack->normalizedChi2() / itTrack->hitPattern().trackerLayersWithMeasurement() > 0.15 ) continue;
-		if ( find( algoParameters_.begin(), algoParameters_.end(), itTrack->originalAlgo() ) == algoParameters_.end() ) continue;
-		if ( !CaloMatch(*itTrack, iEvent, itTrack - tracks->begin()) ) continue;
+
+		bool bPix = false;
+		int nHits = itTrack->numberOfValidHits();
+//		std::cout << __LINE__ << "\tnHits = " << nHits << std::endl;
+		if ( itTrack->pt() < 2.4 and (nHits==3 or nHits==4 or nHits==5 or nHits==6) ) bPix = true;
+		if ( not bPix ) {
+			if ( nHits < 11 ) continue;
+			if ( itTrack->normalizedChi2() / itTrack->hitPattern().trackerLayersWithMeasurement() > 0.15 ) {
+				continue;
+			}
+			if ( itTrack->ptError()/itTrack->pt() > pterrorpt_ ) {
+				continue;
+			}
+			if ( 	itTrack->pt() > 2.4 and
+				itTrack->originalAlgo() != 4 and
+				itTrack->originalAlgo() != 5 and
+				itTrack->originalAlgo() != 6 and
+				itTrack->originalAlgo() != 7
+			) {
+				continue;
+			}
+
+			double d0 = -1.* itTrack->dxy(v1);
+			double derror=sqrt(itTrack->dxyError()*itTrack->dxyError()+vxError*vyError);
+			if ( fabs( d0/derror ) > d0d0error_ ) {
+				continue;
+			}
+
+			double dz=itTrack->dz(v1);
+			double dzerror=sqrt(itTrack->dzError()*itTrack->dzError()+vzError*vzError);
+			if ( fabs( dz/dzerror ) > dzdzerror_ ) {
+				continue;
+			}
+			if ( !CaloMatch(*itTrack, iEvent, itTrack - tracks->begin()) ) continue;
+		}
 
 		t->RFP[t->Mult] = 1;
 		t->Charge[t->Mult] = itTrack->charge();

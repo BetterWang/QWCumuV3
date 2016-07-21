@@ -94,6 +94,7 @@ class QWCumuV3 : public edm::EDAnalyzer {
 		double	rfpptmin_, rfpptmax_;
 		double	poiptmin_, poiptmax_;
 		int	charge_;
+		double	dEtaGap_;
 
 		bool	bFak;
 		bool	bEff;
@@ -152,6 +153,15 @@ class QWCumuV3 : public edm::EDAnalyzer {
 
 		int gNoff;
 		int gMult;
+
+		double rQGap[7];
+		double wQGap[7];
+
+		double rQpGap[7][24];
+		double wQpGap[7][24];
+
+		double rQetaGap[7][24];
+		double wQetaGap[7][24];
 
 		double rQ[7][4];
 		double iQ[7][4];
