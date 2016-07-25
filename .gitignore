@@ -1,7 +1,9 @@
 bin/
+pix/
 MC
 PbPb
 PbPb2015
+PbPb2015Pix
 pPb
 test/*
 !test/qw*.py

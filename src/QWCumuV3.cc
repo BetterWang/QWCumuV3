@@ -105,6 +105,7 @@ QWCumuV3::QWCumuV3(const edm::ParameterSet& iConfig)
 	nvtx_ = iConfig.getUntrackedParameter<int>("nvtx_", 100);
 	bFlipEta_ = iConfig.getUntrackedParameter<bool>("bFlipEta_", false);
 	bEP_ = iConfig.getUntrackedParameter<bool>("bEP", false);
+	b2PartGap_ = iConfig.getUntrackedParameter<bool>("b2PartGap", false);
 	EPlvl_ = iConfig.getUntrackedParameter<int>("EPlvl_", 0);
 	reso_ = iConfig.getUntrackedParameter<double>("reso", 0.2);
 
@@ -218,15 +219,14 @@ QWCumuV3::QWCumuV3(const edm::ParameterSet& iConfig)
 //	trV->Branch("RunId", &t->RunId, "RunId/I");
 //	trV->Branch("EventId", &t->EventId, "EventId/I");
 
+	trV->Branch("wQGap22", &wQGap[2], "wQGap22/D");
+	trV->Branch("wQpGap22", &wQpGap[2], "wQpGap22[24]/D");
+	trV->Branch("wQetaGap22", &wQetaGap[2], "wQetaGap22[24]/D");
+
 	for ( int n = 2; n < 7; n++ ) {
 		trV->Branch(Form("rQGap%i%i", n, 2), &rQGap[n], Form("rQGap%i%i/D", n, 2));
-		trV->Branch(Form("wQGap%i%i", n, 2), &wQGap[n], Form("wQGap%i%i/D", n, 2));
-
 		trV->Branch(Form("rQpGap%i%i", n, 2), &rQpGap[n], Form("rQpGap%i%i[24]/D", n, 2));
-		trV->Branch(Form("wQpGap%i%i", n, 2), &wQpGap[n], Form("wQpGap%i%i[24]/D", n, 2));
-
 		trV->Branch(Form("rQetaGap%i%i", n, 2), &rQetaGap[n], Form("rQetaGap%i%i[24]/D", n, 2));
-		trV->Branch(Form("wQetaGap%i%i", n, 2), &wQetaGap[n], Form("wQetaGap%i%i[24]/D", n, 2));
 
 		for ( int np = 0; np < 4; np++ ) {
 			trV->Branch(Form("rQ%i%i", n, 2+2*np), &rQ[n][np], Form("rQ%i%i/D", n, 2+2*np));
@@ -415,39 +415,41 @@ QWCumuV3::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 		}
 	}
 
-	for ( int i = 0; i < t->Mult; i++ ) {
-		if ( t->RFP[i] != 1 ) continue;
-		for ( int n = 1; n < 7; n++ ) {
-			q[n].fill(t->Phi[i], t->weight[i]);
-			// ref 2part gap
-			for ( int j = i+1; j < t->Mult; j++ ) {
-				if ( t->RFP[j] != 1 ) continue;
-				if ( fabs(t->Eta[i] - t->Eta[j]) < dEtaGap_ ) continue;
-				rQGap[n] += cos( n*( t->Phi[i] - t->Phi[j] ) ) * t->weight[i] * t->weight[j];
-				wQGap[n] += t->weight[i] * t->weight[j];
-			}
-			// pt diff 2part gap
-			for ( int ipt = 0; ipt < nPtBins; ipt++ ) {
+	if ( b2PartGap_ ) {
+		for ( int i = 0; i < t->Mult; i++ ) {
+			if ( t->RFP[i] != 1 ) continue;
+			for ( int n = 1; n < 7; n++ ) {
+				q[n].fill(t->Phi[i], t->weight[i]);
+				// ref 2part gap
 				for ( int j = i+1; j < t->Mult; j++ ) {
+					if ( t->RFP[j] != 1 ) continue;
 					if ( fabs(t->Eta[i] - t->Eta[j]) < dEtaGap_ ) continue;
-					if ( t->Eta[j] < poimineta_ or t->Eta[j] > poimaxeta_ ) continue;
-					if ( t->Pt[j] < poiptmin_ or t->Pt[j] > poiptmax_ ) continue;
-					if ( t->Pt[j] < ptbins[ipt] || t->Pt[j] > ptbins[ipt+1] ) continue;
-
-					rQpGap[n][ipt] += cos( n*( t->Phi[i] - t->Phi[j] ) ) * t->weight[i] * t->weight[j];
-					wQpGap[n][ipt] += t->weight[i] * t->weight[j];
+					rQGap[n] += cos( n*( t->Phi[i] - t->Phi[j] ) ) * t->weight[i] * t->weight[j];
+					wQGap[n] += t->weight[i] * t->weight[j];
 				}
-			}
+				// pt diff 2part gap
+				for ( int ipt = 0; ipt < nPtBins; ipt++ ) {
+					for ( int j = i+1; j < t->Mult; j++ ) {
+						if ( fabs(t->Eta[i] - t->Eta[j]) < dEtaGap_ ) continue;
+						if ( t->Eta[j] < poimineta_ or t->Eta[j] > poimaxeta_ ) continue;
+						if ( t->Pt[j] < poiptmin_ or t->Pt[j] > poiptmax_ ) continue;
+						if ( t->Pt[j] < ptbins[ipt] || t->Pt[j] > ptbins[ipt+1] ) continue;
 
-			// eta diff 2part gap
-			for ( int ieta = 0; ieta < nEtaBins; ieta++ ) {
-				for ( int j = i+1; j < t->Mult; j++ ) {
-					if ( fabs(t->Eta[i] - t->Eta[j]) < dEtaGap_ ) continue;
-					if ( t->Pt[j] < rfpptmin_ or t->Pt[j] > rfpptmax_ ) continue;
-					if ( t->Eta[j] < etabins[ieta] || t->Eta[j] > etabins[ieta+1] ) continue;
+						rQpGap[n][ipt] += cos( n*( t->Phi[i] - t->Phi[j] ) ) * t->weight[i] * t->weight[j];
+						wQpGap[n][ipt] += t->weight[i] * t->weight[j];
+					}
+				}
 
-					rQetaGap[n][ieta] += cos( n*( t->Phi[i] - t->Phi[j] ) ) * t->weight[i] * t->weight[j];
-					wQetaGap[n][ieta] += t->weight[i] * t->weight[j];
+				// eta diff 2part gap
+				for ( int ieta = 0; ieta < nEtaBins; ieta++ ) {
+					for ( int j = i+1; j < t->Mult; j++ ) {
+						if ( fabs(t->Eta[i] - t->Eta[j]) < dEtaGap_ ) continue;
+						if ( t->Pt[j] < rfpptmin_ or t->Pt[j] > rfpptmax_ ) continue;
+						if ( t->Eta[j] < etabins[ieta] || t->Eta[j] > etabins[ieta+1] ) continue;
+
+						rQetaGap[n][ieta] += cos( n*( t->Phi[i] - t->Phi[j] ) ) * t->weight[i] * t->weight[j];
+						wQetaGap[n][ieta] += t->weight[i] * t->weight[j];
+					}
 				}
 			}
 		}

@@ -109,6 +109,7 @@ class QWCumuV3 : public edm::EDAnalyzer {
 		bool	bGen_;
 		bool	bFlipEta_;
 		bool	bEP_;
+		bool	b2PartGap_;
 		int	EPlvl_;
 		std::vector<int> algoParameters_;
 
