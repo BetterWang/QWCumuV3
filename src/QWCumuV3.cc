@@ -565,36 +565,18 @@ QWCumuV3::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 					if ( fabs(t->Eta[i] - t->Eta[j]) < dEtaGap_ ) continue;
 					if ( t->Eta[j] < poimineta_ or t->Eta[j] > poimaxeta_ ) continue;
 					if ( t->Pt[j] < poiptmin_ or t->Pt[j] > poiptmax_ ) continue;
+					int ipt = 0;
+					while ( ptbins[ipt+1] > t->Pt[j] ) ipt++;
+					rQpGap[n][ipt] += cos( n*( t->Phi[j] - t->Phi[i] ) ) * t->weight[i] * t->weight[j];
+					wQpGap[n][ipt] += t->weight[i] * t->weight[j];
+
+					int ieta = 0;
+					while ( etabins[ieta+1] > t->Eta[j] ) ieta++;
+					rQetaGap[n][ieta] += cos( n*( t->Phi[j] - t->Phi[i] ) ) * t->weight[i] * t->weight[j];
+					wQetaGap[n][ieta] += t->weight[i] * t->weight[j];
 				}
 			}
 		}
-
-//				// pt diff 2part gap
-//				for ( int ipt = 0; ipt < nPtBins; ipt++ ) {
-//					for ( int j = i+1; j < t->Mult; j++ ) {
-//						if ( fabs(t->Eta[i] - t->Eta[j]) < dEtaGap_ ) continue;
-//						if ( t->Eta[j] < poimineta_ or t->Eta[j] > poimaxeta_ ) continue;
-//						if ( t->Pt[j] < poiptmin_ or t->Pt[j] > poiptmax_ ) continue;
-//						if ( t->Pt[j] < ptbins[ipt] || t->Pt[j] > ptbins[ipt+1] ) continue;
-//
-//						rQpGap[n][ipt] += cos( n*( t->Phi[i] - t->Phi[j] ) ) * t->weight[i] * t->weight[j];
-//						wQpGap[n][ipt] += t->weight[i] * t->weight[j];
-//					}
-//				}
-//
-//				// eta diff 2part gap
-//				for ( int ieta = 0; ieta < nEtaBins; ieta++ ) {
-//					for ( int j = i+1; j < t->Mult; j++ ) {
-//						if ( fabs(t->Eta[i] - t->Eta[j]) < dEtaGap_ ) continue;
-//						if ( t->Pt[j] < rfpptmin_ or t->Pt[j] > rfpptmax_ ) continue;
-//						if ( t->Eta[j] < etabins[ieta] || t->Eta[j] > etabins[ieta+1] ) continue;
-//
-//						rQetaGap[n][ieta] += cos( n*( t->Phi[i] - t->Phi[j] ) ) * t->weight[i] * t->weight[j];
-//						wQetaGap[n][ieta] += t->weight[i] * t->weight[j];
-//					}
-//				}
-//			}
-//		}
 	}
 
 	correlations::Result r[7][4];

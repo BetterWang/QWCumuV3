@@ -13,6 +13,8 @@
 #include <TFile.h>
 #include "QWConstV3.h"
 #include <RecoHI/HiEvtPlaneAlgos/interface/HiEvtPlaneList.h>
+#include "DataFormats/TrackReco/interface/Track.h"
+#include "DataFormats/TrackReco/interface/TrackFwd.h"
 //
 // constants, enums and typedefs
 //
