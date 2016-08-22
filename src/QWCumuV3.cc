@@ -33,15 +33,11 @@ Implementation:
 
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "FWCore/Utilities/interface/InputTag.h"
-#include "DataFormats/TrackReco/interface/Track.h"
-#include "DataFormats/TrackReco/interface/TrackFwd.h"
 #include <DataFormats/ParticleFlowCandidate/interface/PFCandidateFwd.h>
 #include <DataFormats/ParticleFlowCandidate/interface/PFCandidate.h>
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
-#include "DataFormats/VertexReco/interface/Vertex.h"
-#include "DataFormats/VertexReco/interface/VertexFwd.h"
 #include "DataFormats/HeavyIonEvent/interface/EvtPlane.h"
 #include "TH1.h"
 #include "TH2.h"
@@ -384,7 +380,7 @@ QWCumuV3::getNoffCent(const edm::Event& iEvent, const edm::EventSetup& iSetup, i
 
 ///
 bool
-QWCumuV3::TrackQuality_ppReco(const TrackCollection::const_iterator& itTrack, const math::XYZPoint& v1)
+QWCumuV3::TrackQuality_ppReco(const reco::TrackCollection::const_iterator& itTrack, const reco::VertexCollection& recoVertices)
 {
         if ( itTrack->charge() == 0 ) {
                 return false;
@@ -392,15 +388,14 @@ QWCumuV3::TrackQuality_ppReco(const TrackCollection::const_iterator& itTrack, co
         if ( !itTrack->quality(reco::TrackBase::highPurity) ) {
                 return false;
         }
-        if ( itTrack->pt() > maxPt_ or itTrack->pt() < minPt_ ) {
-                return false;
-        }
-        if ( itTrack->eta() > maxEta_ or itTrack->eta() < minEta_ ) {
-                return false;
-        }
         if ( itTrack->ptError()/itTrack->pt() > pterrorpt_ ) {
                 return false;
         }
+	int primaryvtx = 0;
+	math::XYZPoint v1( recoVertices[primaryvtx].position().x(), recoVertices[primaryvtx].position().y(), recoVertices[primaryvtx].position().z() );
+	double vxError = recoVertices[primaryvtx].xError();
+	double vyError = recoVertices[primaryvtx].yError();
+	double vzError = recoVertices[primaryvtx].zError();
         double d0 = -1.* itTrack->dxy(v1);
         double derror=sqrt(itTrack->dxyError()*itTrack->dxyError()+vxError*vyError);
         if ( fabs( d0/derror ) > d0d0error_ ) {
@@ -416,7 +411,7 @@ QWCumuV3::TrackQuality_ppReco(const TrackCollection::const_iterator& itTrack, co
 
 ///
 bool
-QWCumuV3::TrackQuality_HIReco(const TrackCollection::const_iterator& itTrack, const math::XYZPoint& v1)
+QWCumuV3::TrackQuality_HIReco(const reco::TrackCollection::const_iterator& itTrack, const reco::VertexCollection& recoVertices)
 {
 	if ( itTrack->charge() == 0 ) return false;
 	if ( !itTrack->quality(reco::TrackBase::highPurity) ) return false;
@@ -437,6 +432,11 @@ QWCumuV3::TrackQuality_HIReco(const TrackCollection::const_iterator& itTrack, co
 		return false;
 	}
 
+	int primaryvtx = 0;
+	math::XYZPoint v1( recoVertices[primaryvtx].position().x(), recoVertices[primaryvtx].position().y(), recoVertices[primaryvtx].position().z() );
+	double vxError = recoVertices[primaryvtx].xError();
+	double vyError = recoVertices[primaryvtx].yError();
+	double vzError = recoVertices[primaryvtx].zError();
 	double d0 = -1.* itTrack->dxy(v1);
 	double derror=sqrt(itTrack->dxyError()*itTrack->dxyError()+vxError*vyError);
 	if ( fabs( d0/derror ) > d0d0error_ ) {
@@ -448,13 +448,12 @@ QWCumuV3::TrackQuality_HIReco(const TrackCollection::const_iterator& itTrack, co
 	if ( fabs( dz/dzerror ) > dzdzerror_ ) {
 		return false;
 	}
-	if ( !CaloMatch(*itTrack, iEvent, itTrack - tracks->begin()) ) return false;
 	return true;
 }
 
 ///
 bool
-QWCumuV3::TrackQuality_Pixel(const TrackCollection::const_iterator& itTrack, const math::XYZPoint& v1)
+QWCumuV3::TrackQuality_Pixel(const reco::TrackCollection::const_iterator& itTrack, const reco::VertexCollection& recoVertices)
 {
 	if ( itTrack->charge() == 0 ) return false;
 	if ( !itTrack->quality(reco::TrackBase::highPurity) ) return false;
@@ -480,6 +479,11 @@ QWCumuV3::TrackQuality_Pixel(const TrackCollection::const_iterator& itTrack, con
 			return false;
 		}
 
+		int primaryvtx = 0;
+		math::XYZPoint v1( recoVertices[primaryvtx].position().x(), recoVertices[primaryvtx].position().y(), recoVertices[primaryvtx].position().z() );
+		double vxError = recoVertices[primaryvtx].xError();
+		double vyError = recoVertices[primaryvtx].yError();
+		double vzError = recoVertices[primaryvtx].zError();
 		double d0 = -1.* itTrack->dxy(v1);
 		double derror=sqrt(itTrack->dxyError()*itTrack->dxyError()+vxError*vyError);
 		if ( fabs( d0/derror ) > d0d0error_ ) {
@@ -903,10 +907,6 @@ QWCumuV3::analyzeData(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 			});
 
 	int primaryvtx = 0;
-	math::XYZPoint v1( recoVertices[primaryvtx].position().x(), recoVertices[primaryvtx].position().y(), recoVertices[primaryvtx].position().z() );
-	double vxError = recoVertices[primaryvtx].xError();
-	double vyError = recoVertices[primaryvtx].yError();
-	double vzError = recoVertices[primaryvtx].zError();
 
 	double vz = recoVertices[primaryvtx].z();
 	if (fabs(vz) < minvz_ || fabs(vz) > maxvz_) {
@@ -946,9 +946,11 @@ QWCumuV3::analyzeData(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	for(TrackCollection::const_iterator itTrack = tracks->begin();
 			itTrack != tracks->end();
 			++itTrack) {
-		if ( sTrackQuality == HIReco and not TrackQuality_HIReco(itTrack, v1) ) continue;
-		else if ( sTrackQuality == ppReco and not TrackQuality_ppReco(itTrack, v1) ) continue;
-		else if ( sTrackQuality == Pixel  and not TrackQuality_Pixel (itTrack, v1) ) continue;
+		if ( sTrackQuality == HIReco and not TrackQuality_HIReco(itTrack, recoVertices) ) continue;
+		else if ( sTrackQuality == ppReco and not TrackQuality_ppReco(itTrack, recoVertices) ) continue;
+		else if ( sTrackQuality == Pixel  and not TrackQuality_Pixel (itTrack, recoVertices) ) continue;
+
+		if ( !CaloMatch(*itTrack, iEvent, itTrack - tracks->begin()) ) continue;
 
 		t->RFP[t->Mult] = 1;
 		t->Charge[t->Mult] = itTrack->charge();

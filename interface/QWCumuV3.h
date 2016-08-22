@@ -15,6 +15,8 @@
 #include <RecoHI/HiEvtPlaneAlgos/interface/HiEvtPlaneList.h>
 #include "DataFormats/TrackReco/interface/Track.h"
 #include "DataFormats/TrackReco/interface/TrackFwd.h"
+#include "DataFormats/VertexReco/interface/Vertex.h"
+#include "DataFormats/VertexReco/interface/VertexFwd.h"
 //
 // constants, enums and typedefs
 //
@@ -70,9 +72,9 @@ class QWCumuV3 : public edm::EDAnalyzer {
 
 	/////////////////////////////////////////////
 		int getNoffCent(const edm::Event&, const edm::EventSetup&, int& Noff);
-		bool TrackQuality_ppReco(const TrackCollection::const_iterator&, const math::XYZPoint&);
-		bool TrackQuality_HIReco(const TrackCollection::const_iterator&, const math::XYZPoint&);
-		bool TrackQuality_Pixel(const TrackCollection::const_iterator&, const math::XYZPoint&);
+		bool TrackQuality_ppReco(const reco::TrackCollection::const_iterator&, const reco::VertexCollection&);
+		bool TrackQuality_HIReco(const reco::TrackCollection::const_iterator&, const reco::VertexCollection&);
+		bool TrackQuality_Pixel(const reco::TrackCollection::const_iterator&, const reco::VertexCollection&);
 		//TRandom3 * gRandom;
 		// ----------member data ---------------------------
 		edm::InputTag					trackTag_;
