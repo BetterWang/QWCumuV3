@@ -68,6 +68,9 @@ class QWCumuV3 : public edm::EDAnalyzer {
 
 	/////////////////////////////////////////////
 		int getNoffCent(const edm::Event&, const edm::EventSetup&, int& Noff);
+		bool TrackQuality_ppReco(const TrackCollection::const_iterator&, const math::XYZPoint&);
+		bool TrackQuality_HIReco(const TrackCollection::const_iterator&, const math::XYZPoint&);
+		bool TrackQuality_Pixel(const TrackCollection::const_iterator&, const math::XYZPoint&);
 		//TRandom3 * gRandom;
 		// ----------member data ---------------------------
 		edm::InputTag					trackTag_;
@@ -84,6 +87,8 @@ class QWCumuV3 : public edm::EDAnalyzer {
 		edm::InputTag fweight_;
 		edm::InputTag facceptance_;
 	/////////////////////////////////////////////
+		enum	TrackCut {trackUndefine = 0, ppReco = 1, HIReco, Pixel};
+		TrackCut sTrackQuality;
 		double	minvz_, maxvz_;
 		double	dzdzerror_;
 		double	d0d0error_;

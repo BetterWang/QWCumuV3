@@ -9,5 +9,8 @@ test/*
 !test/qw*.py
 !test/crab_*.py
 !test/run*.sh
+!runConfig/qw*.py
+!runConfig/crab_*.py
+!runConfig/run*.sh
 *.pyc
 tmp/

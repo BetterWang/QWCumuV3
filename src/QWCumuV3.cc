@@ -115,6 +115,16 @@ QWCumuV3::QWCumuV3(const edm::ParameterSet& iConfig)
 		trackToken_ = consumes<reco::TrackCollection>(trackTag_);
 	}
 
+	if ( trackTag_.label() == "hiGeneralTracks" ) {
+		sTrackQuality = HIReco;
+	} else if ( trackTag_.label() == "generalTracks" ) {
+		sTrackQuality = ppReco;
+	} else if ( trackTag_.label() == "hiGeneralAndPixelTracks" ) {
+		sTrackQuality = Pixel;
+	} else {
+		sTrackQuality = trackUndefine;
+	}
+
 	string streff = fweight_.label();
 	if ( streff == string("NA") ) {
 		cout << "!!! eff NA" << endl;
@@ -372,6 +382,119 @@ QWCumuV3::getNoffCent(const edm::Event& iEvent, const edm::EventSetup& iSetup, i
 }
 
 
+///
+bool
+QWCumuV3::TrackQuality_ppReco(const TrackCollection::const_iterator& itTrack, const math::XYZPoint& v1)
+{
+        if ( itTrack->charge() == 0 ) {
+                return false;
+        }
+        if ( !itTrack->quality(reco::TrackBase::highPurity) ) {
+                return false;
+        }
+        if ( itTrack->pt() > maxPt_ or itTrack->pt() < minPt_ ) {
+                return false;
+        }
+        if ( itTrack->eta() > maxEta_ or itTrack->eta() < minEta_ ) {
+                return false;
+        }
+        if ( itTrack->ptError()/itTrack->pt() > pterrorpt_ ) {
+                return false;
+        }
+        double d0 = -1.* itTrack->dxy(v1);
+        double derror=sqrt(itTrack->dxyError()*itTrack->dxyError()+vxError*vyError);
+        if ( fabs( d0/derror ) > d0d0error_ ) {
+                return false;
+        }
+        double dz=itTrack->dz(v1);
+        double dzerror=sqrt(itTrack->dzError()*itTrack->dzError()+vzError*vzError);
+        if ( fabs( dz/dzerror ) > dzdzerror_ ) {
+                return false;
+        }
+        return true;
+}
+
+///
+bool
+QWCumuV3::TrackQuality_HIReco(const TrackCollection::const_iterator& itTrack, const math::XYZPoint& v1)
+{
+	if ( itTrack->charge() == 0 ) return false;
+	if ( !itTrack->quality(reco::TrackBase::highPurity) ) return false;
+	if ( fabs(itTrack->eta()) > 2.4 ) return false;
+	if ( itTrack->numberOfValidHits() < 11 ) return false;
+	if ( itTrack->normalizedChi2() / itTrack->hitPattern().trackerLayersWithMeasurement() > 0.15 ) {
+		return false;
+	}
+	if ( itTrack->ptError()/itTrack->pt() > pterrorpt_ ) {
+		return false;
+	}
+	if (
+		itTrack->originalAlgo() != 4 and
+		itTrack->originalAlgo() != 5 and
+		itTrack->originalAlgo() != 6 and
+		itTrack->originalAlgo() != 7
+	) {
+		return false;
+	}
+
+	double d0 = -1.* itTrack->dxy(v1);
+	double derror=sqrt(itTrack->dxyError()*itTrack->dxyError()+vxError*vyError);
+	if ( fabs( d0/derror ) > d0d0error_ ) {
+		return false;
+	}
+
+	double dz=itTrack->dz(v1);
+	double dzerror=sqrt(itTrack->dzError()*itTrack->dzError()+vzError*vzError);
+	if ( fabs( dz/dzerror ) > dzdzerror_ ) {
+		return false;
+	}
+	if ( !CaloMatch(*itTrack, iEvent, itTrack - tracks->begin()) ) return false;
+	return true;
+}
+
+///
+bool
+QWCumuV3::TrackQuality_Pixel(const TrackCollection::const_iterator& itTrack, const math::XYZPoint& v1)
+{
+	if ( itTrack->charge() == 0 ) return false;
+	if ( !itTrack->quality(reco::TrackBase::highPurity) ) return false;
+	if ( fabs(itTrack->eta()) > 2.4 ) return false;
+	bool bPix = false;
+	int nHits = itTrack->numberOfValidHits();
+//	std::cout << __LINE__ << "\tnHits = " << nHits << std::endl;
+	if ( itTrack->pt() < 2.4 and (nHits==3 or nHits==4 or nHits==5 or nHits==6) ) bPix = true;
+	if ( not bPix ) {
+		if ( nHits < 11 ) return false;
+		if ( itTrack->normalizedChi2() / itTrack->hitPattern().trackerLayersWithMeasurement() > 0.15 ) {
+			return false;
+		}
+		if ( itTrack->ptError()/itTrack->pt() > pterrorpt_ ) {
+			return false;
+		}
+		if (
+			itTrack->originalAlgo() != 4 and
+			itTrack->originalAlgo() != 5 and
+			itTrack->originalAlgo() != 6 and
+			itTrack->originalAlgo() != 7
+		) {
+			return false;
+		}
+
+		double d0 = -1.* itTrack->dxy(v1);
+		double derror=sqrt(itTrack->dxyError()*itTrack->dxyError()+vxError*vyError);
+		if ( fabs( d0/derror ) > d0d0error_ ) {
+			return false;
+		}
+
+		double dz=itTrack->dz(v1);
+		double dzerror=sqrt(itTrack->dzError()*itTrack->dzError()+vzError*vzError);
+		if ( fabs( dz/dzerror ) > dzdzerror_ ) {
+			return false;
+		}
+	}
+	return true;
+}
+///
 void
 QWCumuV3::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
@@ -415,44 +538,63 @@ QWCumuV3::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 		}
 	}
 
+	for ( int i = 0; i < t->Mult; i++ ) {
+		if ( t->RFP[i] != 1 ) continue;
+		for ( int n = 1; n < 7; n++ ) {
+			q[n].fill(t->Phi[i], t->weight[i]);
+		}
+	}
 	if ( b2PartGap_ ) {
 		for ( int i = 0; i < t->Mult; i++ ) {
 			if ( t->RFP[i] != 1 ) continue;
 			for ( int n = 1; n < 7; n++ ) {
-				q[n].fill(t->Phi[i], t->weight[i]);
 				// ref 2part gap
 				for ( int j = i+1; j < t->Mult; j++ ) {
 					if ( t->RFP[j] != 1 ) continue;
 					if ( fabs(t->Eta[i] - t->Eta[j]) < dEtaGap_ ) continue;
-					rQGap[n] += cos( n*( t->Phi[i] - t->Phi[j] ) ) * t->weight[i] * t->weight[j];
+					rQGap[n] += cos( n*( t->Phi[j] - t->Phi[i] ) ) * t->weight[i] * t->weight[j];
 					wQGap[n] += t->weight[i] * t->weight[j];
-				}
-				// pt diff 2part gap
-				for ( int ipt = 0; ipt < nPtBins; ipt++ ) {
-					for ( int j = i+1; j < t->Mult; j++ ) {
-						if ( fabs(t->Eta[i] - t->Eta[j]) < dEtaGap_ ) continue;
-						if ( t->Eta[j] < poimineta_ or t->Eta[j] > poimaxeta_ ) continue;
-						if ( t->Pt[j] < poiptmin_ or t->Pt[j] > poiptmax_ ) continue;
-						if ( t->Pt[j] < ptbins[ipt] || t->Pt[j] > ptbins[ipt+1] ) continue;
-
-						rQpGap[n][ipt] += cos( n*( t->Phi[i] - t->Phi[j] ) ) * t->weight[i] * t->weight[j];
-						wQpGap[n][ipt] += t->weight[i] * t->weight[j];
-					}
-				}
-
-				// eta diff 2part gap
-				for ( int ieta = 0; ieta < nEtaBins; ieta++ ) {
-					for ( int j = i+1; j < t->Mult; j++ ) {
-						if ( fabs(t->Eta[i] - t->Eta[j]) < dEtaGap_ ) continue;
-						if ( t->Pt[j] < rfpptmin_ or t->Pt[j] > rfpptmax_ ) continue;
-						if ( t->Eta[j] < etabins[ieta] || t->Eta[j] > etabins[ieta+1] ) continue;
-
-						rQetaGap[n][ieta] += cos( n*( t->Phi[i] - t->Phi[j] ) ) * t->weight[i] * t->weight[j];
-						wQetaGap[n][ieta] += t->weight[i] * t->weight[j];
-					}
 				}
 			}
 		}
+		for ( int i = 0; i < t->Mult; i++ ) {
+			if ( t->RFP[i] != 1 ) continue;
+			for ( int n = 1; n < 7; n++ ) {
+				for ( int j = 0; j < t->Mult; j++ ) {
+					if ( j == i ) continue;
+					if ( fabs(t->Eta[i] - t->Eta[j]) < dEtaGap_ ) continue;
+					if ( t->Eta[j] < poimineta_ or t->Eta[j] > poimaxeta_ ) continue;
+					if ( t->Pt[j] < poiptmin_ or t->Pt[j] > poiptmax_ ) continue;
+				}
+			}
+		}
+
+//				// pt diff 2part gap
+//				for ( int ipt = 0; ipt < nPtBins; ipt++ ) {
+//					for ( int j = i+1; j < t->Mult; j++ ) {
+//						if ( fabs(t->Eta[i] - t->Eta[j]) < dEtaGap_ ) continue;
+//						if ( t->Eta[j] < poimineta_ or t->Eta[j] > poimaxeta_ ) continue;
+//						if ( t->Pt[j] < poiptmin_ or t->Pt[j] > poiptmax_ ) continue;
+//						if ( t->Pt[j] < ptbins[ipt] || t->Pt[j] > ptbins[ipt+1] ) continue;
+//
+//						rQpGap[n][ipt] += cos( n*( t->Phi[i] - t->Phi[j] ) ) * t->weight[i] * t->weight[j];
+//						wQpGap[n][ipt] += t->weight[i] * t->weight[j];
+//					}
+//				}
+//
+//				// eta diff 2part gap
+//				for ( int ieta = 0; ieta < nEtaBins; ieta++ ) {
+//					for ( int j = i+1; j < t->Mult; j++ ) {
+//						if ( fabs(t->Eta[i] - t->Eta[j]) < dEtaGap_ ) continue;
+//						if ( t->Pt[j] < rfpptmin_ or t->Pt[j] > rfpptmax_ ) continue;
+//						if ( t->Eta[j] < etabins[ieta] || t->Eta[j] > etabins[ieta+1] ) continue;
+//
+//						rQetaGap[n][ieta] += cos( n*( t->Phi[i] - t->Phi[j] ) ) * t->weight[i] * t->weight[j];
+//						wQetaGap[n][ieta] += t->weight[i] * t->weight[j];
+//					}
+//				}
+//			}
+//		}
 	}
 
 	correlations::Result r[7][4];
@@ -822,44 +964,9 @@ QWCumuV3::analyzeData(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	for(TrackCollection::const_iterator itTrack = tracks->begin();
 			itTrack != tracks->end();
 			++itTrack) {
-		if ( itTrack->charge() == 0 ) continue;
-		if ( !itTrack->quality(reco::TrackBase::highPurity) ) continue;
-		if ( fabs(itTrack->eta()) > 2.4 ) continue;
-
-		bool bPix = false;
-		int nHits = itTrack->numberOfValidHits();
-//		std::cout << __LINE__ << "\tnHits = " << nHits << std::endl;
-		if ( itTrack->pt() < 2.4 and (nHits==3 or nHits==4 or nHits==5 or nHits==6) ) bPix = true;
-		if ( not bPix ) {
-			if ( nHits < 11 ) continue;
-			if ( itTrack->normalizedChi2() / itTrack->hitPattern().trackerLayersWithMeasurement() > 0.15 ) {
-				continue;
-			}
-			if ( itTrack->ptError()/itTrack->pt() > pterrorpt_ ) {
-				continue;
-			}
-			if ( 	itTrack->pt() > 2.4 and
-				itTrack->originalAlgo() != 4 and
-				itTrack->originalAlgo() != 5 and
-				itTrack->originalAlgo() != 6 and
-				itTrack->originalAlgo() != 7
-			) {
-				continue;
-			}
-
-			double d0 = -1.* itTrack->dxy(v1);
-			double derror=sqrt(itTrack->dxyError()*itTrack->dxyError()+vxError*vyError);
-			if ( fabs( d0/derror ) > d0d0error_ ) {
-				continue;
-			}
-
-			double dz=itTrack->dz(v1);
-			double dzerror=sqrt(itTrack->dzError()*itTrack->dzError()+vzError*vzError);
-			if ( fabs( dz/dzerror ) > dzdzerror_ ) {
-				continue;
-			}
-			if ( !CaloMatch(*itTrack, iEvent, itTrack - tracks->begin()) ) continue;
-		}
+		if ( sTrackQuality == HIReco and not TrackQuality_HIReco(itTrack, v1) ) continue;
+		else if ( sTrackQuality == ppReco and not TrackQuality_ppReco(itTrack, v1) ) continue;
+		else if ( sTrackQuality == Pixel  and not TrackQuality_Pixel (itTrack, v1) ) continue;
 
 		t->RFP[t->Mult] = 1;
 		t->Charge[t->Mult] = itTrack->charge();
