@@ -120,7 +120,6 @@ class QWCumuV3 : public edm::EDAnalyzer {
 		bool	bEP_;
 		bool	b2PartGap_;
 		int	EPlvl_;
-		std::vector<int> algoParameters_;
 
 		unsigned int	nvtx_;
 		int	sGenPreset_;

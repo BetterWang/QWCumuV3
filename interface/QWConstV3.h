@@ -14,7 +14,7 @@ const double ptbins[] = {
 */
 const double ptbins[25] = {
                 0.3,  0.4,   0.5,  0.6,  0.8, 1.0, 1.25,  1.5,  2.0,  2.5,  3.0,  3.5,   4.0, 5.0, 6.0, 7.0, 8.0,
-		10.0, 12.0, 14.0, 20.0, 26.0, 1000000.0}; // pPb pt binning nPtBins = 24;
+		10.0, 12.0, 14.0, 20.0, 26.0, 35.0, 45.0, 1000000.0}; // pPb pt binning nPtBins = 24;
 const Int_t nPtBins = sizeof(ptbins)/sizeof(double)-1;
 
 const double etabins[] = {

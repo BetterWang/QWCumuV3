@@ -62,14 +62,12 @@ QWCumuV3::QWCumuV3(const edm::ParameterSet& iConfig)
 	,	vertexToken_( consumes<reco::VertexCollection>(iConfig.getUntrackedParameter<edm::InputTag>("vertexSrc_")) )
 	,	epToken_( consumes<reco::EvtPlaneCollection>(iConfig.getUntrackedParameter<edm::InputTag>("epSrc", string("hiEvtPlane") )) )
 	,	bacc(false)
-	,	algoParameters_(iConfig.getParameter<std::vector<int> >("algoParameters"))
 {
 	//now do what ever initialization is needed
 	minvz_ = iConfig.getUntrackedParameter<double>("minvz_", -15.);
 	maxvz_ = iConfig.getUntrackedParameter<double>("maxvz_", 15.);
 	dzdzerror_ = iConfig.getUntrackedParameter<double>("dzdzerror_", 3.);
 	d0d0error_ = iConfig.getUntrackedParameter<double>("d0d0error_", 3.);
-	chi2_ = iConfig.getUntrackedParameter<double>("chi2_", 40);
 	pterrorpt_ = iConfig.getUntrackedParameter<double>("pterrorpt_", 0.1);
 
 	rfpmineta_ = iConfig.getUntrackedParameter<double>("rfpmineta_", -2.4);
@@ -85,7 +83,7 @@ QWCumuV3::QWCumuV3(const edm::ParameterSet& iConfig)
 	fweight_ = iConfig.getUntrackedParameter<edm::InputTag>("fweight_", string("NA"));
 	facceptance_ = iConfig.getUntrackedParameter<edm::InputTag>("facceptance_", string("NA"));
 	charge_ = iConfig.getUntrackedParameter<int>("charge_", 0);
-	dEtaGap_ = iConfig.getUntrackedParameter<double>("dEtaGap_", 2.0);
+	dEtaGap_ = iConfig.getUntrackedParameter<double>("dEtaGap", 2.0);
 	bFak = iConfig.getUntrackedParameter<bool>("bFak_", false);
 	bEff = iConfig.getUntrackedParameter<bool>("bEff_", false);
 	bPhiEta = iConfig.getUntrackedParameter<bool>("bPhiEta_", false);
@@ -120,6 +118,7 @@ QWCumuV3::QWCumuV3(const edm::ParameterSet& iConfig)
 	} else {
 		sTrackQuality = trackUndefine;
 	}
+	cout << "!!! using Track cuts " << sTrackQuality << endl;
 
 	string streff = fweight_.label();
 	if ( streff == string("NA") ) {
@@ -357,17 +356,6 @@ QWCumuV3::getNoffCent(const edm::Event& iEvent, const edm::EventSetup& iSetup, i
 		if ( fabs( d0/derror ) > 3. ) continue;
 		if ( itTrack->ptError()/itTrack->pt() > 0.1 ) continue;
 		if ( itTrack->numberOfValidHits() < 11 ) continue;
-//		bool b_pix = itTrack->numberOfValidHits() < 7;
-//		if ( b_pix ) {
-//			if ( fabs( dz/dzerror ) > dzdzerror_ ) continue;
-//			if ( itTrack->normalizedChi2() > chi2_ ) continue;
-//		} else {
-//			// full track
-//			if ( fabs( dz/dzerror ) > 3. ) continue;
-//			if ( fabs( d0/derror ) > 3. ) continue;
-//			if ( itTrack->ptError()/itTrack->pt() > pterrorpt_ ) continue;
-//			if ( itTrack->numberOfValidHits() < 12 ) continue;
-//		}
 
 		Noff++;
 	}
@@ -567,13 +555,19 @@ QWCumuV3::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 				for ( int j = 0; j < t->Mult; j++ ) {
 					if ( j == i ) continue;
 					if ( fabs(t->Eta[i] - t->Eta[j]) < dEtaGap_ ) continue;
-					if ( t->Eta[j] < poimineta_ or t->Eta[j] > poimaxeta_ ) continue;
+					if ( t->Eta[j] < rfpmineta_ or t->Eta[j] > rfpmaxeta_ ) continue;
 					if ( t->Pt[j] < poiptmin_ or t->Pt[j] > poiptmax_ ) continue;
 					int ipt = 0;
 					while ( ptbins[ipt+1] > t->Pt[j] ) ipt++;
 					rQpGap[n][ipt] += cos( n*( t->Phi[j] - t->Phi[i] ) ) * t->weight[i] * t->weight[j];
 					wQpGap[n][ipt] += t->weight[i] * t->weight[j];
 
+				}
+				for ( int j = 0; j < t->Mult; j++ ) {
+					if ( j == i ) continue;
+					if ( fabs(t->Eta[i] - t->Eta[j]) < dEtaGap_ ) continue;
+					if ( t->Eta[j] < -2.4 or t->Eta[j] > 2.4 ) continue;
+					if ( t->Pt[j] < rfpptmin_ or t->Pt[j] > rfpptmax_ ) continue;
 					int ieta = 0;
 					while ( etabins[ieta+1] > t->Eta[j] ) ieta++;
 					rQetaGap[n][ieta] += cos( n*( t->Phi[j] - t->Phi[i] ) ) * t->weight[i] * t->weight[j];
