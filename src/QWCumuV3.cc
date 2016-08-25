@@ -227,33 +227,31 @@ QWCumuV3::QWCumuV3(const edm::ParameterSet& iConfig)
 	trV->Branch("wQGap22", &wQGap[2], "wQGap22/D");
 	trV->Branch("wQpGap22", &wQpGap[2], "wQpGap22[24]/D");
 	trV->Branch("wQetaGap22", &wQetaGap[2], "wQetaGap22[24]/D");
+	trV->Branch("wQcGap22", &wQcGap[2], "wQcGap22[2]/D");
+
 
 	for ( int n = 2; n < 7; n++ ) {
 		trV->Branch(Form("rQGap%i%i", n, 2), &rQGap[n], Form("rQGap%i%i/D", n, 2));
 		trV->Branch(Form("rQpGap%i%i", n, 2), &rQpGap[n], Form("rQpGap%i%i[24]/D", n, 2));
 		trV->Branch(Form("rQetaGap%i%i", n, 2), &rQetaGap[n], Form("rQetaGap%i%i[24]/D", n, 2));
+		trV->Branch(Form("rQcGap%i%i", n, 2), &rQcGap[n], Form("rQcGap%i%i[2]/D", n, 2));
+	}
 
-		for ( int np = 0; np < 4; np++ ) {
+	for ( int np = 0; np < 4; np++ ) {
+		for ( int n = 2; n < 7; n++ ) {
 			trV->Branch(Form("rQ%i%i", n, 2+2*np), &rQ[n][np], Form("rQ%i%i/D", n, 2+2*np));
-//			trV->Branch(Form("iQ%i%i", n, 2+2*np), &iQ[n][np], Form("iQ%i%i/D", n, 2+2*np));
-			trV->Branch(Form("wQ%i%i", n, 2+2*np), &wQ[n][np], Form("wQ%i%i/D", n, 2+2*np));
-
 			trV->Branch(Form("rX%i%i", n, 2+2*np), &rX[n][np], Form("rX%i%i/D", n, 2+2*np));
-//			trV->Branch(Form("iX%i%i", n, 2+2*np), &iX[n][np], Form("iX%i%i/D", n, 2+2*np));
-			trV->Branch(Form("wX%i%i", n, 2+2*np), &wX[n][np], Form("wX%i%i/D", n, 2+2*np));
-
 			trV->Branch(Form("rQ%i%ic", n, 2+2*np), rQc[n][np], Form("rQ%i%ic[2]/D", n, 2+2*np));
-//			trV->Branch(Form("iQ%i%ic", n, 2+2*np), iQc[n][np], Form("iQ%i%ic[2]/D", n, 2+2*np));
-			trV->Branch(Form("wQ%i%ic", n, 2+2*np), wQc[n][np], Form("wQ%i%ic[2]/D", n, 2+2*np));
-
 			trV->Branch(Form("rQ%i%ip", n, 2+2*np), rQp[n][np], Form("rQ%i%ip[24]/D", n, 2+2*np));
-//			trV->Branch(Form("iQ%i%ip", n, 2+2*np), iQp[n][np], Form("iQ%i%ip[24]/D", n, 2+2*np));
-			trV->Branch(Form("wQ%i%ip", n, 2+2*np), wQp[n][np], Form("wQ%i%ip[24]/D", n, 2+2*np));
-
 			trV->Branch(Form("rQ%i%ieta", n, 2+2*np), rQeta[n][np], Form("rQ%i%ieta[24]/D", n, 2+2*np));
-//			trV->Branch(Form("iQ%i%ieta", n, 2+2*np), iQeta[n][np], Form("iQ%i%ieta[24]/D", n, 2+2*np));
-			trV->Branch(Form("wQ%i%ieta", n, 2+2*np), wQeta[n][np], Form("wQ%i%ieta[24]/D", n, 2+2*np));
 		}
+
+		int n = 2;
+		trV->Branch(Form("wQ%i%i", n, 2+2*np), &wQ[n][np], Form("wQ%i%i/D", n, 2+2*np));
+		trV->Branch(Form("wX%i%i", n, 2+2*np), &wX[n][np], Form("wX%i%i/D", n, 2+2*np));
+		trV->Branch(Form("wQ%i%ic", n, 2+2*np), wQc[n][np], Form("wQ%i%ic[2]/D", n, 2+2*np));
+		trV->Branch(Form("wQ%i%ip", n, 2+2*np), wQp[n][np], Form("wQ%i%ip[24]/D", n, 2+2*np));
+		trV->Branch(Form("wQ%i%ieta", n, 2+2*np), wQeta[n][np], Form("wQ%i%ieta[24]/D", n, 2+2*np));
 	}
 
 	initQ();
@@ -497,6 +495,11 @@ QWCumuV3::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	for ( int n = 0; n < 7; n++ ) {
 		rQGap[n] = 0;
 		wQGap[n] = 0;
+		rQcGap[n][0] = 0;
+		wQcGap[n][0] = 0;
+		rQcGap[n][1] = 0;
+		wQcGap[n][1] = 0;
+
 		for ( int np = 0; np < 4; np++ ) {
 			rQ[n][np] = 0;
 			iQ[n][np] = 0;
@@ -572,6 +575,19 @@ QWCumuV3::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 					while ( etabins[ieta+1] > t->Eta[j] ) ieta++;
 					rQetaGap[n][ieta] += cos( n*( t->Phi[j] - t->Phi[i] ) ) * t->weight[i] * t->weight[j];
 					wQetaGap[n][ieta] += t->weight[i] * t->weight[j];
+				}
+				for ( int j = 0; j < t->Mult; j++ ) {
+					if ( j == i ) continue;
+					if ( t->RFP[j] != 1) continue;
+					if ( fabs(t->Eta[i] - t->Eta[j]) < dEtaGap_ ) continue;
+
+					if ( t->Charge[j] < 0 ) {
+						rQcGap[n][0] += cos( n*( t->Phi[j] - t->Phi[i] ) ) * t->weight[i] * t->weight[j]
+						wQcGap[n][0] += t->weight[i] * t->weight[j]
+					} else {
+						rQcGap[n][1] += cos( n*( t->Phi[j] - t->Phi[i] ) ) * t->weight[i] * t->weight[j]
+						wQcGap[n][1] += t->weight[i] * t->weight[j]
+					}
 				}
 			}
 		}

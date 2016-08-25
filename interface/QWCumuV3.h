@@ -172,6 +172,9 @@ class QWCumuV3 : public edm::EDAnalyzer {
 		double rQetaGap[7][24];
 		double wQetaGap[7][24];
 
+		double rQcGap[7][2];
+		double wQcGap[7][2];
+
 		double rQ[7][4];
 		double iQ[7][4];
 		double wQ[7][4];
