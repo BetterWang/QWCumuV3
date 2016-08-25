@@ -158,6 +158,11 @@ QWCumuV3::QWCumuV3(const edm::ParameterSet& iConfig)
 						for ( int c = 100; c < 200; c++ ) {
 							hEff_cbin[c] = h;
 						}
+					} else if ( streff == string("Hydjet_eff_mult_v1.root") ) {
+						TH2D * h = (TH2D*) fEffFak->Get("rTotalEff3D_1");
+						for ( int c = 0; c < 200; c++ ) {
+							hEff_cbin[c] = h;
+						}
 					}
 				}
 				cout << "!!! eff histo done" << endl;
@@ -582,11 +587,11 @@ QWCumuV3::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 					if ( fabs(t->Eta[i] - t->Eta[j]) < dEtaGap_ ) continue;
 
 					if ( t->Charge[j] < 0 ) {
-						rQcGap[n][0] += cos( n*( t->Phi[j] - t->Phi[i] ) ) * t->weight[i] * t->weight[j]
-						wQcGap[n][0] += t->weight[i] * t->weight[j]
+						rQcGap[n][0] += cos( n*( t->Phi[j] - t->Phi[i] ) ) * t->weight[i] * t->weight[j];
+						wQcGap[n][0] += t->weight[i] * t->weight[j];
 					} else {
-						rQcGap[n][1] += cos( n*( t->Phi[j] - t->Phi[i] ) ) * t->weight[i] * t->weight[j]
-						wQcGap[n][1] += t->weight[i] * t->weight[j]
+						rQcGap[n][1] += cos( n*( t->Phi[j] - t->Phi[i] ) ) * t->weight[i] * t->weight[j];
+						wQcGap[n][1] += t->weight[i] * t->weight[j];
 					}
 				}
 			}
