@@ -566,10 +566,9 @@ QWCumuV3::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 					if ( t->Eta[j] < rfpmineta_ or t->Eta[j] > rfpmaxeta_ ) continue;
 					if ( t->Pt[j] < poiptmin_ or t->Pt[j] > poiptmax_ ) continue;
 					int ipt = 0;
-					while ( ptbins[ipt+1] > t->Pt[j] ) ipt++;
+					while ( t->Pt[j] > ptbins[ipt+1] ) ipt++;
 					rQpGap[n][ipt] += cos( n*( t->Phi[j] - t->Phi[i] ) ) * t->weight[i] * t->weight[j];
 					wQpGap[n][ipt] += t->weight[i] * t->weight[j];
-
 				}
 				for ( int j = 0; j < t->Mult; j++ ) {
 					if ( j == i ) continue;
@@ -577,7 +576,7 @@ QWCumuV3::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 					if ( t->Eta[j] < -2.4 or t->Eta[j] > 2.4 ) continue;
 					if ( t->Pt[j] < rfpptmin_ or t->Pt[j] > rfpptmax_ ) continue;
 					int ieta = 0;
-					while ( etabins[ieta+1] > t->Eta[j] ) ieta++;
+					while ( t->Eta[j] > etabins[ieta+1] ) ieta++;
 					rQetaGap[n][ieta] += cos( n*( t->Phi[j] - t->Phi[i] ) ) * t->weight[i] * t->weight[j];
 					wQetaGap[n][ieta] += t->weight[i] * t->weight[j];
 				}
