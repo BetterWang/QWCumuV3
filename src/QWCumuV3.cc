@@ -916,8 +916,8 @@ QWCumuV3::analyzeData(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	VertexCollection recoVertices = *vertexCollection;
 	if ( recoVertices.size() > nvtx_ ) return;
 	sort(recoVertices.begin(), recoVertices.end(), [](const reco::Vertex &a, const reco::Vertex &b){
-			if ( a.tracksSize() == b.tracksSize() ) return a.chi2() < b.chi2() ? true:false;
-			return a.tracksSize() > b.tracksSize() ? true:false;
+			if ( a.tracksSize() == b.tracksSize() ) return a.chi2() < b.chi2();
+			return a.tracksSize() > b.tracksSize();
 			});
 
 	int primaryvtx = 0;
