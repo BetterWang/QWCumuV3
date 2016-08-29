@@ -230,16 +230,16 @@ QWCumuV3::QWCumuV3(const edm::ParameterSet& iConfig)
 //	trV->Branch("EventId", &t->EventId, "EventId/I");
 
 	trV->Branch("wQGap22", &wQGap[2], "wQGap22/D");
-	trV->Branch("wQpGap22", &wQpGap[2], "wQpGap22[24]/D");
-	trV->Branch("wQetaGap22", &wQetaGap[2], "wQetaGap22[24]/D");
-	trV->Branch("wQcGap22", &wQcGap[2], "wQcGap22[2]/D");
+	trV->Branch("wQpGap22", wQpGap[2], "wQpGap22[24]/D");
+	trV->Branch("wQetaGap22", wQetaGap[2], "wQetaGap22[24]/D");
+	trV->Branch("wQcGap22", wQcGap[2], "wQcGap22[2]/D");
 
 
 	for ( int n = 2; n < 7; n++ ) {
 		trV->Branch(Form("rQGap%i%i", n, 2), &rQGap[n], Form("rQGap%i%i/D", n, 2));
-		trV->Branch(Form("rQpGap%i%i", n, 2), &rQpGap[n], Form("rQpGap%i%i[24]/D", n, 2));
-		trV->Branch(Form("rQetaGap%i%i", n, 2), &rQetaGap[n], Form("rQetaGap%i%i[24]/D", n, 2));
-		trV->Branch(Form("rQcGap%i%i", n, 2), &rQcGap[n], Form("rQcGap%i%i[2]/D", n, 2));
+		trV->Branch(Form("rQpGap%i%i", n, 2), rQpGap[n], Form("rQpGap%i%i[24]/D", n, 2));
+		trV->Branch(Form("rQetaGap%i%i", n, 2), rQetaGap[n], Form("rQetaGap%i%i[24]/D", n, 2));
+		trV->Branch(Form("rQcGap%i%i", n, 2), rQcGap[n], Form("rQcGap%i%i[2]/D", n, 2));
 	}
 
 	for ( int np = 0; np < 4; np++ ) {
