@@ -5,14 +5,14 @@ from httplib import HTTPException
 
 config = config()
 
-config.General.requestName = 'HIMB5_ppReco_eff_2part_v3'
+config.General.requestName = 'HIMB3_Reco_eff_2part_v1'
 config.General.workArea = 'CrabArea'
 config.General.transferOutputs = True
 config.General.transferLogs = True
 config.JobType.pluginName = 'Analysis'
-config.JobType.psetName = 'qwcumu_PbPb15_HIMB_ppReco_2part_v2.py'
-config.JobType.inputFiles = ['Hydjet_eff_mult_v1.root']
-config.Data.inputDataset = '/HIMinimumBias5/HIRun2015-02May2016-v1/AOD'
+config.JobType.psetName = 'qwcumu_PbPb15_HIMB_RECO_2part_v1.py'
+config.JobType.inputFiles = ['PbPb_dijet_TT_5TeV_v2.root']
+config.Data.inputDataset = '/HIMinimumBias3/qwang-HIMinBias_v2-ce439b1c24fa1bf3a491f2ccb0fd72a9/USER'
 config.Data.inputDBS = 'global'
 config.Data.splitting = 'LumiBased'
 config.Data.unitsPerJob = 10

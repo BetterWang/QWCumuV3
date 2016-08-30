@@ -4,6 +4,7 @@ MC
 PbPb
 PbPb2015
 PbPb2015Pix
+PbPb2015_cumu
 pPb
 test/*
 !test/qw*.py
