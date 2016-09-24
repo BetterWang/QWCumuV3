@@ -10,6 +10,7 @@ process.load('Configuration.StandardSequences.MagneticField_38T_cff')
 #process.load('Configuration.StandardSequences.Reconstruction_cff')
 #process.load('Configuration.StandardSequences.ReconstructionHeavyIons_cff')
 process.load('Configuration.StandardSequences.EndOfProcess_cff')
+#process.load('HeavyIonsAnalysis.Configuration.collisionEventSelection_cff')
 #process.load('Configuration.EventContent.EventContentHeavyIons_cff')
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_condDBv2_cff')
 
@@ -88,12 +89,9 @@ process.TFileService = cms.Service("TFileService",
 process.load("RecoHI.HiCentralityAlgos.CentralityBin_cfi")
 process.centralityBin.Centrality = cms.InputTag("hiCentrality")
 process.centralityBin.centralityVariable = cms.string("HFtowers")
-#process.centralityBin = cms.EDProducer('QWPPRecoCentBinProducer')
 
 process.load('HeavyIonsAnalysis.Configuration.collisionEventSelection_cff')
 process.clusterCompatibilityFilter.clusterPars = cms.vdouble(0.0,0.006)
-#process.load('HeavyIonsAnalysis.Configuration.hfCoincFilter_cff')
-#process.primaryVertexFilter.src = cms.InputTag("offlinePrimaryVertices")
 
 process.eventSelection = cms.Sequence(
         process.hfCoincFilter3
@@ -101,9 +99,7 @@ process.eventSelection = cms.Sequence(
         + process.clusterCompatibilityFilter
 )
 
-#process.hardprobe = cms.Path(process.hltMB*process.eventSelection*process.centralityBin*process.cumulantMB)
-process.ana = cms.Path(process.eventSelection*process.centralityBin*process.cumulantMB)
-#process.ana = cms.Path(process.eventSelection*process.centralityBin)
+process.ana = cms.Path(process.hltMB*process.eventSelection*process.centralityBin*process.cumulantMB)
 
 process.schedule = cms.Schedule(
 	process.ana,
