@@ -30,24 +30,6 @@
 // class declaration
 //
 
-const int NMAX_TRK = 10000;
-typedef struct QWEvent_ {
-	int     Cent;
-	int     Mult;
-	double  vz;
-	int	Noff;
-	double  Pt[NMAX_TRK];
-	double  Eta[NMAX_TRK];
-	double  Phi[NMAX_TRK];
-	int     Charge[NMAX_TRK];
-	double	rEff[NMAX_TRK];
-	double	rFak[NMAX_TRK];
-	double	weight[NMAX_TRK];
-	int	RFP[NMAX_TRK];
-	int     RunId;
-	int     EventId;
-} QWEvent;
-
 ///////////////// Class ////////////////////////////
 
 class QWCumuV3 : public edm::EDAnalyzer {
@@ -71,93 +53,33 @@ class QWCumuV3 : public edm::EDAnalyzer {
 		virtual void endLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&);
 
 	/////////////////////////////////////////////
-		int getNoffCent(const edm::Event&, const edm::EventSetup&, int& Noff);
-		bool TrackQuality_ppReco(const reco::TrackCollection::const_iterator&, const reco::VertexCollection&);
-		bool TrackQuality_HIReco(const reco::TrackCollection::const_iterator&, const reco::VertexCollection&);
-		bool TrackQuality_Pixel(const reco::TrackCollection::const_iterator&, const reco::VertexCollection&);
 		//TRandom3 * gRandom;
 		// ----------member data ---------------------------
-		edm::InputTag					trackTag_;
-		edm::EDGetTokenT<reco::TrackCollection>		trackToken_;
-		edm::EDGetTokenT<reco::GenParticle>		trackGenToken_;
-		edm::EDGetTokenT<int>				centralityToken_;
-		edm::EDGetTokenT<reco::VertexCollection>	vertexToken_;
-		edm::EDGetTokenT<reco::EvtPlaneCollection>	epToken_;
-		//edm::InputTag tracks_; //used to select what tracks to read from configuration file
-		//edm::InputTag centrality_;	// centrality
-		///edm::InputTag vertexSrc_;
-		edm::EDGetTokenT<reco::PFCandidateCollection>	pfToken_;
 
-		edm::InputTag fweight_;
-		edm::InputTag facceptance_;
-	/////////////////////////////////////////////
-		enum	TrackCut {trackUndefine = 0, ppReco = 1, HIReco, Pixel};
-		TrackCut sTrackQuality;
+		edm::InputTag					trackEta_;
+		edm::InputTag					trackPhi_;
+		edm::InputTag					trackWeight_;
+		edm::InputTag					vertexZ_;
+
+		edm::InputTag					centralityTag_;
+
 		double	minvz_, maxvz_;
-		double	dzdzerror_;
-		double	d0d0error_;
-		double	chi2_;
-		double	pterrorpt_;
+
+		unsigned int	nvtx_;
+	/////////////////////////////////////////////
 		double	rfpmineta_, rfpmaxeta_;
 		double	poimineta_, poimaxeta_;
 		double	rfpptmin_, rfpptmax_;
 		double	poiptmin_, poiptmax_;
-		int	charge_;
+
+		bool	b2PartGap_;
 		double	dEtaGap_;
 
-		bool	bFak;
-		bool	bEff;
-		bool	bacc;
-		bool	bPhiEta;
-		bool	bCentNoff;
-		bool	bSim_;
-		bool	bCaloMatching_;
-		int	Noffmin_;
-		int	Noffmax_;
 		int	cmode_;
-		bool	bGen_;
-		bool	bFlipEta_;
-		bool	bEP_;
-		bool	b2PartGap_;
-		int	EPlvl_;
 
 		unsigned int	nvtx_;
-		int	sGenPreset_;
 
-//		double	effCut_;
-		double	reso_;
-		QWEvent * t;
-		TFile	* fEffFak;
-		TFile	* facc;
 	/////////////////////////////////////////////
-		TH1D * hPt[nCentBins];
-		TH2D * hPhiEta[nCentBins][nPtBins][2];
-
-		TH2D	* hdNdPtdEta[nCentBins];
-		TH2D	* hdNdPtdEtaPt[nCentBins];
-
-		TH2D * hEff_cbin[200];
-		TH2D * hFak_cbin[200];
-
-		TH2D * hacc[nCentBins][nPtBins][2];
-
-		TH2D * hEP[nPtBins][7];
-		TH2D * hSP[nPtBins][7];
-		TH2D * iEP[nPtBins][7];
-		TH2D * iSP[nPtBins][7];
-		TH2D * hMult;
-
-		TH2D * hEPresAB;
-		TH2D * hEPresAC;
-		TH2D * hEPresBC;
-
-		TH2D * hSPresAB;
-		TH2D * hSPresAC;
-		TH2D * hSPresBC;
-
-		TH2D * hMultRes;
-
-//		TNtupleD * ntResult;
 		TTree * trV;
 
 		int gNoff;
