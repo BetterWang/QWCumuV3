@@ -58,6 +58,7 @@ using namespace std;
 QWCumuV3::QWCumuV3(const edm::ParameterSet& iConfig):
 	trackEta_( iConfig.getUntrackedParameter<edm::InputTag>("trackEta") ),
 	trackPhi_( iConfig.getUntrackedParameter<edm::InputTag>("trackPhi") ),
+	trackPt_( iConfig.getUntrackedParameter<edm::InputTag>("trackPt") ),
 	trackWeight_( iConfig.getUntrackedParameter<edm::InputTag>("trackWeight") ),
 	trackCharge_( iConfig.getUntrackedParameter<edm::InputTag>("trackCharge") ),
 	vertexZ_( iConfig.getUntrackedParameter<edm::InputTag>("vertexZ") ),
@@ -82,6 +83,14 @@ QWCumuV3::QWCumuV3(const edm::ParameterSet& iConfig):
 
 	cmode_ = iConfig.getUntrackedParameter<int>("cmode", 1);
 	nvtx_ = iConfig.getUntrackedParameter<int>("nvtx", 100);
+
+        consumes<int>(centralityTag_);
+        consumes<std::vector<double> >(trackEta_);
+        consumes<std::vector<double> >(trackPhi_);
+        consumes<std::vector<double> >(trackPt_);
+        consumes<std::vector<double> >(trackWeight_);
+        consumes<std::vector<double> >(trackCharge_);
+        consumes<std::vector<double> >(vertexZ_);
 
 	for ( int n = 1; n < 7; n++ ) {
 		q[n] = correlations::QVector(0, 0, true);
@@ -126,6 +135,8 @@ QWCumuV3::QWCumuV3(const edm::ParameterSet& iConfig):
 		trV->Branch(Form("wQ%i%ieta", n, 2+2*np), wQeta[n][np], Form("wQ%i%ieta[24]/D", n, 2+2*np));
 	}
 
+	cout << " cmode_ = " << cmode_ << endl;
+
 	initQ();
 }
 
@@ -146,6 +157,7 @@ QWCumuV3::~QWCumuV3()
 void
 QWCumuV3::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
+	using namespace edm;
 //	analyzeData(iEvent, iSetup);
 
 	Handle<std::vector<double> >	hEta;
@@ -162,15 +174,17 @@ QWCumuV3::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	iEvent.getByLabel(trackCharge_, hCharge);
 	iEvent.getByLabel(vertexZ_, 	hVz);
 
-	unsigned int sz = hEta->size();
+	int sz = int(hEta->size());
 	if ( sz == 0 ) return;
 
 	std::vector<int>	RFP;
 	RFP.reserve(sz);
+	int rfp_sz = 0;
 	for ( int i = 0; i < sz; i++ ) {
-		if ( hEta[i] < rfpmaxeta_ and hEta[i] > rfpmineta_
-		and hPt[i] < rfpmaxpt_ and hPt[i] > rfpminpt_ ) {
+		if ( (*hEta)[i] < rfpmaxeta_ and (*hEta)[i] > rfpmineta_
+		and (*hPt)[i] < rfpmaxpt_ and (*hPt)[i] > rfpminpt_ ) {
 			RFP[i] = 1;
+			rfp_sz++;
 		} else {
 			RFP[i] = 0;
 		}
@@ -220,7 +234,7 @@ QWCumuV3::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	for ( int i = 0; i < sz; i++ ) {
 		if ( RFP[i] != 1 ) continue;
 		for ( int n = 1; n < 7; n++ ) {
-			q[n].fill(hPhi[i], hWeight[i]);
+			q[n].fill((*hPhi)[i], (*hWeight)[i]);
 		}
 	}
 	if ( b2PartGap_ ) {
@@ -230,9 +244,9 @@ QWCumuV3::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 				// ref 2part gap
 				for ( int j = i+1; j < sz; j++ ) {
 					if ( RFP[j] != 1 ) continue;
-					if ( fabs(hEta[i] - hEta[j]) < dEtaGap_ ) continue;
-					rQGap[n] += cos( n*( hPhi[j] - hPhi[i] ) ) * hWeight[i] * hWeight[j];
-					wQGap[n] += hWeight[i] * hWeight[j];
+					if ( fabs((*hEta)[i] - (*hEta)[j]) < dEtaGap_ ) continue;
+					rQGap[n] += cos( n*( (*hPhi)[j] - (*hPhi)[i] ) ) * (*hWeight)[i] * (*hWeight)[j];
+					wQGap[n] += (*hWeight)[i] * (*hWeight)[j];
 				}
 			}
 		}
@@ -241,35 +255,35 @@ QWCumuV3::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 			for ( int n = 1; n < 7; n++ ) {
 				for ( int j = 0; j < sz; j++ ) {
 					if ( j == i ) continue;
-					if ( fabs(hEta[i] - hEta[j]) < dEtaGap_ ) continue;
-					if ( hEta[j] < rfpmineta_ or hEta[j] > rfpmaxeta_ ) continue;
-					if ( hPt[j] < poiptmin_ or hPt[j] > poiptmax_ ) continue;
+					if ( fabs((*hEta)[i] - (*hEta)[j]) < dEtaGap_ ) continue;
+					if ( (*hEta)[j] < rfpmineta_ or (*hEta)[j] > rfpmaxeta_ ) continue;
+					if ( (*hPt)[j] < poiminpt_ or (*hPt)[j] > poimaxpt_ ) continue;
 					int ipt = 0;
-					while ( hPt[j] > ptbins[ipt+1] ) ipt++;
-					rQpGap[n][ipt] += cos( n*( hPhi[j] - hPhi[i] ) ) * hWeight[i] * hWeight[j];
-					wQpGap[n][ipt] += hWeight[i] * hWeight[j];
+					while ( (*hPt)[j] > ptbins[ipt+1] ) ipt++;
+					rQpGap[n][ipt] += cos( n*( (*hPhi)[j] - (*hPhi)[i] ) ) * (*hWeight)[i] * (*hWeight)[j];
+					wQpGap[n][ipt] += (*hWeight)[i] * (*hWeight)[j];
 				}
 				for ( int j = 0; j < sz; j++ ) {
 					if ( j == i ) continue;
-					if ( fabs(hEta[i] - hEta[j]) < dEtaGap_ ) continue;
-					if ( hEta[j] < -2.4 or hEta[j] > 2.4 ) continue;
-					if ( hPt[j] < rfpptmin_ or hPt[j] > rfpptmax_ ) continue;
+					if ( fabs((*hEta)[i] - (*hEta)[j]) < dEtaGap_ ) continue;
+					if ( (*hEta)[j] < -2.4 or (*hEta)[j] > 2.4 ) continue;
+					if ( (*hPt)[j] < rfpminpt_ or (*hPt)[j] > rfpmaxpt_ ) continue;
 					int ieta = 0;
-					while ( hEta[j] > etabins[ieta+1] ) ieta++;
-					rQetaGap[n][ieta] += cos( n*( hPhi[j] - hPhi[i] ) ) * hWeight[i] * hWeight[j];
-					wQetaGap[n][ieta] += hWeight[i] * hWeight[j];
+					while ( (*hEta)[j] > etabins[ieta+1] ) ieta++;
+					rQetaGap[n][ieta] += cos( n*( (*hPhi)[j] - (*hPhi)[i] ) ) * (*hWeight)[i] * (*hWeight)[j];
+					wQetaGap[n][ieta] += (*hWeight)[i] * (*hWeight)[j];
 				}
 				for ( int j = 0; j < sz; j++ ) {
 					if ( j == i ) continue;
 					if ( RFP[j] != 1) continue;
-					if ( fabs(hEta[i] - hEta[j]) < dEtaGap_ ) continue;
+					if ( fabs((*hEta)[i] - (*hEta)[j]) < dEtaGap_ ) continue;
 
-					if ( hCharge[j] < 0 ) {
-						rQcGap[n][0] += cos( n*( hPhi[j] - hPhi[i] ) ) * hWeight[i] * hWeight[j];
-						wQcGap[n][0] += hWeight[i] * hWeight[j];
+					if ( (*hCharge)[j] < 0 ) {
+						rQcGap[n][0] += cos( n*( (*hPhi)[j] - (*hPhi)[i] ) ) * (*hWeight)[i] * (*hWeight)[j];
+						wQcGap[n][0] += (*hWeight)[i] * (*hWeight)[j];
 					} else {
-						rQcGap[n][1] += cos( n*( hPhi[j] - hPhi[i] ) ) * hWeight[i] * hWeight[j];
-						wQcGap[n][1] += hWeight[i] * hWeight[j];
+						rQcGap[n][1] += cos( n*( (*hPhi)[j] - (*hPhi)[i] ) ) * (*hWeight)[i] * (*hWeight)[j];
+						wQcGap[n][1] += (*hWeight)[i] * (*hWeight)[j];
 					}
 				}
 			}
@@ -300,7 +314,7 @@ QWCumuV3::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 			for ( int i = 0; i < sz; i++ ) {
 				if ( !RFP[i] ) continue;
 				correlations::QVector tq = q[n];
-				tq.unfill(hPhi[i], hWeight[i]);
+				tq.unfill((*hPhi)[i], (*hWeight)[i]);
 				correlations::FromQVector *cq = 0;
 				switch ( cmode_ ) {
 					case 1:
@@ -314,8 +328,8 @@ QWCumuV3::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 						break;
 				}
 				correlations::Result r = cq->calculate(np*2+1, hc[n]);
-				qp += hWeight[i] * correlations::Complex( TMath::Cos(hPhi[i] * n) , TMath::Sin(hPhi[i] * n) ) * r.sum();
-				wt += hWeight[i] * r.weight();
+				qp += (*hWeight)[i] * correlations::Complex( TMath::Cos((*hPhi)[i] * n) , TMath::Sin((*hPhi)[i] * n) ) * r.sum();
+				wt += (*hWeight)[i] * r.weight();
 				delete cq;
 			}
 			rX[n][np] = qp.real();
@@ -327,11 +341,11 @@ QWCumuV3::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 				qp = 0;
 				wt = 0;
 				for ( int i = 0; i < sz; i++ ) {
-					if ( hEta[i] < poimineta_ or hEta[i] > poimaxeta_ ) continue;
-					if ( hPt[i] < poiptmin_ or hPt[i] > poiptmax_ ) continue;
-					if ( hPt[i] < ptbins[ipt] || hPt[i] > ptbins[ipt+1] ) continue;
+					if ( (*hEta)[i] < poimineta_ or (*hEta)[i] > poimaxeta_ ) continue;
+					if ( (*hPt)[i] < poiminpt_ or (*hPt)[i] > poimaxpt_ ) continue;
+					if ( (*hPt)[i] < ptbins[ipt] || (*hPt)[i] > ptbins[ipt+1] ) continue;
 					correlations::QVector tq = q[n];
-					if ( RFP[i] ) tq.unfill(hPhi[i], hWeight[i]);
+					if ( RFP[i] ) tq.unfill((*hPhi)[i], (*hWeight)[i]);
 					correlations::FromQVector *cq = 0;
 					switch ( cmode_ ) {
 						case 1:
@@ -345,8 +359,8 @@ QWCumuV3::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 							break;
 					}
 					correlations::Result r = cq->calculate(np*2+1, hc[n]);
-					qp += hWeight[i] * correlations::Complex( TMath::Cos(hPhi[i] * n) , TMath::Sin(hPhi[i] * n) ) * r.sum();
-					wt += hWeight[i] * r.weight();
+					qp += (*hWeight)[i] * correlations::Complex( TMath::Cos((*hPhi)[i] * n) , TMath::Sin((*hPhi)[i] * n) ) * r.sum();
+					wt += (*hWeight)[i] * r.weight();
 					delete cq;
 				}
 				rQp[n][np][ipt] = qp.real();
@@ -358,10 +372,10 @@ QWCumuV3::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 				qp = 0;
 				wt = 0;
 				for ( int i = 0; i < sz; i++ ) {
-					if ( hPt[i] < rfpptmin_ or hPt[i] > rfpptmax_ ) continue;
-					if ( hEta[i] < etabins[ieta] || hEta[i] > etabins[ieta+1] ) continue;
+					if ( (*hPt)[i] < rfpminpt_ or (*hPt)[i] > rfpmaxpt_ ) continue;
+					if ( (*hEta)[i] < etabins[ieta] || (*hEta)[i] > etabins[ieta+1] ) continue;
 					correlations::QVector tq = q[n];
-					if ( RFP[i] ) tq.unfill(hPhi[i], hWeight[i]);
+					if ( RFP[i] ) tq.unfill((*hPhi)[i], (*hWeight)[i]);
 					correlations::FromQVector *cq = 0;
 					switch ( cmode_ ) {
 						case 1:
@@ -375,8 +389,8 @@ QWCumuV3::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 							break;
 					}
 					correlations::Result r = cq->calculate(np*2+1, hc[n]);
-					qp += hWeight[i] * correlations::Complex( TMath::Cos(hPhi[i] * n) , TMath::Sin(hPhi[i] * n) ) * r.sum();
-					wt += hWeight[i] * r.weight();
+					qp += (*hWeight)[i] * correlations::Complex( TMath::Cos((*hPhi)[i] * n) , TMath::Sin((*hPhi)[i] * n) ) * r.sum();
+					wt += (*hWeight)[i] * r.weight();
 					delete cq;
 				}
 				rQeta[n][np][ieta] = qp.real();
@@ -388,9 +402,9 @@ QWCumuV3::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 			for ( int i = 0; i < sz; i++ ) {
 				qp = 0;
 				wt = 0;
-				if ( hCharge[i] > 0 || !RFP[i] ) continue;
+				if ( (*hCharge)[i] > 0 || !RFP[i] ) continue;
 				correlations::QVector tq = q[n];
-				tq.unfill(hPhi[i], hWeight[i]);
+				tq.unfill((*hPhi)[i], (*hWeight)[i]);
 				correlations::FromQVector *cq = 0;
 				switch ( cmode_ ) {
 					case 1:
@@ -404,8 +418,8 @@ QWCumuV3::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 						break;
 				}
 				correlations::Result r = cq->calculate(np*2+1, hc[n]);
-				qp += hWeight[i] * correlations::Complex( TMath::Cos(hPhi[i] * n) , TMath::Sin(hPhi[i] * n) ) * r.sum();
-				wt += hWeight[i] * r.weight();
+				qp += (*hWeight)[i] * correlations::Complex( TMath::Cos((*hPhi)[i] * n) , TMath::Sin((*hPhi)[i] * n) ) * r.sum();
+				wt += (*hWeight)[i] * r.weight();
 				delete cq;
 			}
 			rQc[n][np][0] = qp.real();
@@ -416,9 +430,9 @@ QWCumuV3::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 			qp = 0;
 			wt = 0;
 			for ( int i = 0; i < sz; i++ ) {
-				if ( hCharge[i] < 0 || !RFP[i] ) continue;
+				if ( (*hCharge)[i] < 0 || !RFP[i] ) continue;
 				correlations::QVector tq = q[n];
-				tq.unfill(hPhi[i], hWeight[i]);
+				tq.unfill((*hPhi)[i], (*hWeight)[i]);
 				correlations::FromQVector *cq = 0;
 				switch ( cmode_ ) {
 					case 1:
@@ -432,8 +446,8 @@ QWCumuV3::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 						break;
 				}
 				correlations::Result r = cq->calculate(np*2+1, hc[n]);
-				qp += hWeight[i] * correlations::Complex( TMath::Cos(hPhi[i] * n) , TMath::Sin(hPhi[i] * n) ) * r.sum();
-				wt += hWeight[i] * r.weight();
+				qp += (*hWeight)[i] * correlations::Complex( TMath::Cos((*hPhi)[i] * n) , TMath::Sin((*hPhi)[i] * n) ) * r.sum();
+				wt += (*hWeight)[i] * r.weight();
 				delete cq;
 			}
 			rQc[n][np][1] = qp.real();
@@ -442,8 +456,10 @@ QWCumuV3::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 		}
 	}
 
-	gNoff = Noff;
-	gMult = Mult;
+	edm::Handle<int> ch;
+	iEvent.getByLabel(centralityTag_,ch);
+	gNoff = *ch;
+	gMult = rfp_sz;
 
 //	t->RunId = iEvent.id().run();
 //	t->EventId = iEvent.id().event();

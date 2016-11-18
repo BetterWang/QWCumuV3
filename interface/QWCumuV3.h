@@ -58,26 +58,26 @@ class QWCumuV3 : public edm::EDAnalyzer {
 
 		edm::InputTag					trackEta_;
 		edm::InputTag					trackPhi_;
+		edm::InputTag					trackPt_;
 		edm::InputTag					trackWeight_;
+		edm::InputTag					trackCharge_;
 		edm::InputTag					vertexZ_;
 
 		edm::InputTag					centralityTag_;
 
 		double	minvz_, maxvz_;
-
-		unsigned int	nvtx_;
 	/////////////////////////////////////////////
 		double	rfpmineta_, rfpmaxeta_;
 		double	poimineta_, poimaxeta_;
-		double	rfpptmin_, rfpptmax_;
-		double	poiptmin_, poiptmax_;
+		double	rfpminpt_, rfpmaxpt_;
+		double	poiminpt_, poimaxpt_;
 
 		bool	b2PartGap_;
 		double	dEtaGap_;
 
 		int	cmode_;
 
-		unsigned int	nvtx_;
+		int	nvtx_;
 
 	/////////////////////////////////////////////
 		TTree * trV;
