@@ -174,6 +174,8 @@ QWCumuV3::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	iEvent.getByLabel(trackCharge_, hCharge);
 	iEvent.getByLabel(vertexZ_, 	hVz);
 
+	if ( hVz->size() < 1 ) return;
+	if ( (*hVz)[0] > maxvz_ or (*hVz)[0] < minvz_ ) return;
 	int sz = int(hEta->size());
 	if ( sz == 0 ) return;
 
