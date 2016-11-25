@@ -5,7 +5,7 @@ from httplib import HTTPException
 
 config = config()
 
-config.General.requestName = 'Express_pA8_noeff_noff_v1'
+config.General.requestName = 'Express_pA8_noeff_noff_v2'
 config.General.workArea = 'CrabArea'
 config.General.transferOutputs = True
 config.General.transferLogs = True
@@ -16,7 +16,7 @@ config.Data.inputDataset = '/ExpressPhysicsPA/PARun2016C-Express-v1/FEVT'
 config.Data.splitting = 'LumiBased'
 config.Data.unitsPerJob = 20
 config.Data.outLFNDirBase = '/store/group/phys_heavyions/qwang/PbPb2015_cumu/'
-config.Data.lumiMask = 'PA_JSON.txt'
+config.Data.lumiMask = '/afs/cern.ch/work/q/qwang/public/PA8TeV_JSON.txt'
 config.Data.publication = False
 config.Data.useParent = False
 config.Site.storageSite = 'T2_CH_CERN'

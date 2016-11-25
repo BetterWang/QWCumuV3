@@ -140,8 +140,9 @@ process.ppNoffFilter300 = process.centralityFilter.clone(
 		BinLabel = cms.InputTag("Noff")
 		)
 process.load('PbPb_HIMB5_ppReco_noeff')
+process.QWEvent.ptMax = cms.untracked.double(20.0)
 
-process.ana = cms.Path(process.eventSelection*process.Noff*process.QWEvent*process.vectMonW*process.cumulantMB)
+process.ana = cms.Path(process.eventSelection*process.Noff*process.QWEvent*process.vectMon*process.cumulantMB)
 #process.ana0 = cms.Path(process.eventSelection*process.Noff*process.ppNoffFilter0*process.QWEvent*process.cumulantMB)
 #process.ana30 = cms.Path(process.eventSelection*process.Noff*process.ppNoffFilter30*process.QWEvent*process.cumulantMB)
 #process.ana60 = cms.Path(process.eventSelection*process.Noff*process.ppNoffFilter60*process.QWEvent*process.cumulantMB)
