@@ -16,5 +16,9 @@ runConfig2/*
 !runConfig2/qw*.py
 !runConfig2/crab_*.py
 !runConfig2/run*.sh
+runPA8TeV/*
+!runPA8TeV/qw*.py
+!runPA8TeV/crab_*.py
+!runPA8TeV/run*.sh
 *.pyc
 tmp/
