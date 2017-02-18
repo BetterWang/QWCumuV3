@@ -5,7 +5,7 @@ from httplib import HTTPException
 
 config = config()
 
-config.General.requestName = 'HIMB2_Cumu_pixel_eff_cent_eta1_v6'
+config.General.requestName = 'HIMB2_Cumu_pixel_eff_cent_eta1_v7'
 config.General.workArea = 'CrabArea'
 config.General.transferOutputs = True
 config.General.transferLogs = True
