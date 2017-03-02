@@ -14,6 +14,7 @@ runConfig/*
 !runConfig/run*.sh
 runConfig2/*
 !runConfig2/qw*.py
+!runConfig2/PbPb*.py
 !runConfig2/crab_*.py
 !runConfig2/run*.sh
 runPA8TeV/*
