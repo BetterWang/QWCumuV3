@@ -80,6 +80,7 @@ class QWCumuV3 : public edm::EDAnalyzer {
 		int	nvtx_;
 
 		std::vector<double>	ptbins_;
+		std::vector<double>	etabins_;
 	/////////////////////////////////////////////
 		TTree * trV;
 

@@ -49,7 +49,7 @@ process.cumulantMB = cms.EDAnalyzer('QWCumuV3'
 	, trackWeight = cms.untracked.InputTag('QWEvent', "weight")
 	, trackCharge = cms.untracked.InputTag('QWEvent', "charge")
 	, vertexZ = cms.untracked.InputTag('QWEvent', "vz")
-	, centrality = cms.untracked.InputTag('Noff')
+	, centrality = cms.untracked.InputTag('centralityBin', 'HFtowers')
 	, minvz = cms.untracked.double(-15.0)
 	, maxvz = cms.untracked.double(15.0)
 	, rfpmineta = cms.untracked.double(-2.4)
@@ -64,6 +64,8 @@ process.cumulantMB = cms.EDAnalyzer('QWCumuV3'
 	, dEtaGap = cms.untracked.double(2.0)
 	, cmode = cms.untracked.int32(1)
 	, nvtx = cms.untracked.int32(100)
+	, ptBin = cms.untracked.vdouble(0.3, 0.4, 0.5, 0.6, 0.8, 1.0, 1.25, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 5.0, 6.0, 7.0, 8.0, 10.0)
+	, etaBin = cms.untracked.vdouble(-2.4, -2.2, -2.0, -1.8, -1.6, -1.4, -1.2, -1.0, -0.8, -0.6, -0.4, -0.2, 0., 0.2, 0.4, 0.6, 0.8, 1.0, 1.2, 1.4, 1.6, 1.8, 2.0, 2.2, 2.4)
 )
 
 
@@ -199,7 +201,7 @@ process.PhiEta2D = cms.EDAnalyzer('QWVCorrAnalyzer',
 #		)
 
 
-process.vectMon = cms.Sequence(process.histCent * process.histNoff * process.vectPhi * process.vectPt * process.vectEta * process.PhiEta2D )
+process.vectMon = cms.Sequence(process.histCent * process.vectPhi * process.vectPt * process.vectEta * process.PhiEta2D )
 
 process.ana = cms.Path(process.hltMB *
 		process.eventSelection *

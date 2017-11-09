@@ -339,7 +339,7 @@ QWCumuV3::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 			wX[n][np] = wt;
 
 			// pt differential
-			for ( int ipt = 0; ipt < ptbins_.size(); ipt++ ) {
+			for ( unsigned int ipt = 0; ipt < ptbins_.size(); ipt++ ) {
 				qp = 0;
 				wt = 0;
 				for ( int i = 0; i < sz; i++ ) {
@@ -370,7 +370,7 @@ QWCumuV3::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 				wQp[n][np][ipt] = wt;
 			}
 			// eta differential
-			for ( int ieta = 0; ieta < etabins_.size(); ieta++ ) {
+			for ( unsigned int ieta = 0; ieta < etabins_.size(); ieta++ ) {
 				qp = 0;
 				wt = 0;
 				for ( int i = 0; i < sz; i++ ) {

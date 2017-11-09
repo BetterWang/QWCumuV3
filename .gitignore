@@ -4,6 +4,7 @@ MC
 cumu
 PbPb2015_cumu
 pPb
+XeXe
 test/*
 !test/qw*.py
 !test/crab_*.py
@@ -23,4 +24,6 @@ runPA8TeV/*
 !runPA8TeV/crab_*.py
 !runPA8TeV/run*.sh
 *.pyc
+runXeXe/*
+!runXeXe/qw*.py
 tmp/
