@@ -85,6 +85,7 @@ QWCumuV3::QWCumuV3(const edm::ParameterSet& iConfig):
 	nvtx_ = iConfig.getUntrackedParameter<int>("nvtx", 100);
 
 	ptbins_ = iConfig.getUntrackedParameter< std::vector<double> >("ptBin");
+	etabins_ = iConfig.getUntrackedParameter< std::vector<double> >("etaBin");
 
         consumes<int>(centralityTag_);
         consumes<std::vector<double> >(trackEta_);
@@ -270,7 +271,7 @@ QWCumuV3::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 					if ( (*hEta)[j] < -2.4 or (*hEta)[j] > 2.4 ) continue;
 					if ( (*hPt)[j] < rfpminpt_ or (*hPt)[j] > rfpmaxpt_ ) continue;
 					int ieta = 0;
-					while ( (*hEta)[j] > etabins[ieta+1] ) ieta++;
+					while ( (*hEta)[j] > etabins_[ieta+1] ) ieta++;
 					rQetaGap[n][ieta] += cos( n*( (*hPhi)[j] - (*hPhi)[i] ) ) * (*hWeight)[i] * (*hWeight)[j];
 					wQetaGap[n][ieta] += (*hWeight)[i] * (*hWeight)[j];
 				}
@@ -338,7 +339,7 @@ QWCumuV3::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 			wX[n][np] = wt;
 
 			// pt differential
-			for ( int ipt = 0; ipt < nPtBins; ipt++ ) {
+			for ( int ipt = 0; ipt < ptbins_.size(); ipt++ ) {
 				qp = 0;
 				wt = 0;
 				for ( int i = 0; i < sz; i++ ) {
@@ -369,12 +370,12 @@ QWCumuV3::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 				wQp[n][np][ipt] = wt;
 			}
 			// eta differential
-			for ( int ieta = 0; ieta < nEtaBins; ieta++ ) {
+			for ( int ieta = 0; ieta < etabins_.size(); ieta++ ) {
 				qp = 0;
 				wt = 0;
 				for ( int i = 0; i < sz; i++ ) {
 					if ( (*hPt)[i] < rfpminpt_ or (*hPt)[i] > rfpmaxpt_ ) continue;
-					if ( (*hEta)[i] < etabins[ieta] || (*hEta)[i] > etabins[ieta+1] ) continue;
+					if ( (*hEta)[i] < etabins_[ieta] || (*hEta)[i] > etabins_[ieta+1] ) continue;
 					correlations::QVector tq = q[n];
 					if ( RFP[i] ) tq.unfill((*hPhi)[i], (*hWeight)[i]);
 					correlations::FromQVector *cq = 0;
