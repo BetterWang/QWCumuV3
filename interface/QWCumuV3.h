@@ -11,7 +11,7 @@
 #include <TNtupleD.h>
 #include <TRandom3.h>
 #include <TFile.h>
-#include "QWConstV3.h"
+//#include "QWConstV3.h"
 #include <RecoHI/HiEvtPlaneAlgos/interface/HiEvtPlaneList.h>
 #include "DataFormats/TrackReco/interface/Track.h"
 #include "DataFormats/TrackReco/interface/TrackFwd.h"
@@ -79,6 +79,7 @@ class QWCumuV3 : public edm::EDAnalyzer {
 
 		int	nvtx_;
 
+		std::vector<double>	ptbins_;
 	/////////////////////////////////////////////
 		TTree * trV;
 

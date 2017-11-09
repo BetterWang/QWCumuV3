@@ -84,6 +84,8 @@ QWCumuV3::QWCumuV3(const edm::ParameterSet& iConfig):
 	cmode_ = iConfig.getUntrackedParameter<int>("cmode", 1);
 	nvtx_ = iConfig.getUntrackedParameter<int>("nvtx", 100);
 
+	ptbins_ = iConfig.getUntrackedParameter< std::vector<double> >("ptBin");
+
         consumes<int>(centralityTag_);
         consumes<std::vector<double> >(trackEta_);
         consumes<std::vector<double> >(trackPhi_);
@@ -96,9 +98,6 @@ QWCumuV3::QWCumuV3(const edm::ParameterSet& iConfig):
 		q[n] = correlations::QVector(0, 0, true);
 	}
 
-	//
-	//cout << __LINE__ << "\t" << tracks_.label().c_str() << "\t|" << tracks_.instance() << "\t|" << tracks_.process() << endl;
-	//
 	edm::Service<TFileService> fs;
 
 	trV = fs->make<TTree>("trV", "trV");
@@ -261,7 +260,7 @@ QWCumuV3::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 					if ( (*hEta)[j] < rfpmineta_ or (*hEta)[j] > rfpmaxeta_ ) continue;
 					if ( (*hPt)[j] < poiminpt_ or (*hPt)[j] > poimaxpt_ ) continue;
 					int ipt = 0;
-					while ( (*hPt)[j] > ptbins[ipt+1] ) ipt++;
+					while ( (*hPt)[j] > ptbins_[ipt+1] ) ipt++;
 					rQpGap[n][ipt] += cos( n*( (*hPhi)[j] - (*hPhi)[i] ) ) * (*hWeight)[i] * (*hWeight)[j];
 					wQpGap[n][ipt] += (*hWeight)[i] * (*hWeight)[j];
 				}
@@ -345,7 +344,7 @@ QWCumuV3::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 				for ( int i = 0; i < sz; i++ ) {
 					if ( (*hEta)[i] < poimineta_ or (*hEta)[i] > poimaxeta_ ) continue;
 					if ( (*hPt)[i] < poiminpt_ or (*hPt)[i] > poimaxpt_ ) continue;
-					if ( (*hPt)[i] < ptbins[ipt] || (*hPt)[i] > ptbins[ipt+1] ) continue;
+					if ( (*hPt)[i] < ptbins_[ipt] || (*hPt)[i] > ptbins_[ipt+1] ) continue;
 					correlations::QVector tq = q[n];
 					if ( RFP[i] ) tq.unfill((*hPhi)[i], (*hWeight)[i]);
 					correlations::FromQVector *cq = 0;
