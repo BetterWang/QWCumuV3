@@ -26,4 +26,5 @@ runPA8TeV/*
 *.pyc
 runXeXe/*
 !runXeXe/qw*.py
+!runXeXe/crab_*.py
 tmp/
