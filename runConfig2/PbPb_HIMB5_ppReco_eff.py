@@ -44,8 +44,8 @@ vectPhi = cms.EDAnalyzer('QWVectorAnalyzer',
 		hstart = cms.untracked.double(0),
 		hend = cms.untracked.double(5000),
 		cNbins = cms.untracked.int32(1000),
-		cstart = cms.untracked.double(-5),
-		cend = cms.untracked.double(5),
+		cstart = cms.untracked.double(-3.14159265358979323846),
+		cend = cms.untracked.double(3.14159265358979323846),
 		)
 
 vectPt = cms.EDAnalyzer('QWVectorAnalyzer',
@@ -55,7 +55,7 @@ vectPt = cms.EDAnalyzer('QWVectorAnalyzer',
 		hend = cms.untracked.double(5000),
 		cNbins = cms.untracked.int32(1000),
 		cstart = cms.untracked.double(0),
-		cend = cms.untracked.double(5),
+		cend = cms.untracked.double(20),
 		)
 
 vectEta = cms.EDAnalyzer('QWVectorAnalyzer',
