@@ -24,6 +24,17 @@ config.Data.useParent = False
 config.Site.storageSite = 'T2_CH_CERN'
 config.Site.ignoreGlobalBlacklist = True
 config.Data.allowNonValidInputDataset = True
+#try:
+#	crabCommand('submit', config = config)
+#except HTTPException as hte:
+#	print "Failed submitting task: %s" % (hte.headers)
+#except ClientException as cle:
+#	print "Failed submitting task: %s" % (cle)
+
+
+#### XeXe MB2
+config.General.requestName = 'XeXe2_CumuV3_eff_Cent_v1'
+config.Data.inputDataset = '/HIMinimumBias2/XeXeRun2017-PromptReco-v1/AOD'
 try:
 	crabCommand('submit', config = config)
 except HTTPException as hte:
@@ -31,4 +42,183 @@ except HTTPException as hte:
 except ClientException as cle:
 	print "Failed submitting task: %s" % (cle)
 
+#### XeXe MB3
+config.General.requestName = 'XeXe3_CumuV3_eff_Cent_v1'
+config.Data.inputDataset = '/HIMinimumBias3/XeXeRun2017-PromptReco-v1/AOD'
+try:
+	crabCommand('submit', config = config)
+except HTTPException as hte:
+	print "Failed submitting task: %s" % (hte.headers)
+except ClientException as cle:
+	print "Failed submitting task: %s" % (cle)
+
+#### XeXe MB4
+config.General.requestName = 'XeXe4_CumuV3_eff_Cent_v1'
+config.Data.inputDataset = '/HIMinimumBias4/XeXeRun2017-PromptReco-v1/AOD'
+try:
+	crabCommand('submit', config = config)
+except HTTPException as hte:
+	print "Failed submitting task: %s" % (hte.headers)
+except ClientException as cle:
+	print "Failed submitting task: %s" % (cle)
+
+#### XeXe MB5
+config.General.requestName = 'XeXe5_CumuV3_eff_Cent_v1'
+config.Data.inputDataset = '/HIMinimumBias5/XeXeRun2017-PromptReco-v1/AOD'
+try:
+	crabCommand('submit', config = config)
+except HTTPException as hte:
+	print "Failed submitting task: %s" % (hte.headers)
+except ClientException as cle:
+	print "Failed submitting task: %s" % (cle)
+
+#### XeXe MB6
+config.General.requestName = 'XeXe6_CumuV3_eff_Cent_v1'
+config.Data.inputDataset = '/HIMinimumBias6/XeXeRun2017-PromptReco-v1/AOD'
+try:
+	crabCommand('submit', config = config)
+except HTTPException as hte:
+	print "Failed submitting task: %s" % (hte.headers)
+except ClientException as cle:
+	print "Failed submitting task: %s" % (cle)
+
+#### XeXe MB7
+config.General.requestName = 'XeXe7_CumuV3_eff_Cent_v1'
+config.Data.inputDataset = '/HIMinimumBias7/XeXeRun2017-PromptReco-v1/AOD'
+try:
+	crabCommand('submit', config = config)
+except HTTPException as hte:
+	print "Failed submitting task: %s" % (hte.headers)
+except ClientException as cle:
+	print "Failed submitting task: %s" % (cle)
+
+#### XeXe MB8
+config.General.requestName = 'XeXe8_CumuV3_eff_Cent_v1'
+config.Data.inputDataset = '/HIMinimumBias8/XeXeRun2017-PromptReco-v1/AOD'
+try:
+	crabCommand('submit', config = config)
+except HTTPException as hte:
+	print "Failed submitting task: %s" % (hte.headers)
+except ClientException as cle:
+	print "Failed submitting task: %s" % (cle)
+
+#### XeXe MB9
+config.General.requestName = 'XeXe9_CumuV3_eff_Cent_v1'
+config.Data.inputDataset = '/HIMinimumBias9/XeXeRun2017-PromptReco-v1/AOD'
+try:
+	crabCommand('submit', config = config)
+except HTTPException as hte:
+	print "Failed submitting task: %s" % (hte.headers)
+except ClientException as cle:
+	print "Failed submitting task: %s" % (cle)
+
+#### XeXe MB10
+config.General.requestName = 'XeXe10_CumuV3_eff_Cent_v1'
+config.Data.inputDataset = '/HIMinimumBias10/XeXeRun2017-PromptReco-v1/AOD'
+try:
+	crabCommand('submit', config = config)
+except HTTPException as hte:
+	print "Failed submitting task: %s" % (hte.headers)
+except ClientException as cle:
+	print "Failed submitting task: %s" % (cle)
+
+#### XeXe MB11
+config.General.requestName = 'XeXe11_CumuV3_eff_Cent_v1'
+config.Data.inputDataset = '/HIMinimumBias11/XeXeRun2017-PromptReco-v1/AOD'
+try:
+	crabCommand('submit', config = config)
+except HTTPException as hte:
+	print "Failed submitting task: %s" % (hte.headers)
+except ClientException as cle:
+	print "Failed submitting task: %s" % (cle)
+
+#### XeXe MB12
+config.General.requestName = 'XeXe12_CumuV3_eff_Cent_v1'
+config.Data.inputDataset = '/HIMinimumBias12/XeXeRun2017-PromptReco-v1/AOD'
+try:
+	crabCommand('submit', config = config)
+except HTTPException as hte:
+	print "Failed submitting task: %s" % (hte.headers)
+except ClientException as cle:
+	print "Failed submitting task: %s" % (cle)
+
+#### XeXe MB13
+config.General.requestName = 'XeXe13_CumuV3_eff_Cent_v1'
+config.Data.inputDataset = '/HIMinimumBias13/XeXeRun2017-PromptReco-v1/AOD'
+try:
+	crabCommand('submit', config = config)
+except HTTPException as hte:
+	print "Failed submitting task: %s" % (hte.headers)
+except ClientException as cle:
+	print "Failed submitting task: %s" % (cle)
+
+#### XeXe MB14
+config.General.requestName = 'XeXe14_CumuV3_eff_Cent_v1'
+config.Data.inputDataset = '/HIMinimumBias14/XeXeRun2017-PromptReco-v1/AOD'
+try:
+	crabCommand('submit', config = config)
+except HTTPException as hte:
+	print "Failed submitting task: %s" % (hte.headers)
+except ClientException as cle:
+	print "Failed submitting task: %s" % (cle)
+
+#### XeXe MB15
+config.General.requestName = 'XeXe15_CumuV3_eff_Cent_v1'
+config.Data.inputDataset = '/HIMinimumBias15/XeXeRun2017-PromptReco-v1/AOD'
+try:
+	crabCommand('submit', config = config)
+except HTTPException as hte:
+	print "Failed submitting task: %s" % (hte.headers)
+except ClientException as cle:
+	print "Failed submitting task: %s" % (cle)
+
+#### XeXe MB16
+config.General.requestName = 'XeXe16_CumuV3_eff_Cent_v1'
+config.Data.inputDataset = '/HIMinimumBias16/XeXeRun2017-PromptReco-v1/AOD'
+try:
+	crabCommand('submit', config = config)
+except HTTPException as hte:
+	print "Failed submitting task: %s" % (hte.headers)
+except ClientException as cle:
+	print "Failed submitting task: %s" % (cle)
+
+#### XeXe MB17
+config.General.requestName = 'XeXe17_CumuV3_eff_Cent_v1'
+config.Data.inputDataset = '/HIMinimumBias17/XeXeRun2017-PromptReco-v1/AOD'
+try:
+	crabCommand('submit', config = config)
+except HTTPException as hte:
+	print "Failed submitting task: %s" % (hte.headers)
+except ClientException as cle:
+	print "Failed submitting task: %s" % (cle)
+
+#### XeXe MB18
+config.General.requestName = 'XeXe18_CumuV3_eff_Cent_v1'
+config.Data.inputDataset = '/HIMinimumBias18/XeXeRun2017-PromptReco-v1/AOD'
+try:
+	crabCommand('submit', config = config)
+except HTTPException as hte:
+	print "Failed submitting task: %s" % (hte.headers)
+except ClientException as cle:
+	print "Failed submitting task: %s" % (cle)
+
+#### XeXe MB19
+config.General.requestName = 'XeXe19_CumuV3_eff_Cent_v1'
+config.Data.inputDataset = '/HIMinimumBias19/XeXeRun2017-PromptReco-v1/AOD'
+try:
+	crabCommand('submit', config = config)
+except HTTPException as hte:
+	print "Failed submitting task: %s" % (hte.headers)
+except ClientException as cle:
+	print "Failed submitting task: %s" % (cle)
+
+#### XeXe MB20
+config.General.requestName = 'XeXe20_CumuV3_eff_Cent_v1'
+config.Data.inputDataset = '/HIMinimumBias20/XeXeRun2017-PromptReco-v1/AOD'
+try:
+	crabCommand('submit', config = config)
+except HTTPException as hte:
+	print "Failed submitting task: %s" % (hte.headers)
+except ClientException as cle:
+	print "Failed submitting task: %s" % (cle)
 
