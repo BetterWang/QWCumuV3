@@ -14,33 +14,14 @@ from Configuration.AlCa.GlobalTag_condDBv2 import GlobalTag
 process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(-1))
 process.MessageLogger.cerr.FwkReport.reportEvery = 100
 
-#process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_data', '')
-process.GlobalTag.snapshotTime = cms.string("9999-12-31 23:59:59.000")
-process.GlobalTag.toGet.extend([
-   cms.PSet(record = cms.string("HeavyIonRcd"),
-      tag = cms.string("CentralityTable_HFtowers200_DataXeXe_eff942_run2v9313x02_offline"),
-      connect = cms.string("frontier://FrontierProd/CMS_CONDITIONS"),
-      label = cms.untracked.string("HFtowersCymbal5Ev8")
-   ),
-])
-
 process.options = cms.untracked.PSet(
     Rethrow = cms.untracked.vstring('ProductNotFound')
 )
 
 process.source = cms.Source("PoolSource",
-        fileNames = cms.untracked.vstring("file:/afs/cern.ch/user/q/qwang/work/cleanroomRun2/Ana/data/XeXe_MB_94X_AOD.root")
+	fileNames = cms.untracked.vstring("root://cms-xrd-global.cern.ch//store/himc/HINXeXeFall17GS/XeXeMinBias_5p44TeV-AMPT-withmelt/GEN/GENonly_92X_upgrade2017_realistic_v11-v1/20000/000A8BBE-33D0-E711-8BB1-FA163EEB2766.root")
 )
 
-
-import HLTrigger.HLTfilters.hltHighLevel_cfi
-
-process.hltMB = HLTrigger.HLTfilters.hltHighLevel_cfi.hltHighLevel.clone()
-process.hltMB.HLTPaths = [
-	"HLT_HIL1MinimumBiasHF_OR_SinglePixelTrack_part*"
-]
-process.hltMB.andOr = cms.bool(True)
-process.hltMB.throw = cms.bool(False)
 
 process.cumulantMB = cms.EDAnalyzer('QWCumuV3'
 	, trackEta = cms.untracked.InputTag('QWEvent', "eta")
@@ -49,7 +30,7 @@ process.cumulantMB = cms.EDAnalyzer('QWCumuV3'
 	, trackWeight = cms.untracked.InputTag('QWEvent', "weight")
 	, trackCharge = cms.untracked.InputTag('QWEvent', "charge")
 	, vertexZ = cms.untracked.InputTag('QWEvent', "vz")
-	, centrality = cms.untracked.InputTag('centralityBin', 'HFtowers')
+	, centrality = cms.untracked.InputTag('centralityBin', 'AMPT')
 	, minvz = cms.untracked.double(-15.0)
 	, maxvz = cms.untracked.double(15.0)
 	, rfpmineta = cms.untracked.double(-2.4)
@@ -74,74 +55,25 @@ process.TFileService = cms.Service("TFileService",
 )
 
 
-process.primaryVertexFilter = cms.EDFilter("VertexSelector",
-    src = cms.InputTag("offlinePrimaryVertices"),
-    cut = cms.string("!isFake && abs(z) <= 25 && position.Rho <= 2 && tracksSize >= 2"),
-    filter = cms.bool(True), # otherwise it won't filter the events
-)
+process.QWEvent = cms.EDProducer("QWGenEventProducer",
+		trackSrc  = cms.untracked.InputTag("genParticles"),
+		ptMin = cms.untracked.double(0.3),
+		ptMax = cms.untracked.double(10.),
+		isPrompt  = cms.untracked.bool(True)
+		)
 
-process.NoScraping = cms.EDFilter("FilterOutScraping",
-    applyfilter = cms.untracked.bool(True),
-    debugOn = cms.untracked.bool(False),
-    numtrack = cms.untracked.uint32(10),
-    thresh = cms.untracked.double(0.25)
-)
+process.QWHIEvent = cms.EDProducer("QWHepMCProducer",
+		src = cms.untracked.InputTag("generatorSmeared")
+		)
 
-process.load("HeavyIonsAnalysis.Configuration.hfCoincFilter_cff")
-process.hfPosFilter2 = process.hfPosFilter.clone(minNumber=cms.uint32(2))
-process.hfNegFilter2 = process.hfNegFilter.clone(minNumber=cms.uint32(2))
-process.hfCoincFilter2 = cms.Sequence(
-    process.towersAboveThreshold 
-    + process.hfPosTowers 
-    + process.hfNegTowers 
-    + process.hfPosFilter2 
-    + process.hfNegFilter2
-)
-
-process.eventSelection = cms.Sequence(
-        process.hfCoincFilter2
-        + process.primaryVertexFilter
-        + process.NoScraping
-)
-
-process.QWEvent = cms.EDProducer("QWEventProducer"
-		, vertexSrc = cms.untracked.InputTag('offlinePrimaryVertices', "")
-		, trackSrc = cms.untracked.InputTag('generalTracks')
-		, fweight = cms.untracked.InputTag('XeXe_eff_table_94x_cent.root')
-                , centralitySrc = cms.untracked.InputTag("centralityBin", 'HFtowers')
-		, dzdzerror = cms.untracked.double(3.0)
-		, d0d0error = cms.untracked.double(3.0)
-		, pterrorpt = cms.untracked.double(0.1)
-		, ptMin = cms.untracked.double(0.3)
-		, ptMax= cms.untracked.double(10.0)
-		, Etamin = cms.untracked.double(-2.4)
-		, Etamax = cms.untracked.double(2.4)
-                )
-
-process.load('RecoHI.HiCentralityAlgos.HiCentrality_cfi')
-process.hiCentrality.produceHFhits = False
-process.hiCentrality.produceHFtowers = True
-process.hiCentrality.produceEcalhits = False
-process.hiCentrality.produceZDChits = False
-process.hiCentrality.produceETmidRapidity = True
-process.hiCentrality.producePixelhits = False
-process.hiCentrality.produceTracks = True
-process.hiCentrality.producePixelTracks = False
-process.hiCentrality.reUseCentrality = False
-process.hiCentrality.srcTracks = cms.InputTag("generalTracks")
-process.hiCentrality.srcVertex = cms.InputTag("offlinePrimaryVertices")
-
-
-
-process.load("RecoHI.HiCentralityAlgos.CentralityBin_cfi")
-process.centralityBin.Centrality = cms.InputTag("hiCentrality")
-process.centralityBin.centralityVariable = cms.string("HFtowers")
-process.centralityBin.nonDefaultGlauberModel = cms.string("Cymbal5Ev8")
+process.centralityBin = cms.EDProducer('QWXeXeB2CentProducer',
+                src = cms.untracked.InputTag("QWHIEvent", "b")
+		)
 
 
 # monitoring
 process.histCent = cms.EDAnalyzer('QWHistAnalyzer',
-		src = cms.untracked.InputTag("centralityBin", 'HFtowers'),
+		src = cms.untracked.InputTag("centralityBin", 'AMPT'),
 		Nbins = cms.untracked.int32(200),
 		start = cms.untracked.double(0),
 		end = cms.untracked.double(200),
@@ -189,27 +121,16 @@ process.PhiEta2D = cms.EDAnalyzer('QWVCorrAnalyzer',
 		hendY = cms.untracked.double(3.14159265358979323846),
 		)
 
-#process.NoffCent2D = cms.EDAnalyzer('QWCorrAnalyzer',
-#		srcX = cms.untracked.InputTag('dbNoff'),
-#		NbinsX = cms.untracked.int32(5000),
-#		hstartX = cms.untracked.double(0),
-#		hendX = cms.untracked.double(5000),
-#		srcY = cms.untracked.InputTag('dbCent'),
-#		NbinsY = cms.untracked.int32(200),
-#		hstartY = cms.untracked.double(0),
-#		hendY = cms.untracked.double(200),
-#		)
-
 
 process.vectMon = cms.Sequence(process.histCent * process.vectPhi * process.vectPt * process.vectEta * process.PhiEta2D )
 
-process.ana = cms.Path(process.hltMB *
-		process.eventSelection *
-		process.hiCentrality *
+process.ana = cms.Path(
+		process.QWHIEvent *
 		process.centralityBin *
 		process.QWEvent *
 		process.cumulantMB *
-		process.vectMon )
+		process.vectMon 
+		)
 
 process.RECO = cms.OutputModule("PoolOutputModule",
 		outputCommands = cms.untracked.vstring('keep *'),

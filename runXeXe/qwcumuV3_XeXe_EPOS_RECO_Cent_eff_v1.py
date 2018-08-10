@@ -8,28 +8,48 @@ process.load('Configuration.StandardSequences.GeometryDB_cff')
 process.load('Configuration.StandardSequences.MagneticField_38T_cff')
 process.load('Configuration.StandardSequences.EndOfProcess_cff')
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_condDBv2_cff')
-from Configuration.AlCa.GlobalTag_condDBv2 import GlobalTag
 
 
 process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(-1))
 process.MessageLogger.cerr.FwkReport.reportEvery = 100
 
-#process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_data', '')
+
+from Configuration.AlCa.GlobalTag_condDBv2 import GlobalTag
+process.GlobalTag = GlobalTag(process.GlobalTag, '94X_mc2017_realistic_ForXeXe_v7', '') #for now track GT manually, since centrality tables updated ex post facto
 process.GlobalTag.snapshotTime = cms.string("9999-12-31 23:59:59.000")
 process.GlobalTag.toGet.extend([
    cms.PSet(record = cms.string("HeavyIonRcd"),
-      tag = cms.string("CentralityTable_HFtowers200_DataXeXe_eff942_run2v9313x02_offline"),
+      tag = cms.string("CentralityTable_HFtowers200_XeXe5p44TeVEPOSLHC_v941x01_mc"),
       connect = cms.string("frontier://FrontierProd/CMS_CONDITIONS"),
-      label = cms.untracked.string("HFtowersCymbal5Ev8")
+      label = cms.untracked.string("HFtowersEPOSLHC")
    ),
 ])
+
+
+process.load('RecoHI.HiCentralityAlgos.HiCentrality_cfi')
+process.hiCentrality.produceHFhits = False
+process.hiCentrality.produceHFtowers = False
+process.hiCentrality.produceEcalhits = False
+process.hiCentrality.produceZDChits = False
+process.hiCentrality.produceETmidRapidity = False
+process.hiCentrality.producePixelhits = False
+process.hiCentrality.produceTracks = False
+process.hiCentrality.producePixelTracks = False
+process.hiCentrality.reUseCentrality = True
+process.hiCentrality.srcReUse = cms.InputTag("hiCentrality","","RECO")
+
+process.load("RecoHI.HiCentralityAlgos.CentralityBin_cfi")
+process.centralityBin.Centrality = cms.InputTag("hiCentrality")
+process.centralityBin.centralityVariable = cms.string("HFtowers")
+process.centralityBin.nonDefaultGlauberModel = cms.string("EPOSLHC")
+
 
 process.options = cms.untracked.PSet(
     Rethrow = cms.untracked.vstring('ProductNotFound')
 )
 
 process.source = cms.Source("PoolSource",
-        fileNames = cms.untracked.vstring("file:/afs/cern.ch/user/q/qwang/work/cleanroomRun2/Ana/data/XeXe_MB_94X_AOD.root")
+	fileNames = cms.untracked.vstring("root://cms-xrd-global.cern.ch//store/himc/HINXeXeFall17DR/XeXeMinBias_5p44TeV-ReggeGribovPartonMC_EposLHC/GEN-SIM-RECO/94X_mc2017_realistic_ForXeXe_v7-v1/40000/00A4A0B8-E604-E811-8CAD-1418773425EA.root")
 )
 
 
@@ -88,18 +108,18 @@ process.NoScraping = cms.EDFilter("FilterOutScraping",
 )
 
 process.load("HeavyIonsAnalysis.Configuration.hfCoincFilter_cff")
-process.hfPosFilter2 = process.hfPosFilter.clone(minNumber=cms.uint32(2))
-process.hfNegFilter2 = process.hfNegFilter.clone(minNumber=cms.uint32(2))
-process.hfCoincFilter2 = cms.Sequence(
-    process.towersAboveThreshold 
-    + process.hfPosTowers 
-    + process.hfNegTowers 
-    + process.hfPosFilter2 
-    + process.hfNegFilter2
-)
+#process.hfPosFilter3 = process.hfPosFilter.clone(minNumber=cms.uint32(3))
+#process.hfNegFilter3 = process.hfNegFilter.clone(minNumber=cms.uint32(3))
+#process.hfCoincFilter3 = cms.Sequence(
+#    process.towersAboveThreshold 
+#    + process.hfPosTowers 
+#    + process.hfNegTowers 
+#    + process.hfPosFilter3 
+#    + process.hfNegFilter3
+#)
 
 process.eventSelection = cms.Sequence(
-        process.hfCoincFilter2
+        process.hfCoincFilter3
         + process.primaryVertexFilter
         + process.NoScraping
 )
@@ -118,25 +138,6 @@ process.QWEvent = cms.EDProducer("QWEventProducer"
 		, Etamax = cms.untracked.double(2.4)
                 )
 
-process.load('RecoHI.HiCentralityAlgos.HiCentrality_cfi')
-process.hiCentrality.produceHFhits = False
-process.hiCentrality.produceHFtowers = True
-process.hiCentrality.produceEcalhits = False
-process.hiCentrality.produceZDChits = False
-process.hiCentrality.produceETmidRapidity = True
-process.hiCentrality.producePixelhits = False
-process.hiCentrality.produceTracks = True
-process.hiCentrality.producePixelTracks = False
-process.hiCentrality.reUseCentrality = False
-process.hiCentrality.srcTracks = cms.InputTag("generalTracks")
-process.hiCentrality.srcVertex = cms.InputTag("offlinePrimaryVertices")
-
-
-
-process.load("RecoHI.HiCentralityAlgos.CentralityBin_cfi")
-process.centralityBin.Centrality = cms.InputTag("hiCentrality")
-process.centralityBin.centralityVariable = cms.string("HFtowers")
-process.centralityBin.nonDefaultGlauberModel = cms.string("Cymbal5Ev8")
 
 
 # monitoring
@@ -203,8 +204,8 @@ process.PhiEta2D = cms.EDAnalyzer('QWVCorrAnalyzer',
 
 process.vectMon = cms.Sequence(process.histCent * process.vectPhi * process.vectPt * process.vectEta * process.PhiEta2D )
 
-process.ana = cms.Path(process.hltMB *
-		process.eventSelection *
+process.ana = cms.Path(
+#		process.eventSelection *
 		process.hiCentrality *
 		process.centralityBin *
 		process.QWEvent *
