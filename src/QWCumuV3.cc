@@ -61,13 +61,9 @@ QWCumuV3::QWCumuV3(const edm::ParameterSet& iConfig):
 	trackPt_( iConfig.getUntrackedParameter<edm::InputTag>("trackPt") ),
 	trackWeight_( iConfig.getUntrackedParameter<edm::InputTag>("trackWeight") ),
 	trackCharge_( iConfig.getUntrackedParameter<edm::InputTag>("trackCharge") ),
-	vertexZ_( iConfig.getUntrackedParameter<edm::InputTag>("vertexZ") ),
 	centralityTag_( iConfig.getUntrackedParameter<edm::InputTag>("centrality") )
 {
 	//now do what ever initialization is needed
-	minvz_ = iConfig.getUntrackedParameter<double>("minvz", -15.);
-	maxvz_ = iConfig.getUntrackedParameter<double>("maxvz", 15.);
-
 	rfpmineta_ = iConfig.getUntrackedParameter<double>("rfpmineta", -2.4);
 	rfpmaxeta_ = iConfig.getUntrackedParameter<double>("rfpmaxeta", 2.4);
 	rfpminpt_ = iConfig.getUntrackedParameter<double>("rfpminpt", 0.3);
@@ -82,7 +78,6 @@ QWCumuV3::QWCumuV3(const edm::ParameterSet& iConfig):
 	dEtaGap_ = iConfig.getUntrackedParameter<double>("etaGap", 2.);
 
 	cmode_ = iConfig.getUntrackedParameter<int>("cmode", 1);
-	nvtx_ = iConfig.getUntrackedParameter<int>("nvtx", 100);
 
 	ptbins_ = iConfig.getUntrackedParameter< std::vector<double> >("ptBin");
 	etabins_ = iConfig.getUntrackedParameter< std::vector<double> >("etaBin");
@@ -93,7 +88,6 @@ QWCumuV3::QWCumuV3(const edm::ParameterSet& iConfig):
         consumes<std::vector<double> >(trackPt_);
         consumes<std::vector<double> >(trackWeight_);
         consumes<std::vector<double> >(trackCharge_);
-        consumes<std::vector<double> >(vertexZ_);
 
 	for ( int n = 1; n < 7; n++ ) {
 		q[n] = correlations::QVector(0, 0, true);
@@ -165,17 +159,13 @@ QWCumuV3::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	Handle<std::vector<double> >	hPt;
 	Handle<std::vector<double> >	hWeight;
 	Handle<std::vector<double> >	hCharge;
-	Handle<std::vector<double> >	hVz;
 
 	iEvent.getByLabel(trackEta_,	hEta);
 	iEvent.getByLabel(trackPhi_,	hPhi);
 	iEvent.getByLabel(trackPt_,	hPt);
 	iEvent.getByLabel(trackWeight_, hWeight);
 	iEvent.getByLabel(trackCharge_, hCharge);
-	iEvent.getByLabel(vertexZ_, 	hVz);
 
-	if ( hVz->size() < 1 ) return;
-	if ( (*hVz)[0] > maxvz_ or (*hVz)[0] < minvz_ ) return;
 	int sz = int(hEta->size());
 	if ( sz == 0 ) return;
 

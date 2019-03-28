@@ -61,11 +61,9 @@ class QWCumuV3 : public edm::EDAnalyzer {
 		edm::InputTag					trackPt_;
 		edm::InputTag					trackWeight_;
 		edm::InputTag					trackCharge_;
-		edm::InputTag					vertexZ_;
 
 		edm::InputTag					centralityTag_;
 
-		double	minvz_, maxvz_;
 	/////////////////////////////////////////////
 		double	rfpmineta_, rfpmaxeta_;
 		double	poimineta_, poimaxeta_;
@@ -76,8 +74,6 @@ class QWCumuV3 : public edm::EDAnalyzer {
 		double	dEtaGap_;
 
 		int	cmode_;
-
-		int	nvtx_;
 
 		std::vector<double>	ptbins_;
 		std::vector<double>	etabins_;

@@ -28,3 +28,6 @@ runXeXe/*
 !runXeXe/qw*.py
 !runXeXe/crab_*.py
 tmp/
+run2018/*
+!run2018/qw*.py
+!run2018/crab_*.py
